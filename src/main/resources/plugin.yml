@@ -1,0 +1,16 @@
+name: AxVaults
+version: '${project.version}'
+main: com.artillexstudios.axvaults.AxVaults
+api-version: '1.13'
+
+permissions:
+  axvaults.vault.1:
+    default: true
+  axvaults.selector:
+    default: true
+  axvaults.admin:
+    default: op
+  axvaults.openremote:
+    default: true
+  axvaults.itempicker:
+    default: true

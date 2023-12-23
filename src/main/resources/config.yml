@@ -1,0 +1,29 @@
+prefix: "&#55ff00&lAxVaults &7» "
+
+# this setting is not reloadable, you have to restart the server
+# how often should the plugin save vaults from ram to the database?
+# this is in minutes
+auto-save-minutes: 5
+
+# how many rows should the /axvault selector menu have?
+vault-selector-rows: 6
+
+# how many rows should vaults have?
+vault-storage-rows: 6
+
+# should the vault selector only show vaults that the player owns?
+only-show-unlocked: false
+
+database:
+  # h2, sqlite
+  type: "h2"
+
+# list of items that CAN'T be put in vaults
+# note: the name-contains string shouldn't include any color codes
+blacklisted-items:
+  "1":
+    material: "barrier"
+    name-contains: "Banned item's name"
+
+# do not change this
+version: 1

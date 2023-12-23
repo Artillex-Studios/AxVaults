@@ -1,0 +1,67 @@
+guis:
+  selector:
+    title: "&0My Vaults"
+    item-owned:
+      # the players can change the default material if the have permission
+      material: BARREL
+      name: "&#55ff00&lVault #%num%"
+      glow: false
+      lore:
+        - " "
+        - " &7- &fSlots: &#aaffaa%used%&7/&#55ff00%max%"
+        - " "
+        - "&#55ff00&l(!) &#55ff00Click - Open Vault"
+        - "&#55ff00&l(!) &#55ff00Shift + Click - Change Item"
+    item-locked:
+      # the players can change the default material if the have permission
+      material: RED_STAINED_GLASS_PANE
+      name: "&#FF0000&lVault #%num%"
+      glow: false
+      lore:
+        - " "
+        - " &7- &fYou have not unlocked this vault yet!"
+        - " "
+        - "&#FF0000&l(!) &#FF0000Locked Vault"
+  item-picker:
+    title: "&0Item Picker"
+  vault:
+    title: "&0Vault #%num%"
+
+gui-items:
+  close:
+    material: BARRIER
+    name: "&#FF3333&lClose"
+  back:
+    material: BARRIER
+    name: "&#FF3333&lBack"
+  previous-page:
+    material: ARROW
+    name: "&#FF6600&lPrevious Page"
+  next-page:
+    material: ARROW
+    name: "&#FFCC00&lNext Page"
+    
+help:
+  - "&#55ff00&lAxVaults &7» &#AAFFAAHelp:"
+  - " "
+  - "  &7⋆ &f/axvaults view <player> <vault> &7| &#AAFFAAOpen another player's vault"
+  - "  &7⋆ &f/axvaults forceopen <player> &7| &#AAFFAAOpen vault selector to player"
+  - "  &7⋆ &f/axvaults reload &7| &#AAFFAAReload configuration"
+  - " "
+
+vault:
+  not-unlocked: "&#FF0000You don't own this vault!"
+  opened: "&fVault &#55FF00#%num% &fopened!"
+
+reload:
+  success: "&#33FF33Plugin successfully reloaded!"
+  failed: "&#FF3333Failed to reload the plugin! Something is wrong in the &f%file%&#FF3333 file, look in the console or use a yaml validator to fix the errors!"
+
+no-permission: "&#FF0000You don't have a permission to use this!"
+force-open: "&#00FF00Opened vault selector for &f%player%&#55FF00!"
+view: "&#55FF00%player%&f's &#55FF00#%num% &fvault opened!"
+view-not-found: "&#FF0000Can't find player or vault!"
+banned-item: "&#FF3333You can't put this item into vaults!"
+
+# do not change this
+version: 1
