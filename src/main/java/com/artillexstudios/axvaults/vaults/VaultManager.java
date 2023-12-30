@@ -37,7 +37,6 @@ public class VaultManager {
     }
 
     public static void addVault(@NotNull Vault vault) {
-        if (!players.containsKey(vault.getUUID())) return;
         players.get(vault.getUUID()).addVault(vault);
     }
 

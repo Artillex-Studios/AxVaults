@@ -41,6 +41,7 @@ public class VaultPlayer {
 
     @NotNull
     public Vault addVault(@NotNull Vault vault) {
+        if (vaultMap.containsKey(vault.getId())) return vaultMap.get(vault.getId());
         vaultMap.put(vault.getId(), vault);
         return vault;
     }

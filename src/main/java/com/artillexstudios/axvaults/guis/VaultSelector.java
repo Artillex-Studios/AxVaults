@@ -71,9 +71,12 @@ public class VaultSelector {
             final ItemBuilder builder = new ItemBuilder(MESSAGES.getSection("guis.selector.item-owned"));
             builder.setLore(MESSAGES.getStringList("guis.selector.item-owned.lore"), replacements);
             builder.setName(MESSAGES.getString("guis.selector.item-owned.name"), replacements);
+
             final ItemStack it = builder.get();
+
             it.setType(vault.getIcon());
             it.setAmount(num % 64 == 0 ? 64 : num % 64);
+
             final GuiItem guiItem = new GuiItem(it);
             guiItem.setAction(event -> {
                 if (event.isShiftClick()) {

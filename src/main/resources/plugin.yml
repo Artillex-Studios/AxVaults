@@ -3,6 +3,10 @@ version: '${project.version}'
 main: com.artillexstudios.axvaults.AxVaults
 api-version: '1.13'
 
+softdepend:
+  - PlaceholderAPI
+  - LuckPerms
+
 permissions:
   axvaults.vault.1:
     default: true
