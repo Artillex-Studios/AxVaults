@@ -20,7 +20,13 @@ public class VaultPlayer {
 
     public VaultPlayer(UUID uuid) {
         this.uuid = uuid;
+    }
 
+    public void loadSync() {
+        AxVaults.getDatabase().loadVaults(uuid);
+    }
+
+    public void loadAsync() {
         AxVaults.getThreadedQueue().submit(() -> AxVaults.getDatabase().loadVaults(uuid));
     }
 

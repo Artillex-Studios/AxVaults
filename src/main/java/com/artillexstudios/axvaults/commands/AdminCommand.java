@@ -57,7 +57,7 @@ public class AdminCommand {
         MESSAGEUTILS.sendLang(sender, "force-open", Collections.singletonMap("%player%", player.getName()));
     }
 
-    @Subcommand("view")
+    @Subcommand("view") // this command right now causes a small memory leak
     public void view(Player sender, @NotNull OfflinePlayer player, int number) {
         final HashMap<String, String> replacements = new HashMap<>();
         replacements.put("%player%", player.getName());

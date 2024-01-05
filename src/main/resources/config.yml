@@ -11,9 +11,6 @@ vault-selector-rows: 6
 # how many rows should vaults have?
 vault-storage-rows: 6
 
-# should the vault selector only show vaults that the player owns?
-only-show-unlocked: false
-
 database:
   # h2, sqlite
   type: "h2"

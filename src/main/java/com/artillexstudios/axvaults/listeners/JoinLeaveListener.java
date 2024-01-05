@@ -13,13 +13,13 @@ public class JoinLeaveListener implements Listener {
 
     public JoinLeaveListener() {
         for (Player player : Bukkit.getOnlinePlayers()) {
-            VaultManager.addPlayer(player.getUniqueId());
+            VaultManager.getPlayer(player.getUniqueId());
         }
     }
 
     @EventHandler
     public void onJoin(@NotNull PlayerJoinEvent event) {
-        VaultManager.addPlayer(event.getPlayer().getUniqueId());
+        VaultManager.getPlayer(event.getPlayer().getUniqueId());
     }
 
     @EventHandler

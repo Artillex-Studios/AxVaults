@@ -11,13 +11,15 @@ public class VaultManager {
     private static final HashMap<UUID, VaultPlayer> players = new HashMap<>();
 
     public static void addPlayer(@NotNull UUID uuid) {
-        players.put(uuid, new VaultPlayer(uuid));
+        final VaultPlayer vaultPlayer = new VaultPlayer(uuid);
+        players.put(uuid, vaultPlayer);
     }
 
     public static VaultPlayer getPlayer(@NotNull UUID uuid) {
         if (players.containsKey(uuid)) return players.get(uuid);
         final VaultPlayer vaultPlayer = new VaultPlayer(uuid);
         players.put(uuid, vaultPlayer);
+        vaultPlayer.loadSync();
         return vaultPlayer;
     }
 
