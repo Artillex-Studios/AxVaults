@@ -104,7 +104,7 @@
         <dependency>
             <groupId>com.artillexstudios.axapi</groupId>
             <artifactId>axapi</artifactId>
-            <version>1.4.10</version>
+            <version>1.4.21</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
@@ -139,7 +139,7 @@
         <dependency>
             <groupId>dev.triumphteam</groupId>
             <artifactId>triumph-gui</artifactId>
-            <version>3.1.5</version>
+            <version>3.1.7</version>
         </dependency>
         <dependency>
             <groupId>net.kyori</groupId>

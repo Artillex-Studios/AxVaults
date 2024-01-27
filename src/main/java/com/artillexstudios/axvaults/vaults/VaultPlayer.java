@@ -1,6 +1,7 @@
 package com.artillexstudios.axvaults.vaults;
 
 import com.artillexstudios.axvaults.AxVaults;
+import com.artillexstudios.axvaults.utils.PermissionUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
@@ -38,7 +39,7 @@ public class VaultPlayer {
     public Vault getVault(int num) {
         final Player player = Bukkit.getPlayer(uuid);
         if (player != null) {
-            if (!player.hasPermission("axvaults.vault." + num)) return null;
+            if (!PermissionUtils.hasPermission(player, num)) return null;
             if (!vaultMap.containsKey(num)) return addVault(new Vault(uuid, num, null));
         }
         if (!vaultMap.containsKey(num)) return null;

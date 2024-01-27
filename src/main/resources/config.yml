@@ -15,6 +15,14 @@ database:
   # h2, sqlite
   type: "h2"
 
+# modes:
+# 0 - every vault needs a separate permission (axvaults.vault.10 will only give access to vault #10)
+# 1 - the highest permission will give all the previous vaults (axvaults.vault.10 will give access to vaults #1-#10)
+permission-mode: 0
+
+# should vaults that the player can't access be shown in the selector gui?
+show-locked-vaults: true
+
 # list of items that CAN'T be put in vaults
 # note: the name-contains string shouldn't include any color codes
 blacklisted-items:

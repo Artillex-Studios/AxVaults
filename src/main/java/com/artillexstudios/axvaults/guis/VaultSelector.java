@@ -10,6 +10,7 @@ import dev.triumphteam.gui.guis.PaginatedGui;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 
@@ -34,7 +35,9 @@ public class VaultSelector {
                 .create();
 
         for (int i = 0; i < pageSize * (page + 1); i++) {
-            gui.addItem(getItemOfVault(player, i + 1, gui));
+            final GuiItem guiItem = getItemOfVault(player, i + 1, gui);
+            if (guiItem == null) continue;
+            gui.addItem(guiItem);
         }
 
         final GuiItem item1 = new GuiItem(new ItemBuilder(MESSAGES.getSection("gui-items.previous-page")).get());
@@ -46,7 +49,9 @@ public class VaultSelector {
             gui.next();
 
             for (int i = 0; i < pageSize; i++) {
-                gui.addItem(getItemOfVault(player, (gui.getCurrentPageNum() * pageSize) + i + 1, gui));
+                final GuiItem guiItem = getItemOfVault(player, (gui.getCurrentPageNum() * pageSize) + i + 1, gui);
+                if (guiItem == null) continue;
+                gui.addItem(guiItem);
             }
         });
         gui.setItem(rows, 7, item2);
@@ -58,7 +63,7 @@ public class VaultSelector {
         gui.open(player, page);
     }
 
-    @NotNull
+    @Nullable
     private GuiItem getItemOfVault(@NotNull Player player, int num, @NotNull PaginatedGui gui) {
         final HashMap<String, String> replacements = new HashMap<>();
         replacements.put("%num%", "" + num);
@@ -93,6 +98,7 @@ public class VaultSelector {
             });
             return guiItem;
         } else {
+            if (!CONFIG.getBoolean("show-locked-vaults", true)) return null;
             final ItemBuilder builder = new ItemBuilder(MESSAGES.getSection("guis.selector.item-locked"));
             builder.setLore(MESSAGES.getStringList("guis.selector.item-locked.lore"), replacements);
             builder.setName(MESSAGES.getString("guis.selector.item-locked.name"), replacements);
