@@ -2,6 +2,7 @@ name: AxVaults
 version: '${project.version}'
 main: com.artillexstudios.axvaults.AxVaults
 api-version: '1.13'
+folia-supported: true
 
 softdepend:
   - PlaceholderAPI

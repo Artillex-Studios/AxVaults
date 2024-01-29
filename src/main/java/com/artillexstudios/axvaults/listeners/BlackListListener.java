@@ -36,9 +36,7 @@ public class BlackListListener implements Listener {
             boolean banned = false;
 
             if (CONFIG.getString("blacklisted-items." + s + ".material") != null) {
-                final Material mt = Material.getMaterial(CONFIG.getString("blacklisted-items." + s + ".material").toUpperCase());
-                if (mt == null) continue;
-                if (!it.getType().equals(mt)) continue;
+                if (!it.getType().toString().equalsIgnoreCase(CONFIG.getString("blacklisted-items." + s + ".material"))) continue;
                 banned = true;
             }
 
