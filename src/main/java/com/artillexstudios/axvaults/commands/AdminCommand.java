@@ -47,6 +47,8 @@ public class AdminCommand {
             return;
         }
         Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#55FF00╠ &#00FF00Reloaded &fmessages.yml&#00FF00!"));
+        VaultManager.reload();
+        Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#55FF00╠ &#00FF00Reloaded &fvaults&#00FF00!"));
         Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#55FF00╚ &#00FF00Successful reload!"));
         MESSAGEUTILS.sendLang(sender, "reload.success");
     }

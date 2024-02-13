@@ -3,12 +3,16 @@ package com.artillexstudios.axvaults.vaults;
 import com.artillexstudios.axapi.utils.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.UUID;
 
 import static com.artillexstudios.axvaults.AxVaults.CONFIG;
@@ -16,7 +20,7 @@ import static com.artillexstudios.axvaults.AxVaults.MESSAGES;
 
 public class Vault {
     private final UUID uuid;
-    private final Inventory storage;
+    private Inventory storage;
     private final int id;
     private Material icon;
 
@@ -72,5 +76,21 @@ public class Vault {
 
     public void open(@NotNull Player player) {
         player.openInventory(storage);
+    }
+
+    public void reload() {
+        final Inventory newStorage = Bukkit.createInventory(null, CONFIG.getInt("vault-storage-rows", 54) * 9, StringUtils.formatToString(MESSAGES.getString("guis.vault.title").replace("%num%", "" + id)));
+        final ItemStack[] contents = storage.getContents();
+        newStorage.setContents(contents);
+
+        final List<HumanEntity> viewers = new ArrayList<>(storage.getViewers());
+        final Iterator<HumanEntity> viewerIterator = viewers.iterator();
+
+        while (viewerIterator.hasNext()) {
+            viewerIterator.next().openInventory(newStorage);
+            viewerIterator.remove();
+        }
+
+        storage = newStorage;
     }
 }

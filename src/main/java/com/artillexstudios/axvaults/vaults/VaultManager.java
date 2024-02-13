@@ -46,4 +46,12 @@ public class VaultManager {
         if (!players.containsKey(player.getUniqueId())) return 0;
         return players.get(player.getUniqueId()).getVaultMap().values().size();
     }
+
+    public static void reload() {
+        for (VaultPlayer vaultPlayer : players.values()) {
+            for (Vault vault : vaultPlayer.getVaultMap().values()) {
+                vault.reload();
+            }
+        }
+    }
 }

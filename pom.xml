@@ -6,7 +6,7 @@
 
     <groupId>com.artillexstudios</groupId>
     <artifactId>AxVaults</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.3</version>
     <packaging>jar</packaging>
 
     <name>AxVaults</name>
@@ -104,7 +104,7 @@
         <dependency>
             <groupId>com.artillexstudios.axapi</groupId>
             <artifactId>axapi</artifactId>
-            <version>1.4.23</version>
+            <version>1.4.39</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
