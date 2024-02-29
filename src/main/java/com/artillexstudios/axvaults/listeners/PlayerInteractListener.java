@@ -13,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class PlayerInteractListener implements Listener {
 
-    @EventHandler
+    @EventHandler (ignoreCancelled = true)
     public void onInteract(@NotNull PlayerInteractEvent event) {
         if (!event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) return;
         if (event.getClickedBlock() == null) return;
