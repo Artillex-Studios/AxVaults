@@ -44,9 +44,10 @@ gui-items:
 help:
   - "&#55ff00&lAxVaults &7» &#AAFFAAHelp:"
   - " "
-  - "  &7⋆ &f/axvaults view <player> <vault> &7| &#AAFFAAOpen another player's vault"
-  - "  &7⋆ &f/axvaults forceopen <player> &7| &#AAFFAAOpen vault selector to player"
-  - "  &7⋆ &f/axvaults reload &7| &#AAFFAAReload configuration"
+  - "  &7⋆ &f/axvaultsadmin view <player> <vault> &7| &#AAFFAAOpen another player's vault"
+  - "  &7⋆ &f/axvaultsadmin forceopen <player> &7| &#AAFFAAOpen vault selector to player"
+  - "  &7⋆ &f/axvaultsadmin set [number] &7| &#AAFFAAAdd vault to block"
+  - "  &7⋆ &f/axvaultsadmin reload &7| &#AAFFAAReload configuration"
   - " "
 
 vault:
@@ -57,11 +58,17 @@ reload:
   success: "&#33FF33Plugin successfully reloaded!"
   failed: "&#FF3333Failed to reload the plugin! Something is wrong in the &f%file%&#FF3333 file, look in the console or use a yaml validator to fix the errors!"
 
+set:
+  success: "&#00FF00You can successfully added the vault to this block!"
+  already: "&#FF0000This block already has a vault on it!"
+  no-block: "&#FF0000You must look at a block!"
+  removed: "&#FF0000You have removed the vault from this block!"
+
 no-permission: "&#FF0000You don't have a permission to use this!"
 force-open: "&#00FF00Opened vault selector for &f%player%&#55FF00!"
 view: "&#55FF00%player%&f's &#55FF00#%num% &fvault opened!"
 view-not-found: "&#FF0000Can't find player or vault!"
-banned-item: "&#FF3333You can't put this item into vaults!"
+banned-item: "&#FF0000You can't put this item into vaults!"
 
 # do not change this
-version: 1
+version: 2

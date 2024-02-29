@@ -20,8 +20,12 @@ public class PlayerCommand {
     @DefaultFor({"~"})
     @AutoComplete("@vaults")
     public void axvault(@NotNull Player sender, @Optional Integer number) {
+        open(sender, number, false);
+    }
+
+    public void open(@NotNull Player sender, @Optional Integer number, boolean force) {
         if (number == null) {
-            if (!sender.hasPermission("axvaults.selector")) {
+            if (!force && !sender.hasPermission("axvaults.selector")) {
                 MESSAGEUTILS.sendLang(sender, "no-permission");
                 return;
             }
@@ -34,7 +38,7 @@ public class PlayerCommand {
         final HashMap<String, String> replacements = new HashMap<>();
         replacements.put("%num%", "" + number);
 
-        if (!sender.hasPermission("axvaults.openremote")) {
+        if (!force && !sender.hasPermission("axvaults.openremote")) {
             MESSAGEUTILS.sendLang(sender, "no-permission");
             return;
         }

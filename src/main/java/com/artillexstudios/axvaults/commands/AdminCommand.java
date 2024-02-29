@@ -1,17 +1,20 @@
 package com.artillexstudios.axvaults.commands;
 
 import com.artillexstudios.axapi.utils.StringUtils;
+import com.artillexstudios.axvaults.AxVaults;
 import com.artillexstudios.axvaults.guis.VaultSelector;
 import com.artillexstudios.axvaults.vaults.Vault;
 import com.artillexstudios.axvaults.vaults.VaultManager;
 import com.artillexstudios.axvaults.vaults.VaultPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import revxrsal.commands.annotation.Command;
 import revxrsal.commands.annotation.DefaultFor;
+import revxrsal.commands.annotation.Optional;
 import revxrsal.commands.annotation.Subcommand;
 import revxrsal.commands.bukkit.annotation.CommandPermission;
 
@@ -34,7 +37,7 @@ public class AdminCommand {
     }
 
     @Subcommand("reload")
-    public void reload(CommandSender sender) {
+    public void reload(@NotNull CommandSender sender) {
         Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#55FF00[AxVaults] &#AAFFAAReloading configuration..."));
         if (!CONFIG.reload()) {
             MESSAGEUTILS.sendFormatted(sender, "reload.failed", Collections.singletonMap("%file%", "config.yml"));
@@ -54,13 +57,13 @@ public class AdminCommand {
     }
 
     @Subcommand("forceopen")
-    public void forceopen(CommandSender sender, @NotNull Player player) {
+    public void forceopen(@NotNull CommandSender sender, @NotNull Player player) {
         new VaultSelector().open(player);
         MESSAGEUTILS.sendLang(sender, "force-open", Collections.singletonMap("%player%", player.getName()));
     }
 
     @Subcommand("view") // this command right now causes a small memory leak
-    public void view(Player sender, @NotNull OfflinePlayer player, int number) {
+    public void view(@NotNull Player sender, @NotNull OfflinePlayer player, int number) {
         final HashMap<String, String> replacements = new HashMap<>();
         replacements.put("%player%", player.getName());
         replacements.put("%num%", "" + number);
@@ -73,5 +76,25 @@ public class AdminCommand {
         }
         vault.open(sender);
         MESSAGEUTILS.sendLang(sender, "view", replacements);
+    }
+
+    @Subcommand("set")
+    public void set(@NotNull Player sender, @Optional Integer number) {
+        final Block block = sender.getTargetBlockExact(5);
+
+        if (block == null) {
+            MESSAGEUTILS.sendLang(sender, "set.no-block");
+            return;
+        }
+
+        AxVaults.getThreadedQueue().submit(() -> {
+            if (AxVaults.getDatabase().isVault(block.getLocation())) {
+                MESSAGEUTILS.sendLang(sender, "set.already");
+                return;
+            }
+
+            AxVaults.getDatabase().setVault(block.getLocation(), number);
+            MESSAGEUTILS.sendLang(sender, "set.success");
+        });
     }
 }

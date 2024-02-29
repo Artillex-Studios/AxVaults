@@ -18,7 +18,9 @@ import com.artillexstudios.axvaults.database.impl.H2;
 import com.artillexstudios.axvaults.database.impl.SQLite;
 import com.artillexstudios.axvaults.libraries.Libraries;
 import com.artillexstudios.axvaults.listeners.BlackListListener;
+import com.artillexstudios.axvaults.listeners.BlockBreakListener;
 import com.artillexstudios.axvaults.listeners.JoinLeaveListener;
+import com.artillexstudios.axvaults.listeners.PlayerInteractListener;
 import com.artillexstudios.axvaults.schedulers.AutoSaveScheduler;
 import com.artillexstudios.axvaults.vaults.Vault;
 import com.artillexstudios.axvaults.vaults.VaultManager;
@@ -84,9 +86,12 @@ public final class AxVaults extends AxPlugin {
         }
 
         database.setup();
+        database.load();
 
         getServer().getPluginManager().registerEvents(new JoinLeaveListener(), this);
         getServer().getPluginManager().registerEvents(new BlackListListener(), this);
+        getServer().getPluginManager().registerEvents(new PlayerInteractListener(), this);
+        getServer().getPluginManager().registerEvents(new BlockBreakListener(), this);
 
         final BukkitCommandHandler handler = BukkitCommandHandler.create(this);
 

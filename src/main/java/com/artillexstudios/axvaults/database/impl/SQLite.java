@@ -1,13 +1,17 @@
 package com.artillexstudios.axvaults.database.impl;
 
+import com.artillexstudios.axapi.serializers.Serializers;
 import com.artillexstudios.axvaults.AxVaults;
 import com.artillexstudios.axvaults.database.Database;
+import com.artillexstudios.axvaults.placed.PlacedVaults;
 import com.artillexstudios.axvaults.utils.SerializationUtils;
 import com.artillexstudios.axvaults.vaults.Vault;
 import com.artillexstudios.axvaults.vaults.VaultManager;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -38,10 +42,18 @@ public class SQLite implements Database {
                 "( `id` INT(128) NOT NULL," +
                 "`uuid` VARCHAR(36) NOT NULL," +
                 "`storage` LONGBLOB," +
-                "`icon` VARCHAR(128)," +
+                "`icon` VARCHAR(128)" +
                 ");";
 
         try (PreparedStatement stmt = conn.prepareStatement(CREATE_TABLE)) {
+            stmt.executeUpdate();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+
+        final String CREATE_TABLE2 = "CREATE TABLE IF NOT EXISTS `axvaults_blocks` ( `location` VARCHAR(255) NOT NULL, `number` INT, PRIMARY KEY (`location`) );";
+
+        try (PreparedStatement stmt = conn.prepareStatement(CREATE_TABLE2)) {
             stmt.executeUpdate();
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -94,6 +106,65 @@ public class SQLite implements Database {
                     final ItemStack[] items = SerializationUtils.invFromBits(rs.getBinaryStream(3));
                     final Vault vault = new Vault(uuid, rs.getInt(1), items, rs.getString(4) == null ? null : Material.valueOf(rs.getString(4)));
                     VaultManager.addVault(vault);
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    @Override
+    public boolean isVault(@NotNull Location location) {
+        final String sql = "SELECT * FROM axvaults_blocks WHERE location = ?;";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, Serializers.LOCATION.serialize(location));
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) return true;
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+
+        return false;
+    }
+
+    @Override
+    public void setVault(@NotNull Location location, @Nullable Integer num) {
+        final String sql = "INSERT INTO `axvaults_blocks`(`location`, `number`) VALUES (?, ?)";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, Serializers.LOCATION.serialize(location));
+            if (num == null) stmt.setString(2, null);
+            else stmt.setInt(2, num);
+            stmt.executeUpdate();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+
+        PlacedVaults.addVault(location, num);
+    }
+
+    @Override
+    public void removeVault(@NotNull Location location) {
+        final String sql = "DELETE FROM axvaults_blocks WHERE location = ?;";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, Serializers.LOCATION.serialize(location));
+            stmt.executeUpdate();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    @Override
+    public void load() {
+        final String sql = "SELECT * FROM axvaults_blocks;";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    final String vault = rs.getString(2);
+                    final Integer vaultInt = vault == null ? null : Integer.parseInt(vault);
+                    PlacedVaults.addVault(Serializers.LOCATION.deserialize(rs.getString(1)), vaultInt);
                 }
             }
         } catch (SQLException ex) {
