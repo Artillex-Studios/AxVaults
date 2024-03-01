@@ -76,12 +76,23 @@ public class Vault {
 
     public void open(@NotNull Player player) {
         player.openInventory(storage);
+        // todo: on close reopen selector (only when it was used)
     }
 
     public void reload() {
-        final Inventory newStorage = Bukkit.createInventory(null, CONFIG.getInt("vault-storage-rows", 54) * 9, StringUtils.formatToString(MESSAGES.getString("guis.vault.title").replace("%num%", "" + id)));
+        final Inventory newStorage = Bukkit.createInventory(null, CONFIG.getInt("vault-storage-rows", 6) * 9, StringUtils.formatToString(MESSAGES.getString("guis.vault.title").replace("%num%", "" + id)));
         final ItemStack[] contents = storage.getContents();
-        newStorage.setContents(contents);
+
+        int n = 0;
+        for (ItemStack it : contents) {
+            n++;
+            if (n > newStorage.getSize() - 1) {
+                if (it == null) continue;
+                newStorage.addItem(it);
+                continue;
+            }
+            newStorage.setItem(n, it);
+        }
 
         final List<HumanEntity> viewers = new ArrayList<>(storage.getViewers());
         final Iterator<HumanEntity> viewerIterator = viewers.iterator();

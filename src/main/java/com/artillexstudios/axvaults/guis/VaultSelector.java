@@ -65,6 +65,9 @@ public class VaultSelector {
 
     @Nullable
     private GuiItem getItemOfVault(@NotNull Player player, int num, @NotNull PaginatedGui gui) {
+        int maxVaults = CONFIG.getInt("max-vault-amount");
+        if (maxVaults != -1 && num > maxVaults) return null;
+
         final HashMap<String, String> replacements = new HashMap<>();
         replacements.put("%num%", "" + num);
 
@@ -80,7 +83,16 @@ public class VaultSelector {
             final ItemStack it = builder.get();
 
             it.setType(vault.getIcon());
-            it.setAmount(num % 64 == 0 ? 64 : num % 64);
+            switch (CONFIG.getInt("selector-item-amount-mode", 1)) {
+                case 1:
+                    it.setAmount(num % 64 == 0 ? 64 : num % 64);
+                    break;
+                case 3:
+                    it.setAmount(Math.max(1, vault.getSlotsFilled()));
+                    break;
+                default:
+                    break;
+            }
 
             final GuiItem guiItem = new GuiItem(it);
             guiItem.setAction(event -> {
@@ -99,11 +111,15 @@ public class VaultSelector {
             return guiItem;
         } else {
             if (!CONFIG.getBoolean("show-locked-vaults", true)) return null;
+
             final ItemBuilder builder = new ItemBuilder(MESSAGES.getSection("guis.selector.item-locked"));
             builder.setLore(MESSAGES.getStringList("guis.selector.item-locked.lore"), replacements);
             builder.setName(MESSAGES.getString("guis.selector.item-locked.name"), replacements);
+
             final ItemStack it = builder.get();
-            it.setAmount(num % 64 == 0 ? 64 : num % 64);
+            if (CONFIG.getInt("selector-item-amount-mode", 1) == 1)
+                it.setAmount(num % 64 == 0 ? 64 : num % 64);
+
             return new GuiItem(it);
         }
     }

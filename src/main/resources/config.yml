@@ -23,6 +23,18 @@ permission-mode: 0
 # should vaults that the player can't access be shown in the selector gui?
 show-locked-vaults: true
 
+# how many items should be shown in the vault selector
+# modes:
+# 1 - the number of the vault, it will restart once it reaches 64
+# 2 - always show 1
+# 3 - show the slots filled in the vault
+selector-item-amount-mode: 1
+
+# how many vaults should be shown in the vault gui
+# this only has an effect if show-locked-vaults is false
+# set to -1 to show an unlimited amount of vaults
+max-vault-amount: -1
+
 # list of items that CAN'T be put in vaults
 # note: the name-contains string shouldn't include any color codes
 blacklisted-items:
@@ -31,4 +43,4 @@ blacklisted-items:
     name-contains: "Banned item's name"
 
 # do not change this
-version: 1
+version: 2
