@@ -8,8 +8,10 @@ import dev.triumphteam.gui.guis.GuiItem;
 import dev.triumphteam.gui.guis.PaginatedGui;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemFlag;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collections;
 import java.util.Objects;
 
 import static com.artillexstudios.axvaults.AxVaults.CONFIG;
@@ -32,8 +34,8 @@ public class ItemPicker {
                 .create();
 
         for (Material material : Material.values()) {
-            if (material.equals(Material.AIR)) continue;
-            final GuiItem guiItem = new GuiItem(new ItemBuilder(material).glow(Objects.equals(vault.getIcon(), material)).get());
+            if (material.equals(Material.AIR) || material.equals(Material.CAVE_AIR) || material.equals(Material.VOID_AIR)) continue;
+            final GuiItem guiItem = new GuiItem(new ItemBuilder(material).applyItemFlags(Collections.singletonList(ItemFlag.HIDE_ATTRIBUTES)).glow(Objects.equals(vault.getIcon(), material)).get());
             guiItem.setAction(event -> {
                 if (vault.getIcon().equals(material)) vault.setIcon(null);
                 else vault.setIcon(material);
