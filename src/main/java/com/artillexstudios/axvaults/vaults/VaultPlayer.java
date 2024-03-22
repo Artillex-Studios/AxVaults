@@ -53,6 +53,10 @@ public class VaultPlayer {
         return vault;
     }
 
+    public void removeVault(@NotNull Vault vault) {
+        vaultMap.remove(vault.getId());
+    }
+
     public void save() {
         AxVaults.getThreadedQueue().submit(() -> {
             for (Vault vault : vaultMap.values()) {

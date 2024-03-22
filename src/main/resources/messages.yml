@@ -2,7 +2,7 @@ guis:
   selector:
     title: "&0My Vaults"
     item-owned:
-      # the players can change the default material if the have permission
+      # players can change the material if they have permission, this is the default value
       material: BARREL
       name: "&#55ff00&lVault #%num%"
       glow: false
@@ -13,7 +13,6 @@ guis:
         - "&#55ff00&l(!) &#55ff00Click - Open Vault"
         - "&#55ff00&l(!) &#55ff00Shift + Click - Change Item"
     item-locked:
-      # the players can change the default material if the have permission
       material: RED_STAINED_GLASS_PANE
       name: "&#FF0000&lVault #%num%"
       glow: false
@@ -48,6 +47,8 @@ help:
   - "  &7⋆ &f/axvaultsadmin forceopen <player> &7| &#AAFFAAOpen vault selector to player"
   - "  &7⋆ &f/axvaultsadmin set [number] &7| &#AAFFAAAdd vault to block"
   - "  &7⋆ &f/axvaultsadmin reload &7| &#AAFFAAReload configuration"
+  - "  &7⋆ &f/axvaultsadmin delete <player> <vault> &7| &#AAFFAADelete vault of player"
+  - "  &7⋆ &f/axvaultsadmin converter <plugin> &7| &#AAFFAAConvert from another plugin"
   - " "
 
 vault:
@@ -59,7 +60,7 @@ reload:
   failed: "&#FF3333Failed to reload the plugin! Something is wrong in the &f%file%&#FF3333 file, look in the console or use a yaml validator to fix the errors!"
 
 set:
-  success: "&#00FF00You can successfully added the vault to this block!"
+  success: "&#00FF00You have successfully added the vault to this block!"
   already: "&#FF0000This block already has a vault on it!"
   no-block: "&#FF0000You must look at a block!"
   removed: "&#FF0000You have removed the vault from this block!"
@@ -67,8 +68,12 @@ set:
 no-permission: "&#FF0000You don't have a permission to use this!"
 force-open: "&#00FF00Opened vault selector for &f%player%&#55FF00!"
 view: "&#55FF00%player%&f's &#55FF00#%num% &fvault opened!"
+delete: "&fDeleted vault &#FF0000#%num% of &#FF0000%player%&f!"
 view-not-found: "&#FF0000Can't find player or vault!"
 banned-item: "&#FF0000You can't put this item into vaults!"
 
+converter:
+  started: "&#55FF00The converter has started! Check the console for the current status!"
+
 # do not change this
-version: 2
+version: 3

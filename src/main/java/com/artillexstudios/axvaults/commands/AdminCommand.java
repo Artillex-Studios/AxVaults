@@ -2,6 +2,7 @@ package com.artillexstudios.axvaults.commands;
 
 import com.artillexstudios.axapi.utils.StringUtils;
 import com.artillexstudios.axvaults.AxVaults;
+import com.artillexstudios.axvaults.converters.PlayerVaultsXConverter;
 import com.artillexstudios.axvaults.guis.VaultSelector;
 import com.artillexstudios.axvaults.vaults.Vault;
 import com.artillexstudios.axvaults.vaults.VaultManager;
@@ -12,6 +13,7 @@ import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import revxrsal.commands.annotation.AutoComplete;
 import revxrsal.commands.annotation.Command;
 import revxrsal.commands.annotation.DefaultFor;
 import revxrsal.commands.annotation.Optional;
@@ -62,7 +64,8 @@ public class AdminCommand {
         MESSAGEUTILS.sendLang(sender, "force-open", Collections.singletonMap("%player%", player.getName()));
     }
 
-    @Subcommand("view") // this command right now causes a small memory leak
+    @Subcommand("view")
+    @AutoComplete("@offlinePlayers *")
     public void view(@NotNull Player sender, @NotNull OfflinePlayer player, int number) {
         final HashMap<String, String> replacements = new HashMap<>();
         replacements.put("%player%", player.getName());
@@ -76,6 +79,24 @@ public class AdminCommand {
         }
         vault.open(sender);
         MESSAGEUTILS.sendLang(sender, "view", replacements);
+    }
+
+    @Subcommand("delete")
+    @AutoComplete("@offlinePlayers *")
+    public void delete(@NotNull Player sender, @NotNull OfflinePlayer player, int number) {
+        final HashMap<String, String> replacements = new HashMap<>();
+        replacements.put("%player%", player.getName());
+        replacements.put("%num%", "" + number);
+
+        final VaultPlayer vaultPlayer = VaultManager.getPlayer(player.getUniqueId());
+        final Vault vault = vaultPlayer.getVault(number);
+        if (vault == null) {
+            MESSAGEUTILS.sendLang(sender, "view-not-found", replacements);
+            return;
+        }
+        VaultManager.removeVault(vault);
+        AxVaults.getDatabase().deleteVault(player.getUniqueId(), number);
+        MESSAGEUTILS.sendLang(sender, "delete", replacements);
     }
 
     @Subcommand("set")
@@ -96,5 +117,11 @@ public class AdminCommand {
             AxVaults.getDatabase().setVault(block.getLocation(), number);
             MESSAGEUTILS.sendLang(sender, "set.success");
         });
+    }
+
+    @Subcommand("converter PlayerVaultsX")
+    public void converter(@NotNull Player sender) {
+        new PlayerVaultsXConverter().run();
+        MESSAGEUTILS.sendLang(sender, "converter.started");
     }
 }

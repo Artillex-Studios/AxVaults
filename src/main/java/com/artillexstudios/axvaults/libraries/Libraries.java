@@ -1,7 +1,7 @@
 package com.artillexstudios.axvaults.libraries;
 
-import com.alessiodp.libby.Library;
-import com.alessiodp.libby.relocation.Relocation;
+import com.artillexstudios.axapi.libs.libby.Library;
+import com.artillexstudios.axapi.libs.libby.relocation.Relocation;
 
 public enum Libraries {
 

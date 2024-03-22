@@ -3,7 +3,6 @@ package com.artillexstudios.axvaults.listeners;
 import com.artillexstudios.axvaults.vaults.Vault;
 import com.artillexstudios.axvaults.vaults.VaultManager;
 import com.artillexstudios.axvaults.vaults.VaultPlayer;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;

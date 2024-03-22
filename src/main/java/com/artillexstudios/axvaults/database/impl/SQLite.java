@@ -156,6 +156,18 @@ public class SQLite implements Database {
     }
 
     @Override
+    public void deleteVault(@NotNull UUID uuid, int num) {
+        final String sql = "DELETE FROM axvaults_data WHERE uuid = ? AND id = ?;";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, uuid.toString());
+            stmt.setInt(2, num);
+            stmt.executeUpdate();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    @Override
     public void load() {
         final String sql = "SELECT * FROM axvaults_blocks;";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {

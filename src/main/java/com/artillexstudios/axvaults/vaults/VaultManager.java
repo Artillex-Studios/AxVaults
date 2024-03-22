@@ -42,6 +42,10 @@ public class VaultManager {
         players.get(vault.getUUID()).addVault(vault);
     }
 
+    public static void removeVault(@NotNull Vault vault) {
+        players.get(vault.getUUID()).removeVault(vault);
+    }
+
     public static int getVaultsOfPlayer(@NotNull Player player) {
         if (!players.containsKey(player.getUniqueId())) return 0;
         return players.get(player.getUniqueId()).getVaultMap().values().size();

@@ -1,6 +1,5 @@
 package com.artillexstudios.axvaults;
 
-import com.alessiodp.libby.BukkitLibraryManager;
 import com.artillexstudios.axapi.AxPlugin;
 import com.artillexstudios.axapi.config.Config;
 import com.artillexstudios.axapi.data.ThreadedQueue;
@@ -9,6 +8,7 @@ import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.settings.dumper.Du
 import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.settings.general.GeneralSettings;
 import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.settings.loader.LoaderSettings;
 import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.settings.updater.UpdaterSettings;
+import com.artillexstudios.axapi.libs.libby.BukkitLibraryManager;
 import com.artillexstudios.axapi.utils.FeatureFlags;
 import com.artillexstudios.axapi.utils.MessageUtils;
 import com.artillexstudios.axapi.utils.StringUtils;
@@ -33,6 +33,7 @@ import revxrsal.commands.bukkit.BukkitCommandHandler;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 public final class AxVaults extends AxPlugin {
     public static Config CONFIG;
@@ -55,7 +56,7 @@ public final class AxVaults extends AxPlugin {
     }
 
     public void load() {
-        BukkitLibraryManager libraryManager = new BukkitLibraryManager(this, "libraries");
+        BukkitLibraryManager libraryManager = new BukkitLibraryManager(this, "lib");
         libraryManager.addMavenCentral();
 
         for (Libraries lib : Libraries.values()) {
@@ -105,6 +106,13 @@ public final class AxVaults extends AxPlugin {
                 numbers.add("" + (i + 1));
             }
             return numbers;
+        });
+
+
+        handler.getAutoCompleter().registerSuggestion("offlinePlayers", (args, sender, command) -> {
+            final List<String> names = new ArrayList<>();
+            for (Player player : Bukkit.getOnlinePlayers()) names.add(player.getName());
+            return names;
         });
 
         handler.register(new PlayerCommand(), new AdminCommand());

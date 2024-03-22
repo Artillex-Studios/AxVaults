@@ -2,7 +2,6 @@ package com.artillexstudios.axvaults.database;
 
 import com.artillexstudios.axvaults.vaults.Vault;
 import org.bukkit.Location;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -23,6 +22,8 @@ public interface Database {
     void setVault(@NotNull Location location, @Nullable Integer num);
 
     void removeVault(@NotNull Location location);
+
+    void deleteVault(@NotNull UUID uuid, int num);
 
     void load();
 
