@@ -9,9 +9,10 @@ import dev.triumphteam.gui.guis.PaginatedGui;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collections;
 import java.util.Objects;
 
 import static com.artillexstudios.axvaults.AxVaults.CONFIG;
@@ -35,7 +36,15 @@ public class ItemPicker {
 
         for (Material material : Material.values()) {
             if (material.equals(Material.AIR) || material.equals(Material.CAVE_AIR) || material.equals(Material.VOID_AIR)) continue;
-            final GuiItem guiItem = new GuiItem(new ItemBuilder(material).applyItemFlags(Collections.singletonList(ItemFlag.HIDE_ATTRIBUTES)).glow(Objects.equals(vault.getIcon(), material)).get());
+            final ItemStack it = new ItemBuilder(material).glow(Objects.equals(vault.getIcon(), material)).get();
+
+            if (it.hasItemMeta()) {
+                final ItemMeta meta = it.getItemMeta();
+                meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+                it.setItemMeta(meta);
+            }
+
+            final GuiItem guiItem = new GuiItem(it);
             guiItem.setAction(event -> {
                 if (vault.getIcon().equals(material)) vault.setIcon(null);
                 else vault.setIcon(material);

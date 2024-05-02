@@ -10,10 +10,10 @@ import dev.triumphteam.gui.guis.PaginatedGui;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collections;
 import java.util.HashMap;
 
 import static com.artillexstudios.axvaults.AxVaults.CONFIG;
@@ -81,9 +81,13 @@ public class VaultSelector {
             final ItemBuilder builder = new ItemBuilder(MESSAGES.getSection("guis.selector.item-owned"));
             builder.setLore(MESSAGES.getStringList("guis.selector.item-owned.lore"), replacements);
             builder.setName(MESSAGES.getString("guis.selector.item-owned.name"), replacements);
-            builder.applyItemFlags(Collections.singletonList(ItemFlag.HIDE_ATTRIBUTES));
 
             final ItemStack it = builder.get();
+            if (it.hasItemMeta()) {
+                final ItemMeta meta = it.getItemMeta();
+                meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+                it.setItemMeta(meta);
+            }
 
             it.setType(vault.getIcon());
             switch (CONFIG.getInt("selector-item-amount-mode", 1)) {
