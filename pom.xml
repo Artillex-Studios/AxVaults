@@ -6,13 +6,13 @@
 
     <groupId>com.artillexstudios</groupId>
     <artifactId>AxVaults</artifactId>
-    <version>1.4.0</version>
+    <version>1.5.0</version>
     <packaging>jar</packaging>
 
     <name>AxVaults</name>
 
     <properties>
-        <java.version>1.8</java.version>
+        <java.version>17</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -23,8 +23,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.1</version>
                 <configuration>
-                    <source>${java.version}</source>
-                    <target>${java.version}</target>
+                    <source>17</source>
+                    <target>17</target>
                     <compilerArgs>
                         <arg>-parameters</arg>
                     </compilerArgs>
@@ -104,7 +104,7 @@
         <dependency>
             <groupId>com.artillexstudios.axapi</groupId>
             <artifactId>axapi</artifactId>
-            <version>1.4.188</version>
+            <version>1.4.224</version>
             <scope>compile</scope>
             <classifier>all</classifier>
         </dependency>

@@ -14,7 +14,6 @@ import org.h2.jdbc.JdbcConnection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -22,7 +21,7 @@ import java.util.Properties;
 import java.util.UUID;
 
 public class H2 implements Database {
-    private Connection conn;
+    private JdbcConnection conn;
 
     @Override
     public String getType() {

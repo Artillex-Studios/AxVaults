@@ -2,11 +2,14 @@ package com.artillexstudios.axvaults.guis;
 
 import com.artillexstudios.axapi.utils.ItemBuilder;
 import com.artillexstudios.axapi.utils.StringUtils;
+import com.artillexstudios.axvaults.utils.SoundUtils;
 import com.artillexstudios.axvaults.vaults.Vault;
 import dev.triumphteam.gui.guis.Gui;
 import dev.triumphteam.gui.guis.GuiItem;
 import dev.triumphteam.gui.guis.PaginatedGui;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -35,20 +38,27 @@ public class ItemPicker {
                 .create();
 
         for (Material material : Material.values()) {
-            if (material.equals(Material.AIR) || material.equals(Material.CAVE_AIR) || material.equals(Material.VOID_AIR)) continue;
-            final ItemStack it = new ItemBuilder(material).glow(Objects.equals(vault.getIcon(), material)).get();
+            final ItemStack it = new ItemBuilder(material).get();
+            final ItemMeta meta = it.hasItemMeta() ? it.getItemMeta() : Bukkit.getItemFactory().getItemMeta(it.getType());
+            if (meta == null) continue;
 
-            if (it.hasItemMeta()) {
-                final ItemMeta meta = it.getItemMeta();
-                meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
-                it.setItemMeta(meta);
+            meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+            it.setItemMeta(meta);
+
+            if (Objects.equals(vault.getIcon(), material)) {
+                it.addUnsafeEnchantment(Enchantment.LOYALTY, 1);
             }
 
             final GuiItem guiItem = new GuiItem(it);
             guiItem.setAction(event -> {
                 if (vault.getIcon().equals(material)) vault.setIcon(null);
                 else vault.setIcon(material);
-                open(player, vault, oldPage, gui.getCurrentPageNum());
+                SoundUtils.playSound(player, MESSAGES.getString("sounds.select-icon"));
+                if (CONFIG.getBoolean("selector-stay-open", true))
+                    open(player, vault, oldPage, gui.getCurrentPageNum());
+                else
+                    new VaultSelector().open(player, oldPage);
             });
             gui.addItem(guiItem);
         }

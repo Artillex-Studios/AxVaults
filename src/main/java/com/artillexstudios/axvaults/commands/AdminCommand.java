@@ -14,22 +14,23 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import revxrsal.commands.annotation.AutoComplete;
-import revxrsal.commands.annotation.Command;
 import revxrsal.commands.annotation.DefaultFor;
 import revxrsal.commands.annotation.Optional;
+import revxrsal.commands.annotation.Range;
 import revxrsal.commands.annotation.Subcommand;
 import revxrsal.commands.bukkit.annotation.CommandPermission;
+import revxrsal.commands.orphan.OrphanCommand;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.stream.Collectors;
 
 import static com.artillexstudios.axvaults.AxVaults.CONFIG;
 import static com.artillexstudios.axvaults.AxVaults.MESSAGES;
 import static com.artillexstudios.axvaults.AxVaults.MESSAGEUTILS;
 
-@Command({"axvaultsadmin", "axvaultadmin", "vaultadmin", "vaultsadmin"})
 @CommandPermission("axvaults.admin")
-public class AdminCommand {
+public class AdminCommand implements OrphanCommand {
 
     @DefaultFor({"~", "~ help"})
     public void help(@NotNull CommandSender sender) {
@@ -52,8 +53,12 @@ public class AdminCommand {
             return;
         }
         Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#55FF00╠ &#00FF00Reloaded &fmessages.yml&#00FF00!"));
+
         VaultManager.reload();
         Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#55FF00╠ &#00FF00Reloaded &fvaults&#00FF00!"));
+
+        AxVaults.registerCommands();
+
         Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#55FF00╚ &#00FF00Successful reload!"));
         MESSAGEUTILS.sendLang(sender, "reload.success");
     }
@@ -66,19 +71,26 @@ public class AdminCommand {
 
     @Subcommand("view")
     @AutoComplete("@offlinePlayers *")
-    public void view(@NotNull Player sender, @NotNull OfflinePlayer player, int number) {
+    public void view(@NotNull Player sender, @NotNull OfflinePlayer player, @Optional @Range(min = 1) Integer number) {
         final HashMap<String, String> replacements = new HashMap<>();
         replacements.put("%player%", player.getName());
+
+        if (number == null) {
+            replacements.put("%vaults%", VaultManager.getPlayer(player.getUniqueId()).getVaultMap().values().stream().filter(vault -> vault.getSlotsFilled() != 0).map(vault -> "" + vault.getId()).collect(Collectors.joining(", ")));
+            MESSAGEUTILS.sendLang(sender, "view.info", replacements);
+            return;
+        }
+
         replacements.put("%num%", "" + number);
 
         final VaultPlayer vaultPlayer = VaultManager.getPlayer(player.getUniqueId());
         final Vault vault = vaultPlayer.getVault(number);
         if (vault == null) {
-            MESSAGEUTILS.sendLang(sender, "view-not-found", replacements);
+            MESSAGEUTILS.sendLang(sender, "view.not-found", replacements);
             return;
         }
         vault.open(sender);
-        MESSAGEUTILS.sendLang(sender, "view", replacements);
+        MESSAGEUTILS.sendLang(sender, "view.open", replacements);
     }
 
     @Subcommand("delete")
@@ -91,7 +103,7 @@ public class AdminCommand {
         final VaultPlayer vaultPlayer = VaultManager.getPlayer(player.getUniqueId());
         final Vault vault = vaultPlayer.getVault(number);
         if (vault == null) {
-            MESSAGEUTILS.sendLang(sender, "view-not-found", replacements);
+            MESSAGEUTILS.sendLang(sender, "view.not-found", replacements);
             return;
         }
         VaultManager.removeVault(vault);

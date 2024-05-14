@@ -6,9 +6,11 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.UUID;
+import java.util.WeakHashMap;
 
 public class VaultManager {
     private static final HashMap<UUID, VaultPlayer> players = new HashMap<>();
+    private static final WeakHashMap<Vault, Void> vaults = new WeakHashMap<>();
 
     public static void addPlayer(@NotNull UUID uuid) {
         final VaultPlayer vaultPlayer = new VaultPlayer(uuid);
@@ -57,5 +59,9 @@ public class VaultManager {
                 vault.reload();
             }
         }
+    }
+
+    public static WeakHashMap<Vault, Void> getVaults() {
+        return vaults;
     }
 }

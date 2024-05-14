@@ -20,16 +20,19 @@ import com.artillexstudios.axvaults.database.impl.SQLite;
 import com.artillexstudios.axvaults.libraries.Libraries;
 import com.artillexstudios.axvaults.listeners.BlackListListener;
 import com.artillexstudios.axvaults.listeners.BlockBreakListener;
+import com.artillexstudios.axvaults.listeners.InventoryCloseListener;
 import com.artillexstudios.axvaults.listeners.JoinLeaveListener;
 import com.artillexstudios.axvaults.listeners.PlayerInteractListener;
 import com.artillexstudios.axvaults.schedulers.AutoSaveScheduler;
 import com.artillexstudios.axvaults.vaults.Vault;
 import com.artillexstudios.axvaults.vaults.VaultManager;
 import com.artillexstudios.axvaults.vaults.VaultPlayer;
+import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import revxrsal.commands.bukkit.BukkitCommandHandler;
+import revxrsal.commands.orphan.Orphans;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -42,6 +45,7 @@ public final class AxVaults extends AxPlugin {
     private static AxPlugin instance;
     private static ThreadedQueue<Runnable> threadedQueue;
     private static Database database;
+    public static BukkitAudiences BUKKITAUDIENCES;
 
     public static ThreadedQueue<Runnable> getThreadedQueue() {
         return threadedQueue;
@@ -74,6 +78,7 @@ public final class AxVaults extends AxPlugin {
         MESSAGES = new Config(new File(getDataFolder(), "messages.yml"), getResource("messages.yml"), GeneralSettings.builder().setUseDefaults(false).build(), LoaderSettings.builder().setAutoUpdate(true).build(), DumperSettings.DEFAULT, UpdaterSettings.builder().setVersioning(new BasicVersioning("version")).build());
 
         MESSAGEUTILS = new MessageUtils(MESSAGES.getBackingDocument(), "prefix", CONFIG.getBackingDocument());
+        BUKKITAUDIENCES = BukkitAudiences.create(this);
 
         threadedQueue = new ThreadedQueue<>("AxVaults-Datastore-thread");
 
@@ -94,8 +99,18 @@ public final class AxVaults extends AxPlugin {
         getServer().getPluginManager().registerEvents(new BlackListListener(), this);
         getServer().getPluginManager().registerEvents(new PlayerInteractListener(), this);
         getServer().getPluginManager().registerEvents(new BlockBreakListener(), this);
+        getServer().getPluginManager().registerEvents(new InventoryCloseListener(), this);
 
-        final BukkitCommandHandler handler = BukkitCommandHandler.create(this);
+        registerCommands();
+
+        new AutoSaveScheduler().start();
+
+        Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#55ff00[AxVaults] Loaded plugin!"));
+    }
+
+    public static void registerCommands() {
+        final BukkitCommandHandler handler = BukkitCommandHandler.create(instance);
+        handler.unregisterAllCommands();
 
         handler.getAutoCompleter().registerSuggestion("vaults", (args, sender, command) -> {
             final Player player = Bukkit.getPlayer(sender.getUniqueId());
@@ -115,12 +130,9 @@ public final class AxVaults extends AxPlugin {
             return names;
         });
 
-        handler.register(new PlayerCommand(), new AdminCommand());
+        handler.register(Orphans.path(CONFIG.getStringList("player-command-aliases").toArray(String[]::new)).handler(new PlayerCommand()));
+        handler.register(Orphans.path(CONFIG.getStringList("admin-command-aliases").toArray(String[]::new)).handler(new AdminCommand()));
         handler.registerBrigadier();
-
-        new AutoSaveScheduler().start();
-
-        Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#55ff00[AxVaults] Loaded plugin!"));
     }
 
     public void disable() {

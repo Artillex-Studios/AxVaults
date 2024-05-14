@@ -35,6 +35,9 @@ selector-item-amount-mode: 1
 # set to -1 to show an unlimited amount of vaults
 max-vault-amount: -1
 
+# if enabled, the icon picker will not close after selecting an item
+selector-stay-open: false
+
 # list of items that CAN'T be put in vaults
 # note: the name-contains string shouldn't include any color codes
 blacklisted-items:
@@ -42,5 +45,23 @@ blacklisted-items:
     material: "barrier"
     name-contains: "Banned item's name"
 
+# you must define at least 1
+# reloading will add new commands, however a restart is recommended when editing this
+player-command-aliases:
+  - "axvault"
+  - "vault"
+  - "pv"
+  - "axpv"
+  - "axvaults"
+  - "vaults"
+
+# you must define at least 1
+# reloading will add new commands, however a restart is recommended when editing this
+admin-command-aliases:
+  - "axvaultsadmin"
+  - "axvaultadmin"
+  - "vaultadmin"
+  - "vaultsadmin"
+
 # do not change this
-version: 2
+version: 3

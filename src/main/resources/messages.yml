@@ -67,13 +67,25 @@ set:
 
 no-permission: "&#FF0000You don't have a permission to use this!"
 force-open: "&#00FF00Opened vault selector for &f%player%&#55FF00!"
-view: "&#55FF00%player%&f's &#55FF00#%num% &fvault opened!"
-delete: "&fDeleted vault &#FF0000#%num% of &#FF0000%player%&f!"
-view-not-found: "&#FF0000Can't find player or vault!"
+delete: "&fDeleted vault &#FF0000#%num% &fof &#FF0000&#FF0000%player%&f!"
 banned-item: "&#FF0000You can't put this item into vaults!"
+
+view:
+  open: "&#55FF00%player%&f's &#55FF00#%num% &fvault opened!"
+  info: "&fVaults of &#55FF00%player%&f: &#AAFFAA%vaults%"
+  not-found: "&#FF0000Can't find player or vault!"
+
+# you can disable sounds by setting the sections to ""
+# for example: open: ""
+# list of sounds: https://www.digminecraft.com/lists/sound_list_pc.php
+# format: <sound>|[volume]|[pitch] (volume and pitch is optional)
+sounds:
+  open: "block.barrel.open|1.0|1.0"
+  close: "block.barrel.close|1.0|1.0"
+  select-icon: "block.barrel.close|1.0|1.0"
 
 converter:
   started: "&#55FF00The converter has started! Check the console for the current status!"
 
 # do not change this
-version: 3
+version: 4

@@ -1,6 +1,7 @@
 package com.artillexstudios.axvaults.vaults;
 
 import com.artillexstudios.axapi.utils.StringUtils;
+import com.artillexstudios.axvaults.utils.SoundUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
@@ -29,13 +30,11 @@ public class Vault {
         this.id = num;
         this.storage = Bukkit.createInventory(null, CONFIG.getInt("vault-storage-rows", 54) * 9, StringUtils.formatToString(MESSAGES.getString("guis.vault.title").replace("%num%", "" + num)));
         this.icon = icon;
+        VaultManager.getVaults().put(this, null);
     }
 
     public Vault(UUID uuid, int num, ItemStack[] items, Material icon) {
-        this.uuid = uuid;
-        this.id = num;
-        this.storage = Bukkit.createInventory(null, CONFIG.getInt("vault-storage-rows", 54) * 9, StringUtils.formatToString(MESSAGES.getString("guis.vault.title").replace("%num%", "" + num)));
-        this.icon = icon;
+        this(uuid, num, icon);
         storage.setContents(items);
     }
 
@@ -76,6 +75,7 @@ public class Vault {
 
     public void open(@NotNull Player player) {
         player.openInventory(storage);
+        SoundUtils.playSound(player, MESSAGES.getString("sounds.open"));
         // todo: on close reopen selector (only when it was used)
     }
 

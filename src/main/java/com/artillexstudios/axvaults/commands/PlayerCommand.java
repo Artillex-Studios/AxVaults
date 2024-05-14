@@ -6,16 +6,16 @@ import com.artillexstudios.axvaults.vaults.VaultManager;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import revxrsal.commands.annotation.AutoComplete;
-import revxrsal.commands.annotation.Command;
 import revxrsal.commands.annotation.DefaultFor;
 import revxrsal.commands.annotation.Optional;
+import revxrsal.commands.annotation.Range;
+import revxrsal.commands.orphan.OrphanCommand;
 
 import java.util.HashMap;
 
 import static com.artillexstudios.axvaults.AxVaults.MESSAGEUTILS;
 
-@Command({"axvault", "vault", "pv", "axpv", "axvaults", "vaults"})
-public class PlayerCommand {
+public class PlayerCommand implements OrphanCommand {
 
     @DefaultFor({"~"})
     @AutoComplete("@vaults")
@@ -23,7 +23,7 @@ public class PlayerCommand {
         open(sender, number, false);
     }
 
-    public void open(@NotNull Player sender, @Optional Integer number, boolean force) {
+    public void open(@NotNull Player sender, @Optional @Range(min = 1) Integer number, boolean force) {
         if (number == null) {
             if (!force && !sender.hasPermission("axvaults.selector")) {
                 MESSAGEUTILS.sendLang(sender, "no-permission");
