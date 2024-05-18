@@ -15,6 +15,6 @@ public class InventoryCloseListener implements Listener {
     @EventHandler
     public void onClose(@NotNull InventoryCloseEvent event) {
         if (VaultManager.getVaults().keySet().stream().filter(vault -> vault.getStorage().equals(event.getInventory())).findAny().isEmpty()) return;
-        SoundUtils.playSound((Player) event.getPlayer(), MESSAGES.getString("sounds.open"));
+        SoundUtils.playSound((Player) event.getPlayer(), MESSAGES.getString("sounds.close"));
     }
 }

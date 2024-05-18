@@ -38,17 +38,12 @@ public class ItemPicker {
                 .create();
 
         for (Material material : Material.values()) {
-            final ItemStack it = new ItemBuilder(material).get();
+            final ItemStack it = new ItemBuilder(material).glow(Objects.equals(vault.getIcon(), material)).get();
             final ItemMeta meta = it.hasItemMeta() ? it.getItemMeta() : Bukkit.getItemFactory().getItemMeta(it.getType());
             if (meta == null) continue;
 
             meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
-            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
             it.setItemMeta(meta);
-
-            if (Objects.equals(vault.getIcon(), material)) {
-                it.addUnsafeEnchantment(Enchantment.LOYALTY, 1);
-            }
 
             final GuiItem guiItem = new GuiItem(it);
             guiItem.setAction(event -> {

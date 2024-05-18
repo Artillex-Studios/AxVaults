@@ -1,7 +1,7 @@
 name: AxVaults
 version: '${project.version}'
 main: com.artillexstudios.axvaults.AxVaults
-api-version: '1.13'
+api-version: '1.18'
 folia-supported: true
 
 softdepend:
