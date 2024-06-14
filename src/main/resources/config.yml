@@ -9,6 +9,8 @@ auto-save-minutes: 5
 vault-selector-rows: 6
 
 # how many rows should vaults have?
+# you can override this with the axvaults.rows.# permission
+# you should keep this on 6 and only /change it with permissions
 vault-storage-rows: 6
 
 database:

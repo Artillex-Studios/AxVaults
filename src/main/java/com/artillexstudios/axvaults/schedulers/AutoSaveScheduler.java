@@ -6,19 +6,29 @@ import com.artillexstudios.axvaults.vaults.VaultManager;
 import com.artillexstudios.axvaults.vaults.VaultPlayer;
 
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import static com.artillexstudios.axvaults.AxVaults.CONFIG;
 
 public class AutoSaveScheduler {
+    private static ScheduledFuture<?> future = null;
 
-    public void start() {
-        Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
+    public static void start() {
+        int time = CONFIG.getInt("auto-save-minutes");
+        if (future != null) future.cancel(true);
+
+        future = Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
             for (VaultPlayer vaultPlayer : VaultManager.getPlayers().values()) {
                 for (Vault vault : vaultPlayer.getVaultMap().values()) {
                     AxVaults.getDatabase().saveVault(vault);
                 }
             }
-        }, CONFIG.getLong("auto-save-minutes"), CONFIG.getLong("auto-save-minutes"), TimeUnit.MINUTES);
+        }, time, time, TimeUnit.MINUTES);
+    }
+
+    public static void stop() {
+        if (future == null) return;
+        future.cancel(true);
     }
 }

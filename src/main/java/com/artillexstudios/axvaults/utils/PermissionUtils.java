@@ -12,8 +12,9 @@ public class PermissionUtils {
         if (CONFIG.getInt("permission-mode", 0) == 0) return player.hasPermission("axvaults.vault." + vault);
         if (player.isOp()) return true;
 
-        int max = 1;
+        int max = player.hasPermission("axvaults.vault.1") ? 1 : 0;
         for (PermissionAttachmentInfo effectivePermission : player.getEffectivePermissions()) {
+            if (!effectivePermission.getValue()) continue;
             if (effectivePermission.getPermission().equals("*")) return true;
 
             if (!effectivePermission.getPermission().startsWith("axvaults.vault.")) continue;

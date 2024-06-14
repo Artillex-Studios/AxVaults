@@ -15,6 +15,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
+import static com.artillexstudios.axvaults.AxVaults.CONFIG;
+
 public class VaultPlayer {
     private final UUID uuid;
     private final HashMap<Integer, Vault> vaultMap = new HashMap<>();
@@ -55,6 +57,16 @@ public class VaultPlayer {
 
     public void removeVault(@NotNull Vault vault) {
         vaultMap.remove(vault.getId());
+    }
+
+    public int getRows() {
+        final Player player = Bukkit.getPlayer(uuid);
+        int def = CONFIG.getInt("vault-storage-rows", 6);
+        if (player == null) return def;
+        for (int i = 6; i >= 1; i--) {
+            if (player.hasPermission("axvaults.rows." + i)) return i;
+        }
+        return def;
     }
 
     public void save() {

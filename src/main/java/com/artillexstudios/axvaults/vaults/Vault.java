@@ -16,7 +16,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
-import static com.artillexstudios.axvaults.AxVaults.CONFIG;
 import static com.artillexstudios.axvaults.AxVaults.MESSAGES;
 
 public class Vault {
@@ -28,7 +27,7 @@ public class Vault {
     public Vault(UUID uuid, int num, Material icon) {
         this.uuid = uuid;
         this.id = num;
-        this.storage = Bukkit.createInventory(null, CONFIG.getInt("vault-storage-rows", 54) * 9, StringUtils.formatToString(MESSAGES.getString("guis.vault.title").replace("%num%", "" + num)));
+        this.storage = Bukkit.createInventory(null, VaultManager.getPlayer(uuid).getRows() * 9, StringUtils.formatToString(MESSAGES.getString("guis.vault.title").replace("%num%", "" + num)));
         this.icon = icon;
         VaultManager.getVaults().put(this, null);
     }
@@ -74,16 +73,19 @@ public class Vault {
     }
 
     public void open(@NotNull Player player) {
+        if (VaultManager.getPlayer(uuid).getRows() != storage.getSize()) {
+            reload();
+        }
         player.openInventory(storage);
         SoundUtils.playSound(player, MESSAGES.getString("sounds.open"));
         // todo: on close reopen selector (only when it was used)
     }
 
     public void reload() {
-        final Inventory newStorage = Bukkit.createInventory(null, CONFIG.getInt("vault-storage-rows", 6) * 9, StringUtils.formatToString(MESSAGES.getString("guis.vault.title").replace("%num%", "" + id)));
+        final Inventory newStorage = Bukkit.createInventory(null, VaultManager.getPlayer(uuid).getRows() * 9, StringUtils.formatToString(MESSAGES.getString("guis.vault.title").replace("%num%", "" + id)));
         final ItemStack[] contents = storage.getContents();
 
-        int n = 0;
+        int n = -1;
         for (ItemStack it : contents) {
             n++;
             if (n > newStorage.getSize() - 1) {
