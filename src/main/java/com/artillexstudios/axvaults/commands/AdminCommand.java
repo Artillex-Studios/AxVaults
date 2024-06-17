@@ -13,7 +13,6 @@ import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import revxrsal.commands.annotation.AutoComplete;
 import revxrsal.commands.annotation.DefaultFor;
 import revxrsal.commands.annotation.Optional;
 import revxrsal.commands.annotation.Range;
@@ -70,7 +69,6 @@ public class AdminCommand implements OrphanCommand {
     }
 
     @Subcommand("view")
-    @AutoComplete("@offlinePlayers *")
     public void view(@NotNull Player sender, @NotNull OfflinePlayer player, @Optional @Range(min = 1) Integer number) {
         final HashMap<String, String> replacements = new HashMap<>();
         replacements.put("%player%", player.getName());
@@ -94,7 +92,6 @@ public class AdminCommand implements OrphanCommand {
     }
 
     @Subcommand("delete")
-    @AutoComplete("@offlinePlayers *")
     public void delete(@NotNull Player sender, @NotNull OfflinePlayer player, int number) {
         final HashMap<String, String> replacements = new HashMap<>();
         replacements.put("%player%", player.getName());

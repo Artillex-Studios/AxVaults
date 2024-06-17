@@ -18,6 +18,7 @@ public class BlackListListener implements Listener {
 
     @EventHandler
     public void onClick(@NotNull InventoryClickEvent event) {
+        if (CONFIG.getSection("blacklisted-items") == null) return;
         boolean isVault = false;
         outer: for (VaultPlayer vaultPlayer : VaultManager.getPlayers().values()) {
             for (Vault vault : vaultPlayer.getVaultMap().values()) {

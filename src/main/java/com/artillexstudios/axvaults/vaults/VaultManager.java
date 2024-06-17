@@ -4,13 +4,15 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Set;
 import java.util.UUID;
 import java.util.WeakHashMap;
 
 public class VaultManager {
     private static final HashMap<UUID, VaultPlayer> players = new HashMap<>();
-    private static final WeakHashMap<Vault, Void> vaults = new WeakHashMap<>();
+    private static final Set<Vault> vaults = Collections.newSetFromMap(new WeakHashMap<>()); // todo: currently this WeakHashMap does nothing
 
     public static void addPlayer(@NotNull UUID uuid) {
         final VaultPlayer vaultPlayer = new VaultPlayer(uuid);
@@ -61,7 +63,7 @@ public class VaultManager {
         }
     }
 
-    public static WeakHashMap<Vault, Void> getVaults() {
+    public static Set<Vault> getVaults() {
         return vaults;
     }
 }

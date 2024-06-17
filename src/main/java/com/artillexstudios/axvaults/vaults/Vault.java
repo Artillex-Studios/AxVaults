@@ -29,7 +29,7 @@ public class Vault {
         this.id = num;
         this.storage = Bukkit.createInventory(null, VaultManager.getPlayer(uuid).getRows() * 9, StringUtils.formatToString(MESSAGES.getString("guis.vault.title").replace("%num%", "" + num)));
         this.icon = icon;
-        VaultManager.getVaults().put(this, null);
+        VaultManager.getVaults().add(this);
     }
 
     public Vault(UUID uuid, int num, ItemStack[] items, Material icon) {

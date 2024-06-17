@@ -51,9 +51,11 @@ help:
   - "  &7⋆ &f/axvaultsadmin converter <plugin> &7| &#AAFFAAConvert from another plugin"
   - " "
 
+# you can disable any messages by setting it to ""
 vault:
   not-unlocked: "&#FF0000You don't own this vault!"
   opened: "&fVault &#55FF00#%num% &fopened!"
+  closed: "&fVault &#55FF00#%num% &fclosed!"
 
 reload:
   success: "&#33FF33Plugin successfully reloaded!"
@@ -65,7 +67,7 @@ set:
   no-block: "&#FF0000You must look at a block!"
   removed: "&#FF0000You have removed the vault from this block!"
 
-no-permission: "&#FF0000You don't have a permission to use this!"
+no-permission: "&#FF0000You don't have permission to use this!"
 force-open: "&#00FF00Opened vault selector for &f%player%&#55FF00!"
 delete: "&fDeleted vault &#FF0000#%num% &fof &#FF0000&#FF0000%player%&f!"
 banned-item: "&#FF0000You can't put this item into vaults!"
@@ -87,5 +89,16 @@ sounds:
 converter:
   started: "&#55FF00The converter has started! Check the console for the current status!"
 
+commands:
+  invalid-value: "&#FF0000Invalid parameter: &#BB0000%value%"
+  invalid-command: "&#FF0000Invalid command or subcommand!"
+  missing-argument: "&#FF0000Missing argument! You must specify a value for &#BB0000%value%&#FF0000."
+  no-permission: "&#FF0000You don't have permission to access this command!"
+  out-of-range: "&#FF0000The &#BB0000%number% &#FF0000must be between &#BB0000%min% &#FF0000and &#BB0000%max%&#FF0000!"
+  player-only: "&#FF0000You must be a player to use this command!"
+  console-only: "&#FF0000This command can only be used from the console!"
+  invalid-player: "&#FF0000The player &#BB0000%player% &#FF0000can not be found!"
+  invalid-selector: "&#FF0000You can not use this selector in this command!"
+
 # do not change this
-version: 4
+version: 6

@@ -9,6 +9,8 @@ import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.settings.general.G
 import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.settings.loader.LoaderSettings;
 import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.settings.updater.UpdaterSettings;
 import com.artillexstudios.axapi.libs.libby.BukkitLibraryManager;
+import com.artillexstudios.axapi.nms.NMSHandlers;
+import com.artillexstudios.axapi.utils.FastFieldAccessor;
 import com.artillexstudios.axapi.utils.MessageUtils;
 import com.artillexstudios.axapi.utils.StringUtils;
 import com.artillexstudios.axvaults.commands.AdminCommand;
@@ -22,6 +24,7 @@ import com.artillexstudios.axvaults.listeners.BlockBreakListener;
 import com.artillexstudios.axvaults.listeners.InventoryCloseListener;
 import com.artillexstudios.axvaults.listeners.JoinLeaveListener;
 import com.artillexstudios.axvaults.listeners.PlayerInteractListener;
+import com.artillexstudios.axvaults.utils.CommandMessages;
 import com.artillexstudios.axvaults.schedulers.AutoSaveScheduler;
 import com.artillexstudios.axvaults.vaults.Vault;
 import com.artillexstudios.axvaults.vaults.VaultManager;
@@ -29,13 +32,19 @@ import com.artillexstudios.axvaults.vaults.VaultPlayer;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.Warning;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
+import revxrsal.commands.bukkit.BukkitCommandActor;
 import revxrsal.commands.bukkit.BukkitCommandHandler;
+import revxrsal.commands.bukkit.exception.InvalidPlayerException;
 import revxrsal.commands.orphan.Orphans;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Locale;
+import java.util.stream.Collectors;
 
 public final class AxVaults extends AxPlugin {
     public static Config CONFIG;
@@ -45,6 +54,7 @@ public final class AxVaults extends AxPlugin {
     private static ThreadedQueue<Runnable> threadedQueue;
     private static Database database;
     public static BukkitAudiences BUKKITAUDIENCES;
+    public static BukkitCommandHandler COMMANDHANDLER;
 
     public static ThreadedQueue<Runnable> getThreadedQueue() {
         return threadedQueue;
@@ -108,30 +118,44 @@ public final class AxVaults extends AxPlugin {
     }
 
     public static void registerCommands() {
-        final BukkitCommandHandler handler = BukkitCommandHandler.create(instance);
-        handler.unregisterAllCommands();
+        if (COMMANDHANDLER == null) {
+            Warning.WarningState prevState = Bukkit.getWarningState();
+            FastFieldAccessor accessor = FastFieldAccessor.forClassField(Bukkit.getServer().getClass().getPackage().getName() + ".CraftServer", "warningState");
+            accessor.set(Bukkit.getServer(), Warning.WarningState.OFF);
+            COMMANDHANDLER = BukkitCommandHandler.create(instance);
+            accessor.set(Bukkit.getServer(), prevState);
 
-        handler.getAutoCompleter().registerSuggestion("vaults", (args, sender, command) -> {
-            final Player player = Bukkit.getPlayer(sender.getUniqueId());
-            if (!player.hasPermission("axvaults.openremote")) return new ArrayList<>();
+            COMMANDHANDLER.getAutoCompleter().registerSuggestion("vaults", (args, sender, command) -> {
+                final Player player = Bukkit.getPlayer(sender.getUniqueId());
+                if (!player.hasPermission("axvaults.openremote")) return new ArrayList<>();
 
-            final ArrayList<String> numbers = new ArrayList<>();
-            for (int i = 0; i < VaultManager.getVaultsOfPlayer(player); i++) {
-                numbers.add("" + (i + 1));
-            }
-            return numbers;
-        });
+                final ArrayList<String> numbers = new ArrayList<>();
+                for (int i = 0; i < VaultManager.getVaultsOfPlayer(player); i++) {
+                    numbers.add("" + (i + 1));
+                }
+                return numbers;
+            });
 
+            COMMANDHANDLER.registerValueResolver(0, OfflinePlayer.class, context -> {
+                String value = context.pop();
+                if (value.equalsIgnoreCase("self") || value.equalsIgnoreCase("me")) return ((BukkitCommandActor) context.actor()).requirePlayer();
+                OfflinePlayer player = NMSHandlers.getNmsHandler().getCachedOfflinePlayer(value);
+                if (player == null && !(player = Bukkit.getOfflinePlayer(value)).hasPlayedBefore()) throw new InvalidPlayerException(context.parameter(), value);
+                return player;
+            });
 
-        handler.getAutoCompleter().registerSuggestion("offlinePlayers", (args, sender, command) -> {
-            final List<String> names = new ArrayList<>();
-            for (Player player : Bukkit.getOnlinePlayers()) names.add(player.getName());
-            return names;
-        });
+            COMMANDHANDLER.getAutoCompleter().registerParameterSuggestions(OfflinePlayer.class, (args, sender, command) -> {
+                return Bukkit.getOnlinePlayers().stream().map(HumanEntity::getName).collect(Collectors.toSet());
+            });
 
-        handler.register(Orphans.path(CONFIG.getStringList("player-command-aliases").toArray(String[]::new)).handler(new PlayerCommand()));
-        handler.register(Orphans.path(CONFIG.getStringList("admin-command-aliases").toArray(String[]::new)).handler(new AdminCommand()));
-        handler.registerBrigadier();
+            COMMANDHANDLER.getTranslator().add(new CommandMessages());
+            COMMANDHANDLER.setLocale(new Locale("en", "US"));
+        }
+
+        COMMANDHANDLER.unregisterAllCommands();
+        COMMANDHANDLER.register(Orphans.path(CONFIG.getStringList("player-command-aliases").toArray(String[]::new)).handler(new PlayerCommand()));
+        COMMANDHANDLER.register(Orphans.path(CONFIG.getStringList("admin-command-aliases").toArray(String[]::new)).handler(new AdminCommand()));
+        COMMANDHANDLER.registerBrigadier();
     }
 
     public void disable() {
