@@ -10,7 +10,7 @@ import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.settings.loader.Lo
 import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.settings.updater.UpdaterSettings;
 import com.artillexstudios.axapi.libs.libby.BukkitLibraryManager;
 import com.artillexstudios.axapi.nms.NMSHandlers;
-import com.artillexstudios.axapi.utils.FastFieldAccessor;
+import com.artillexstudios.axapi.reflection.FastFieldAccessor;
 import com.artillexstudios.axapi.utils.MessageUtils;
 import com.artillexstudios.axapi.utils.StringUtils;
 import com.artillexstudios.axvaults.commands.AdminCommand;
@@ -26,6 +26,7 @@ import com.artillexstudios.axvaults.listeners.JoinLeaveListener;
 import com.artillexstudios.axvaults.listeners.PlayerInteractListener;
 import com.artillexstudios.axvaults.schedulers.AutoSaveScheduler;
 import com.artillexstudios.axvaults.utils.CommandMessages;
+import com.artillexstudios.axvaults.utils.UpdateNotifier;
 import com.artillexstudios.axvaults.vaults.Vault;
 import com.artillexstudios.axvaults.vaults.VaultManager;
 import com.artillexstudios.axvaults.vaults.VaultPlayer;
@@ -115,6 +116,8 @@ public final class AxVaults extends AxPlugin {
         AutoSaveScheduler.start();
 
         Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#55ff00[AxVaults] Loaded plugin!"));
+
+        if (CONFIG.getBoolean("update-notifier.enabled", true)) new UpdateNotifier(this, 5417);
     }
 
     public static void registerCommands() {
