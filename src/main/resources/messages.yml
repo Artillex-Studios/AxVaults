@@ -1,3 +1,6 @@
+# DOCUMENTATION: https://docs.artillex-studios.com/axvaults.html
+# ITEM BUILDER: https://docs.artillex-studios.com/item-builder.html
+
 guis:
   selector:
     title: "&0My Vaults"
@@ -18,7 +21,7 @@ guis:
       glow: false
       lore:
         - " "
-        - " &7- &fYou have not unlocked this vault yet!"
+        - " &7- &fYou have &#FF0000not unlocked &fthis vault yet!"
         - " "
         - "&#FF0000&l(!) &#FF0000Locked Vault"
   item-picker:

@@ -1,5 +1,6 @@
 package com.artillexstudios.axvaults.guis;
 
+import com.artillexstudios.axapi.reflection.ClassUtils;
 import com.artillexstudios.axapi.utils.ItemBuilder;
 import com.artillexstudios.axapi.utils.StringUtils;
 import com.artillexstudios.axvaults.utils.SoundUtils;
@@ -29,8 +30,14 @@ public class ItemPicker {
     public void open(@NotNull Player player, @NotNull Vault vault, int oldPage, int cPage) {
         int rows = CONFIG.getInt("vault-selector-rows", 6);
         int pageSize = rows * 9 - 9;
+
+        String title = MESSAGES.getString("guis.item-picker.title");
+        if (ClassUtils.INSTANCE.classExists("me.clip.placeholderapi.PlaceholderAPI")) {
+            title = me.clip.placeholderapi.PlaceholderAPI.setPlaceholders(player, title);
+        }
+
         final PaginatedGui gui = Gui.paginated()
-                .title(StringUtils.format(MESSAGES.getString("guis.item-picker.title")))
+                .title(StringUtils.format(title))
                 .rows(rows)
                 .pageSize(pageSize)
                 .disableAllInteractions()

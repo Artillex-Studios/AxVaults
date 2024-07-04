@@ -29,6 +29,7 @@ public class VaultManager {
 
     public static void removePlayer(@NotNull Player player) {
         final VaultPlayer vaultPlayer = players.remove(player.getUniqueId());
+        if (vaultPlayer == null) return;
         vaultPlayer.save();
     }
 

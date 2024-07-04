@@ -1,5 +1,6 @@
 package com.artillexstudios.axvaults.vaults;
 
+import com.artillexstudios.axapi.reflection.ClassUtils;
 import com.artillexstudios.axapi.utils.StringUtils;
 import com.artillexstudios.axvaults.utils.SoundUtils;
 import org.bukkit.Bukkit;
@@ -27,7 +28,13 @@ public class Vault {
     public Vault(UUID uuid, int num, Material icon) {
         this.uuid = uuid;
         this.id = num;
-        this.storage = Bukkit.createInventory(null, VaultManager.getPlayer(uuid).getRows() * 9, StringUtils.formatToString(MESSAGES.getString("guis.vault.title").replace("%num%", "" + num)));
+
+        String title = MESSAGES.getString("guis.vault.title").replace("%num%", "" + num);
+        if (ClassUtils.INSTANCE.classExists("me.clip.placeholderapi.PlaceholderAPI")) {
+            title = me.clip.placeholderapi.PlaceholderAPI.setPlaceholders(Bukkit.getOfflinePlayer(uuid), title);
+        }
+
+        this.storage = Bukkit.createInventory(null, VaultManager.getPlayer(uuid).getRows() * 9, StringUtils.formatToString(title));
         this.icon = icon;
         VaultManager.getVaults().add(this);
     }
@@ -82,7 +89,12 @@ public class Vault {
     }
 
     public void reload() {
-        final Inventory newStorage = Bukkit.createInventory(null, VaultManager.getPlayer(uuid).getRows() * 9, StringUtils.formatToString(MESSAGES.getString("guis.vault.title").replace("%num%", "" + id)));
+        String title = MESSAGES.getString("guis.vault.title").replace("%num%", "" + id);
+        if (ClassUtils.INSTANCE.classExists("me.clip.placeholderapi.PlaceholderAPI")) {
+            title = me.clip.placeholderapi.PlaceholderAPI.setPlaceholders(Bukkit.getOfflinePlayer(uuid), title);
+        }
+
+        final Inventory newStorage = Bukkit.createInventory(null, VaultManager.getPlayer(uuid).getRows() * 9, StringUtils.formatToString(title));
         final ItemStack[] contents = storage.getContents();
 
         int n = -1;
