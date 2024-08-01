@@ -28,9 +28,9 @@ import static com.artillexstudios.axvaults.AxVaults.CONFIG;
 import static com.artillexstudios.axvaults.AxVaults.MESSAGES;
 import static com.artillexstudios.axvaults.AxVaults.MESSAGEUTILS;
 
-@CommandPermission("axvaults.admin")
 public class AdminCommand implements OrphanCommand {
 
+    @CommandPermission("axvaults.admin")
     @DefaultFor({"~", "~ help"})
     public void help(@NotNull CommandSender sender) {
         for (String m : MESSAGES.getStringList("help")) {
@@ -38,6 +38,7 @@ public class AdminCommand implements OrphanCommand {
         }
     }
 
+    @CommandPermission("axvaults.admin.reload")
     @Subcommand("reload")
     public void reload(@NotNull CommandSender sender) {
         Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#55FF00[AxVaults] &#AAFFAAReloading configuration..."));
@@ -62,12 +63,14 @@ public class AdminCommand implements OrphanCommand {
         MESSAGEUTILS.sendLang(sender, "reload.success");
     }
 
+    @CommandPermission("axvaults.admin.forceopen")
     @Subcommand("forceopen")
     public void forceopen(@NotNull CommandSender sender, @NotNull Player player) {
         new VaultSelector().open(player);
         MESSAGEUTILS.sendLang(sender, "force-open", Collections.singletonMap("%player%", player.getName()));
     }
 
+    @CommandPermission("axvaults.admin.view")
     @Subcommand("view")
     public void view(@NotNull Player sender, @NotNull OfflinePlayer player, @Optional @Range(min = 1) Integer number) {
         final HashMap<String, String> replacements = new HashMap<>();
@@ -91,6 +94,7 @@ public class AdminCommand implements OrphanCommand {
         MESSAGEUTILS.sendLang(sender, "view.open", replacements);
     }
 
+    @CommandPermission("axvaults.admin.delete")
     @Subcommand("delete")
     public void delete(@NotNull Player sender, @NotNull OfflinePlayer player, int number) {
         final HashMap<String, String> replacements = new HashMap<>();
@@ -108,6 +112,7 @@ public class AdminCommand implements OrphanCommand {
         MESSAGEUTILS.sendLang(sender, "delete", replacements);
     }
 
+    @CommandPermission("axvaults.admin.set")
     @Subcommand("set")
     public void set(@NotNull Player sender, @Optional Integer number) {
         final Block block = sender.getTargetBlockExact(5);
@@ -128,6 +133,7 @@ public class AdminCommand implements OrphanCommand {
         });
     }
 
+    @CommandPermission("axvaults.admin.converter")
     @Subcommand("converter PlayerVaultsX")
     public void converter(@NotNull Player sender) {
         new PlayerVaultsXConverter().run();

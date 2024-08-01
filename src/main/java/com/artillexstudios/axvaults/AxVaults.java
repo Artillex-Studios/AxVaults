@@ -11,6 +11,7 @@ import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.settings.updater.U
 import com.artillexstudios.axapi.libs.libby.BukkitLibraryManager;
 import com.artillexstudios.axapi.nms.NMSHandlers;
 import com.artillexstudios.axapi.reflection.FastFieldAccessor;
+import com.artillexstudios.axapi.utils.FeatureFlags;
 import com.artillexstudios.axapi.utils.MessageUtils;
 import com.artillexstudios.axapi.utils.StringUtils;
 import com.artillexstudios.axvaults.commands.AdminCommand;
@@ -171,8 +172,9 @@ public final class AxVaults extends AxPlugin {
         database.disable();
     }
 
-//    public void updateFlags() {
+    public void updateFlags() {
+        FeatureFlags.USE_LEGACY_HEX_FORMATTER.set(true);
 //        FeatureFlags.PACKET_ENTITY_TRACKER_ENABLED.set(true);
 //        FeatureFlags.HOLOGRAM_UPDATE_TICKS.set(10L);
-//    }
+    }
 }

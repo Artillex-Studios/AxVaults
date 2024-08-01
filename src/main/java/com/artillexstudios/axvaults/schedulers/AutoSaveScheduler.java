@@ -19,10 +19,14 @@ public class AutoSaveScheduler {
         if (future != null) future.cancel(true);
 
         future = Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
-            for (VaultPlayer vaultPlayer : VaultManager.getPlayers().values()) {
-                for (Vault vault : vaultPlayer.getVaultMap().values()) {
-                    AxVaults.getDatabase().saveVault(vault);
+            try {
+                for (VaultPlayer vaultPlayer : VaultManager.getPlayers().values()) {
+                    for (Vault vault : vaultPlayer.getVaultMap().values()) {
+                        AxVaults.getDatabase().saveVault(vault);
+                    }
                 }
+            } catch (Exception ex) {
+                ex.printStackTrace();
             }
         }, time, time, TimeUnit.MINUTES);
     }

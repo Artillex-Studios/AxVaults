@@ -17,14 +17,19 @@ import java.util.UUID;
 public class PlayerVaultsXConverter {
 
     public void run() {
-        final File path = new File("plugins/PlayerVaults/newvaults");
+        final File path = new File(Bukkit.getWorldContainer(), "plugins/PlayerVaults/newvaults");
         if (path.exists()) {
             int vaults = 0;
             int players = 0;
             for (File file : path.listFiles()) {
                 if (!file.getName().endsWith(".yml")) continue;
                 final Config data = new Config(file);
-                final UUID uuid = UUID.fromString(file.getName().replace(".yml", ""));
+                UUID uuid;
+                try {
+                    uuid = UUID.fromString(file.getName().replace(".yml", ""));
+                } catch (Exception ex) {
+                    continue;
+                }
                 players++;
 
                 final Player player = Bukkit.getPlayer(uuid);

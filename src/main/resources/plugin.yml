@@ -12,9 +12,21 @@ permissions:
     default: true
   axvaults.selector:
     default: true
-  axvaults.admin:
-    default: op
   axvaults.openremote:
     default: true
   axvaults.itempicker:
     default: true
+  axvaults.admin.*:
+    default: op
+  axvaults.admin.reload:
+    default: op
+  axvaults.admin.forceopen:
+    default: op
+  axvaults.admin.view:
+    default: op
+  axvaults.admin.delete:
+    default: op
+  axvaults.admin.set:
+    default: op
+  axvaults.admin.converter:
+    default: op
