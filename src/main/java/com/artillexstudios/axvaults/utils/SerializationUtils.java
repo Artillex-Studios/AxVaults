@@ -9,6 +9,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 
+@Deprecated(forRemoval = true)
 public class SerializationUtils {
 
     public static byte[] invToBits(ItemStack[] stack) {

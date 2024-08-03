@@ -1,12 +1,13 @@
 package com.artillexstudios.axvaults.database.impl;
 
 import com.artillexstudios.axapi.serializers.Serializers;
+import com.artillexstudios.axapi.utils.StringUtils;
 import com.artillexstudios.axvaults.AxVaults;
 import com.artillexstudios.axvaults.database.Database;
 import com.artillexstudios.axvaults.placed.PlacedVaults;
 import com.artillexstudios.axvaults.utils.SerializationUtils;
 import com.artillexstudios.axvaults.vaults.Vault;
-import com.artillexstudios.axvaults.vaults.VaultManager;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -30,7 +31,6 @@ public class SQLite implements Database {
 
     @Override
     public void setup() {
-
         try {
             Class.forName("org.sqlite.JDBC");
             this.conn = DriverManager.getConnection(String.format("jdbc:sqlite:%s/data.db", AxVaults.getInstance().getDataFolder()));
@@ -58,6 +58,44 @@ public class SQLite implements Database {
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
+
+        convert();
+    }
+
+    private void convert() { // todo: clean db
+        String test = "SELECT storage FROM axvaults_data LIMIT 1;";
+        try (PreparedStatement stmt = conn.prepareStatement(test)) {
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    Serializers.ITEM_ARRAY.deserialize(rs.getBytes(1));
+                }
+                return;
+            }
+        } catch (Exception ignored) {}
+
+        String sql = "SELECT * FROM axvaults_data;";
+        int am = 0;
+        long time = System.currentTimeMillis();
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    String sql2 = "UPDATE axvaults_data SET storage = ? WHERE id = ? AND uuid = ?";
+                    try (PreparedStatement stmt2 = conn.prepareStatement(sql2)) {
+                        ItemStack[] items = SerializationUtils.invFromBits(rs.getBinaryStream("storage"));
+                        stmt2.setBytes(1, Serializers.ITEM_ARRAY.serialize(items));
+                        stmt2.setInt(2, rs.getInt("id"));
+                        stmt2.setString(3, rs.getString("uuid"));
+                        stmt2.executeUpdate();
+                        am++;
+                        if (am % 50 == 0)
+                            Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#33FF33[AxVaults] Converted " + am + " vaults so far! (" + (System.currentTimeMillis() - time) + "ms)"));
+                    }
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#33FF33[AxVaults] Successfully converted " + am + " vaults in " + (System.currentTimeMillis() - time) + "ms"));
     }
 
     @Override
@@ -71,7 +109,7 @@ public class SQLite implements Database {
                 if (rs.next()) {
                     final String sql2 = "UPDATE axvaults_data SET storage = ?, icon = ? WHERE uuid = ? AND id = ?;";
                     try (PreparedStatement stmt2 = conn.prepareStatement(sql2)) {
-                        final byte[] bytes = SerializationUtils.invToBits(vault.getStorage().getContents());
+                        final byte[] bytes = Serializers.ITEM_ARRAY.serialize(vault.getStorage().getContents());
                         stmt2.setBytes(1, bytes);
                         stmt2.setString(2, vault.getRealIcon() == null ? null : vault.getRealIcon().name());
                         stmt2.setString(3, vault.getUUID().toString());
@@ -83,7 +121,7 @@ public class SQLite implements Database {
                     try (PreparedStatement stmt2 = conn.prepareStatement(sql2)) {
                         stmt2.setInt(1, vault.getId());
                         stmt2.setString(2, vault.getUUID().toString());
-                        final byte[] bytes = SerializationUtils.invToBits(vault.getStorage().getContents());
+                        final byte[] bytes = Serializers.ITEM_ARRAY.serialize(vault.getStorage().getContents());
                         stmt2.setBytes(3, bytes);
                         stmt2.setString(4, vault.getRealIcon() == null ? null : vault.getRealIcon().name());
                         stmt2.executeUpdate();
@@ -103,9 +141,9 @@ public class SQLite implements Database {
 
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
-                    final ItemStack[] items = SerializationUtils.invFromBits(rs.getBinaryStream(3));
-                    final Vault vault = new Vault(uuid, rs.getInt(1), items, rs.getString(4) == null ? null : Material.valueOf(rs.getString(4)));
-                    VaultManager.addVault(vault);
+                    final ItemStack[] items = Serializers.ITEM_ARRAY.deserialize(rs.getBytes(3));
+                    final Vault vault = new Vault(uuid, rs.getInt(1), rs.getString(4) == null ? null : Material.valueOf(rs.getString(4)));
+                    vault.setContents(items, unused -> {});
                 }
             }
         } catch (SQLException ex) {

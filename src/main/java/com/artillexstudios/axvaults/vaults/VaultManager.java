@@ -1,54 +1,64 @@
 package com.artillexstudios.axvaults.vaults;
 
+import com.artillexstudios.axapi.scheduler.Scheduler;
+import com.artillexstudios.axvaults.AxVaults;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Set;
+import java.util.ArrayList;
 import java.util.UUID;
-import java.util.WeakHashMap;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 public class VaultManager {
-    private static final HashMap<UUID, VaultPlayer> players = new HashMap<>();
-    private static final Set<Vault> vaults = Collections.newSetFromMap(new WeakHashMap<>()); // todo: currently this WeakHashMap does nothing
+    private static final ConcurrentHashMap<UUID, VaultPlayer> players = new ConcurrentHashMap<>();
+    private static final ArrayList<Vault> vaults = new ArrayList<>();
 
-    public static void addPlayer(@NotNull UUID uuid) {
-        final VaultPlayer vaultPlayer = new VaultPlayer(uuid);
-        players.put(uuid, vaultPlayer);
+    public static void loadPlayer(@NotNull UUID uuid) {
+        getPlayer(uuid, vaultPlayer -> {});
     }
 
-    public static VaultPlayer getPlayer(@NotNull UUID uuid) {
-        if (players.containsKey(uuid)) return players.get(uuid);
-        final VaultPlayer vaultPlayer = new VaultPlayer(uuid);
+    public static void getPlayer(@NotNull UUID uuid, Consumer<VaultPlayer> consumer) {
+        VaultPlayer vaultPlayer = players.get(uuid);
+        if (vaultPlayer != null) {
+            consumer.accept(vaultPlayer);
+            return;
+        }
+        vaultPlayer = new VaultPlayer(uuid);
         players.put(uuid, vaultPlayer);
-        vaultPlayer.loadSync();
-        return vaultPlayer;
+
+        VaultPlayer finalVaultPlayer = vaultPlayer;
+        CompletableFuture<Void> future = new CompletableFuture<>();
+        AxVaults.getThreadedQueue().submit(() -> {
+            finalVaultPlayer.load();
+            future.complete(null);
+        });
+        future.thenRun(() -> Scheduler.get().run(scheduledTask -> consumer.accept(finalVaultPlayer)));
     }
 
-    public static void removePlayer(@NotNull Player player) {
+    public static void removePlayer(@NotNull Player player, boolean save) {
         final VaultPlayer vaultPlayer = players.remove(player.getUniqueId());
-        if (vaultPlayer == null) return;
+        if (!save || vaultPlayer == null) return;
         vaultPlayer.save();
     }
 
-    @Nullable
-    public static Vault getVaultOfPlayer(@NotNull Player player, int num) {
-        final VaultPlayer vaultPlayer = players.get(player.getUniqueId());
-        return vaultPlayer.getVault(num);
+    public static void getVaultOfPlayer(@NotNull Player player, int num, Consumer<Vault> consumer) {
+        getPlayer(player.getUniqueId(), vaultPlayer -> {
+            consumer.accept(vaultPlayer.getVault(num));
+        });
     }
 
-    public static HashMap<UUID, VaultPlayer> getPlayers() {
+    public static ConcurrentHashMap<UUID, VaultPlayer> getPlayers() {
         return players;
     }
 
-    public static void addVault(@NotNull Vault vault) {
-        players.get(vault.getUUID()).addVault(vault);
-    }
-
     public static void removeVault(@NotNull Vault vault) {
-        players.get(vault.getUUID()).removeVault(vault);
+        final VaultPlayer player = players.get(vault.getUUID());
+        player.removeVault(vault);
+        if (player.getVaultMap().isEmpty()) {
+            players.remove(player.getUUID());
+        }
     }
 
     public static int getVaultsOfPlayer(@NotNull Player player) {
@@ -64,7 +74,7 @@ public class VaultManager {
         }
     }
 
-    public static Set<Vault> getVaults() {
+    public static ArrayList<Vault> getVaults() {
         return vaults;
     }
 }

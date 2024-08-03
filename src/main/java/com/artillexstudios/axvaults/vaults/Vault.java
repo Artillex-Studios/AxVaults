@@ -16,6 +16,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 import static com.artillexstudios.axvaults.AxVaults.MESSAGES;
 
@@ -24,24 +26,40 @@ public class Vault {
     private Inventory storage;
     private final int id;
     private Material icon;
+    private VaultPlayer vaultPlayer;
+    private long lastOpen = System.currentTimeMillis();
+    private CompletableFuture<Void> future = new CompletableFuture<>();
 
     public Vault(UUID uuid, int num, Material icon) {
         this.uuid = uuid;
         this.id = num;
 
-        String title = MESSAGES.getString("guis.vault.title").replace("%num%", "" + num);
-        if (ClassUtils.INSTANCE.classExists("me.clip.placeholderapi.PlaceholderAPI")) {
-            title = me.clip.placeholderapi.PlaceholderAPI.setPlaceholders(Bukkit.getOfflinePlayer(uuid), title);
-        }
+        VaultManager.getPlayer(uuid, vaultPlayer -> {
+            this.vaultPlayer = vaultPlayer;
+            String title = MESSAGES.getString("guis.vault.title").replace("%num%", "" + num);
+            if (ClassUtils.INSTANCE.classExists("me.clip.placeholderapi.PlaceholderAPI")) {
+                title = me.clip.placeholderapi.PlaceholderAPI.setPlaceholders(Bukkit.getOfflinePlayer(uuid), title);
+            }
+            this.storage = Bukkit.createInventory(null, vaultPlayer.getRows() * 9, StringUtils.formatToString(title));
+            future.complete(null);
+            future = null;
+            vaultPlayer.getVaultMap().put(num, this);
+        });
 
-        this.storage = Bukkit.createInventory(null, VaultManager.getPlayer(uuid).getRows() * 9, StringUtils.formatToString(title));
         this.icon = icon;
         VaultManager.getVaults().add(this);
     }
 
-    public Vault(UUID uuid, int num, ItemStack[] items, Material icon) {
-        this(uuid, num, icon);
-        storage.setContents(items);
+    public void setContents(ItemStack[] items, Consumer<Void> consumer) {
+        if (future == null) {
+            storage.setContents(items);
+            consumer.accept(null);
+            return;
+        }
+        future.thenRun(() -> {
+            storage.setContents(items);
+            consumer.accept(null);
+        });
     }
 
     public Inventory getStorage() {
@@ -54,6 +72,10 @@ public class Vault {
 
     public int getId() {
         return id;
+    }
+
+    public long getLastOpen() {
+        return lastOpen;
     }
 
     public void setIcon(Material icon) {
@@ -80,12 +102,17 @@ public class Vault {
     }
 
     public void open(@NotNull Player player) {
-        if (VaultManager.getPlayer(uuid).getRows() != storage.getSize()) {
+        if (vaultPlayer.getRows() != storage.getSize()) {
             reload();
         }
         player.openInventory(storage);
         SoundUtils.playSound(player, MESSAGES.getString("sounds.open"));
+        lastOpen = System.currentTimeMillis();
         // todo: on close reopen selector (only when it was used)
+    }
+
+    public boolean isOpened() {
+        return !storage.getViewers().isEmpty();
     }
 
     public void reload() {
@@ -94,7 +121,7 @@ public class Vault {
             title = me.clip.placeholderapi.PlaceholderAPI.setPlaceholders(Bukkit.getOfflinePlayer(uuid), title);
         }
 
-        final Inventory newStorage = Bukkit.createInventory(null, VaultManager.getPlayer(uuid).getRows() * 9, StringUtils.formatToString(title));
+        final Inventory newStorage = Bukkit.createInventory(null, vaultPlayer.getRows() * 9, StringUtils.formatToString(title));
         final ItemStack[] contents = storage.getContents();
 
         int n = -1;

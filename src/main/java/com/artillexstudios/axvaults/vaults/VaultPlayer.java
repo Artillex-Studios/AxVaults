@@ -25,12 +25,8 @@ public class VaultPlayer {
         this.uuid = uuid;
     }
 
-    public void loadSync() {
+    public void load() {
         AxVaults.getDatabase().loadVaults(uuid);
-    }
-
-    public void loadAsync() {
-        AxVaults.getThreadedQueue().submit(() -> AxVaults.getDatabase().loadVaults(uuid));
     }
 
     public HashMap<Integer, Vault> getVaultMap() {
@@ -89,5 +85,9 @@ public class VaultPlayer {
             viewerIterator.next().closeInventory();
             viewerIterator.remove();
         }
+    }
+
+    public UUID getUUID() {
+        return uuid;
     }
 }

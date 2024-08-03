@@ -6,7 +6,6 @@ import com.artillexstudios.axvaults.converters.PlayerVaultsXConverter;
 import com.artillexstudios.axvaults.guis.VaultSelector;
 import com.artillexstudios.axvaults.vaults.Vault;
 import com.artillexstudios.axvaults.vaults.VaultManager;
-import com.artillexstudios.axvaults.vaults.VaultPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
@@ -77,21 +76,24 @@ public class AdminCommand implements OrphanCommand {
         replacements.put("%player%", player.getName());
 
         if (number == null) {
-            replacements.put("%vaults%", VaultManager.getPlayer(player.getUniqueId()).getVaultMap().values().stream().filter(vault -> vault.getSlotsFilled() != 0).map(vault -> "" + vault.getId()).collect(Collectors.joining(", ")));
-            MESSAGEUTILS.sendLang(sender, "view.info", replacements);
+            VaultManager.getPlayer(player.getUniqueId(), vaultPlayer -> {
+                replacements.put("%vaults%", vaultPlayer.getVaultMap().values().stream().filter(vault -> vault.getSlotsFilled() != 0).map(vault -> "" + vault.getId()).collect(Collectors.joining(", ")));
+                MESSAGEUTILS.sendLang(sender, "view.info", replacements);
+            });
             return;
         }
 
         replacements.put("%num%", "" + number);
 
-        final VaultPlayer vaultPlayer = VaultManager.getPlayer(player.getUniqueId());
-        final Vault vault = vaultPlayer.getVault(number);
-        if (vault == null) {
-            MESSAGEUTILS.sendLang(sender, "view.not-found", replacements);
-            return;
-        }
-        vault.open(sender);
-        MESSAGEUTILS.sendLang(sender, "view.open", replacements);
+        VaultManager.getPlayer(player.getUniqueId(), vaultPlayer -> {
+            final Vault vault = vaultPlayer.getVault(number);
+            if (vault == null) {
+                MESSAGEUTILS.sendLang(sender, "view.not-found", replacements);
+                return;
+            }
+            vault.open(sender);
+            MESSAGEUTILS.sendLang(sender, "view.open", replacements);
+        });
     }
 
     @CommandPermission("axvaults.admin.delete")
@@ -101,15 +103,16 @@ public class AdminCommand implements OrphanCommand {
         replacements.put("%player%", player.getName());
         replacements.put("%num%", "" + number);
 
-        final VaultPlayer vaultPlayer = VaultManager.getPlayer(player.getUniqueId());
-        final Vault vault = vaultPlayer.getVault(number);
-        if (vault == null) {
-            MESSAGEUTILS.sendLang(sender, "view.not-found", replacements);
-            return;
-        }
-        VaultManager.removeVault(vault);
-        AxVaults.getDatabase().deleteVault(player.getUniqueId(), number);
-        MESSAGEUTILS.sendLang(sender, "delete", replacements);
+        VaultManager.getPlayer(player.getUniqueId(), vaultPlayer -> {
+            final Vault vault = vaultPlayer.getVault(number);
+            if (vault == null) {
+                MESSAGEUTILS.sendLang(sender, "view.not-found", replacements);
+                return;
+            }
+            VaultManager.removeVault(vault);
+            AxVaults.getDatabase().deleteVault(player.getUniqueId(), number);
+            MESSAGEUTILS.sendLang(sender, "delete", replacements);
+        });
     }
 
     @CommandPermission("axvaults.admin.set")

@@ -6,24 +6,23 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
 import org.jetbrains.annotations.NotNull;
 
 public class JoinLeaveListener implements Listener {
 
     public JoinLeaveListener() {
         for (Player player : Bukkit.getOnlinePlayers()) {
-            VaultManager.getPlayer(player.getUniqueId());
+            VaultManager.loadPlayer(player.getUniqueId());
         }
     }
 
     @EventHandler
     public void onJoin(@NotNull PlayerJoinEvent event) {
-        VaultManager.getPlayer(event.getPlayer().getUniqueId());
+        VaultManager.loadPlayer(event.getPlayer().getUniqueId());
     }
 
-    @EventHandler
-    public void onQuit(@NotNull PlayerQuitEvent event) {
-        VaultManager.removePlayer(event.getPlayer());
-    }
+//    @EventHandler
+//    public void onQuit(@NotNull PlayerQuitEvent event) {
+//        VaultManager.removePlayer(event.getPlayer());
+//    }
 }

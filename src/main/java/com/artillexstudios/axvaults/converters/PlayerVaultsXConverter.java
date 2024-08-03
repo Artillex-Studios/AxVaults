@@ -4,9 +4,7 @@ import com.artillexstudios.axapi.config.Config;
 import com.artillexstudios.axapi.utils.StringUtils;
 import com.artillexstudios.axvaults.AxVaults;
 import com.artillexstudios.axvaults.vaults.Vault;
-import com.artillexstudios.axvaults.vaults.VaultManager;
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
 
@@ -32,17 +30,14 @@ public class PlayerVaultsXConverter {
                 }
                 players++;
 
-                final Player player = Bukkit.getPlayer(uuid);
-                if (player != null) VaultManager.removePlayer(player);
-
                 for (String route : data.getBackingDocument().getRoutesAsStrings(false)) {
                     final int num = Integer.parseInt(route.replace("vault", ""));
-                    final Vault vault = new Vault(uuid, num, getItems(data.getString(route)), null);
-                    AxVaults.getDatabase().saveVault(vault);
+                    final Vault vault = new Vault(uuid, num, null);
+                    vault.setContents(getItems(data.getString(route)), unused -> {
+                        AxVaults.getDatabase().saveVault(vault);
+                    });
                     vaults++;
                 }
-
-                if (player != null) VaultManager.getPlayer(uuid);
             }
             Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#33FF33[AxVaults] Finished converting " + vaults + " vaults of " + players + " players!"));
             return;
