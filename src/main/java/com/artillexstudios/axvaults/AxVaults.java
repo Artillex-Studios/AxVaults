@@ -163,10 +163,8 @@ public final class AxVaults extends AxPlugin {
     }
 
     public void disable() {
-        for (VaultPlayer vaultPlayer : VaultManager.getPlayers().values()) {
-            for (Vault vault : vaultPlayer.getVaultMap().values()) {
-                AxVaults.getDatabase().saveVault(vault);
-            }
+        for (Vault vault : VaultManager.getVaults()) {
+            AxVaults.getDatabase().saveVault(vault);
         }
         AutoSaveScheduler.stop();
         database.disable();

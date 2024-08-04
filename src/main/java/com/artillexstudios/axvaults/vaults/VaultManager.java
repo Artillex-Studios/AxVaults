@@ -5,15 +5,15 @@ import com.artillexstudios.axvaults.AxVaults;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
 
 public class VaultManager {
     private static final ConcurrentHashMap<UUID, VaultPlayer> players = new ConcurrentHashMap<>();
-    private static final ArrayList<Vault> vaults = new ArrayList<>();
+    private static final ConcurrentLinkedQueue<Vault> vaults = new ConcurrentLinkedQueue<>();
 
     public static void loadPlayer(@NotNull UUID uuid) {
         getPlayer(uuid, vaultPlayer -> {});
@@ -74,7 +74,7 @@ public class VaultManager {
         }
     }
 
-    public static ArrayList<Vault> getVaults() {
+    public static ConcurrentLinkedQueue<Vault> getVaults() {
         return vaults;
     }
 }

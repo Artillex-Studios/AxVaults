@@ -10,7 +10,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.Map;
 
 import static com.artillexstudios.axvaults.AxVaults.MESSAGES;
@@ -22,7 +21,7 @@ public class InventoryCloseListener implements Listener {
     public void onClose(@NotNull InventoryCloseEvent event) {
         AxVaults.getThreadedQueue().submit(() -> {
             Vault v = null;
-            for (Vault vault : new ArrayList<>(VaultManager.getVaults())) {
+            for (Vault vault : VaultManager.getVaults()) {
                 if (!vault.getStorage().equals(event.getInventory())) continue;
                 v = vault;
                 break;

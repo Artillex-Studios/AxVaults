@@ -109,6 +109,7 @@ public class AdminCommand implements OrphanCommand {
                 MESSAGEUTILS.sendLang(sender, "view.not-found", replacements);
                 return;
             }
+            VaultManager.getVaults().remove(vault);
             VaultManager.removeVault(vault);
             AxVaults.getDatabase().deleteVault(player.getUniqueId(), number);
             MESSAGEUTILS.sendLang(sender, "delete", replacements);

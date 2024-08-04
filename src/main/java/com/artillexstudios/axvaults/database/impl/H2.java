@@ -87,7 +87,7 @@ public class H2 implements Database {
                     }
                 }
             }
-        } catch (SQLException ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
         Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#33FF33[AxVaults] Successfully converted " + am + " vaults in " + (System.currentTimeMillis() - time) + "ms"));
