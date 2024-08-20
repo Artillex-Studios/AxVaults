@@ -55,6 +55,7 @@ public class VaultManager {
 
     public static void removeVault(@NotNull Vault vault) {
         final VaultPlayer player = players.get(vault.getUUID());
+        if (player == null) return;
         player.removeVault(vault);
         if (player.getVaultMap().isEmpty()) {
             players.remove(player.getUUID());

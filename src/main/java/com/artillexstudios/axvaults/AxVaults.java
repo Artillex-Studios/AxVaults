@@ -18,19 +18,20 @@ import com.artillexstudios.axvaults.commands.AdminCommand;
 import com.artillexstudios.axvaults.commands.PlayerCommand;
 import com.artillexstudios.axvaults.database.Database;
 import com.artillexstudios.axvaults.database.impl.H2;
+import com.artillexstudios.axvaults.database.impl.MySQL;
 import com.artillexstudios.axvaults.database.impl.SQLite;
+import com.artillexstudios.axvaults.database.messaging.SQLMessaging;
 import com.artillexstudios.axvaults.libraries.Libraries;
 import com.artillexstudios.axvaults.listeners.BlackListListener;
 import com.artillexstudios.axvaults.listeners.BlockBreakListener;
 import com.artillexstudios.axvaults.listeners.InventoryCloseListener;
-import com.artillexstudios.axvaults.listeners.JoinLeaveListener;
+import com.artillexstudios.axvaults.listeners.PlayerListeners;
 import com.artillexstudios.axvaults.listeners.PlayerInteractListener;
 import com.artillexstudios.axvaults.schedulers.AutoSaveScheduler;
 import com.artillexstudios.axvaults.utils.CommandMessages;
 import com.artillexstudios.axvaults.utils.UpdateNotifier;
 import com.artillexstudios.axvaults.vaults.Vault;
 import com.artillexstudios.axvaults.vaults.VaultManager;
-import com.artillexstudios.axvaults.vaults.VaultPlayer;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
@@ -98,6 +99,14 @@ public final class AxVaults extends AxPlugin {
                 database = new SQLite();
                 break;
             }
+            case "mysql": {
+                database = new MySQL();
+                break;
+            }
+//            case "postgresql": {
+//                database = new PostgeSQL();
+//                break;
+//            }
             default: {
                 database = new H2();
             }
@@ -106,7 +115,7 @@ public final class AxVaults extends AxPlugin {
         database.setup();
         database.load();
 
-        getServer().getPluginManager().registerEvents(new JoinLeaveListener(), this);
+        getServer().getPluginManager().registerEvents(new PlayerListeners(), this);
         getServer().getPluginManager().registerEvents(new BlackListListener(), this);
         getServer().getPluginManager().registerEvents(new PlayerInteractListener(), this);
         getServer().getPluginManager().registerEvents(new BlockBreakListener(), this);
@@ -115,6 +124,7 @@ public final class AxVaults extends AxPlugin {
         registerCommands();
 
         AutoSaveScheduler.start();
+        SQLMessaging.start();
 
         Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#55ff00[AxVaults] Loaded plugin!"));
 
@@ -167,6 +177,7 @@ public final class AxVaults extends AxPlugin {
             AxVaults.getDatabase().saveVault(vault);
         }
         AutoSaveScheduler.stop();
+        SQLMessaging.stop();
         database.disable();
     }
 

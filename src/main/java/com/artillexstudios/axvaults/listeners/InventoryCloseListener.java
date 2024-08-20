@@ -1,6 +1,7 @@
 package com.artillexstudios.axvaults.listeners;
 
 import com.artillexstudios.axvaults.AxVaults;
+import com.artillexstudios.axvaults.database.impl.MySQL;
 import com.artillexstudios.axvaults.utils.SoundUtils;
 import com.artillexstudios.axvaults.vaults.Vault;
 import com.artillexstudios.axvaults.vaults.VaultManager;
@@ -29,6 +30,10 @@ public class InventoryCloseListener implements Listener {
             if (v == null) return;
             MESSAGEUTILS.sendLang(event.getPlayer(), "vault.closed", Map.of("%num%", "" + v.getId()));
             SoundUtils.playSound((Player) event.getPlayer(), MESSAGES.getString("sounds.close"));
+
+            if (AxVaults.getDatabase() instanceof MySQL db) {
+                AxVaults.getDatabase().saveVault(v);
+            }
         });
     }
 }
