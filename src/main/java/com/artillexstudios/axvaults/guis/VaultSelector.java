@@ -1,5 +1,6 @@
 package com.artillexstudios.axvaults.guis;
 
+import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.block.implementation.Section;
 import com.artillexstudios.axapi.reflection.ClassUtils;
 import com.artillexstudios.axapi.utils.ItemBuilder;
 import com.artillexstudios.axapi.utils.StringUtils;
@@ -49,26 +50,35 @@ public class VaultSelector {
             });
         }
 
-        final GuiItem item1 = new GuiItem(new ItemBuilder(MESSAGES.getSection("gui-items.previous-page")).get());
-        item1.setAction(event -> gui.previous());
-        gui.setItem(rows, 3, item1);
+        final Section prev;
+        if ((prev = MESSAGES.getSection("gui-items.previous-page")) != null) {
+            final GuiItem item1 = new GuiItem(new ItemBuilder(prev).get());
+            item1.setAction(event -> gui.previous());
+            gui.setItem(rows, 3, item1);
+        }
 
-        final GuiItem item2 = new GuiItem(new ItemBuilder(MESSAGES.getSection("gui-items.next-page")).get());
-        item2.setAction(event -> {
-            gui.next();
+        final Section next;
+        if ((next = MESSAGES.getSection("gui-items.next-page")) != null) {
+            final GuiItem item2 = new GuiItem(new ItemBuilder(next).get());
+            item2.setAction(event -> {
+                gui.next();
 
-            for (int i = 0; i < pageSize; i++) {
-                getItemOfVault(player, (gui.getCurrentPageNum() * pageSize) + i + 1, gui, guiItem -> {
-                    if (guiItem == null) return;
-                    gui.addItem(guiItem);
-                });
-            }
-        });
-        gui.setItem(rows, 7, item2);
+                for (int i = 0; i < pageSize; i++) {
+                    getItemOfVault(player, (gui.getCurrentPageNum() * pageSize) + i + 1, gui, guiItem -> {
+                        if (guiItem == null) return;
+                        gui.addItem(guiItem);
+                    });
+                }
+            });
+            gui.setItem(rows, 7, item2);
+        }
 
-        final GuiItem item3 = new GuiItem(new ItemBuilder(MESSAGES.getSection("gui-items.close")).get());
-        item3.setAction(event -> event.getWhoClicked().closeInventory());
-        gui.setItem(rows, 5, item3);
+        final Section close;
+        if ((close = MESSAGES.getSection("gui-items.close")) != null) {
+            final GuiItem item3 = new GuiItem(new ItemBuilder(close).get());
+            item3.setAction(event -> event.getWhoClicked().closeInventory());
+            gui.setItem(rows, 5, item3);
+        }
 
         gui.open(player, page);
     }

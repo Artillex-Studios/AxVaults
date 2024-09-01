@@ -10,6 +10,9 @@ auto-save-minutes: 5
 # how many rows should the /axvault selector menu have?
 vault-selector-rows: 6
 
+# how many rows should the vault icon picker have?
+item-picker-rows: 6
+
 # how many rows should vaults have?
 # you can override this with the axvaults.rows.# permission
 # you should keep this on 6 and only /change it with permissions
@@ -94,4 +97,4 @@ update-notifier:
   on-join: true
 
 # do not change this
-version: 5
+version: 6

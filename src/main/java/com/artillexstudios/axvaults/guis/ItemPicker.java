@@ -1,5 +1,6 @@
 package com.artillexstudios.axvaults.guis;
 
+import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.block.implementation.Section;
 import com.artillexstudios.axapi.reflection.ClassUtils;
 import com.artillexstudios.axapi.utils.ItemBuilder;
 import com.artillexstudios.axapi.utils.StringUtils;
@@ -28,7 +29,7 @@ public class ItemPicker {
     }
 
     public void open(@NotNull Player player, @NotNull Vault vault, int oldPage, int cPage) {
-        int rows = CONFIG.getInt("vault-selector-rows", 6);
+        int rows = CONFIG.getInt("item-picker-rows", 6);
         int pageSize = rows * 9 - 9;
 
         String title = MESSAGES.getString("guis.item-picker.title");
@@ -68,17 +69,26 @@ public class ItemPicker {
             gui.addItem(guiItem);
         }
 
-        final GuiItem item1 = new GuiItem(new ItemBuilder(MESSAGES.getSection("gui-items.previous-page")).get());
-        item1.setAction(event -> gui.previous());
-        gui.setItem(rows, 3, item1);
+        final Section prev;
+        if ((prev = MESSAGES.getSection("gui-items.previous-page")) != null) {
+            final GuiItem item1 = new GuiItem(new ItemBuilder(prev).get());
+            item1.setAction(event -> gui.previous());
+            gui.setItem(rows, 3, item1);
+        }
 
-        final GuiItem item2 = new GuiItem(new ItemBuilder(MESSAGES.getSection("gui-items.next-page")).get());
-        item2.setAction(event -> gui.next());
-        gui.setItem(rows, 7, item2);
+        final Section next;
+        if ((next = MESSAGES.getSection("gui-items.next-page")) != null) {
+            final GuiItem item2 = new GuiItem(new ItemBuilder(next).get());
+            item2.setAction(event -> gui.next());
+            gui.setItem(rows, 7, item2);
+        }
 
-        final GuiItem item3 = new GuiItem(new ItemBuilder(MESSAGES.getSection("gui-items.back")).get());
-        item3.setAction(event -> new VaultSelector().open(player, oldPage));
-        gui.setItem(rows, 5, item3);
+        final Section back;
+        if ((back = MESSAGES.getSection("gui-items.back")) != null) {
+            final GuiItem item3 = new GuiItem(new ItemBuilder(back).get());
+            item3.setAction(event -> new VaultSelector().open(player, oldPage));
+            gui.setItem(rows, 5, item3);
+        }
 
         gui.open(player, cPage);
     }
