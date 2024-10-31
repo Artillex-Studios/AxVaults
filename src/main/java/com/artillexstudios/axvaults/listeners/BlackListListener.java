@@ -2,7 +2,6 @@ package com.artillexstudios.axvaults.listeners;
 
 import com.artillexstudios.axvaults.vaults.Vault;
 import com.artillexstudios.axvaults.vaults.VaultManager;
-import com.artillexstudios.axvaults.vaults.VaultPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -20,11 +19,10 @@ public class BlackListListener implements Listener {
     public void onClick(@NotNull InventoryClickEvent event) {
         if (CONFIG.getSection("blacklisted-items") == null) return;
         boolean isVault = false;
-        outer: for (VaultPlayer vaultPlayer : VaultManager.getPlayers().values()) {
-            for (Vault vault : vaultPlayer.getVaultMap().values()) {
-                if (!vault.getStorage().equals(event.getView().getTopInventory())) continue;
+        for (Vault vault : VaultManager.getVaults()) {
+            if (vault.getStorage().equals(event.getView().getTopInventory())) {
                 isVault = true;
-                break outer;
+                break;
             }
         }
         if (!isVault) return;

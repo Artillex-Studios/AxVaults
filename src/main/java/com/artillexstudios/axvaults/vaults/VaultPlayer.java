@@ -10,16 +10,16 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static com.artillexstudios.axvaults.AxVaults.CONFIG;
 
 public class VaultPlayer {
     private final UUID uuid;
-    private final HashMap<Integer, Vault> vaultMap = new HashMap<>();
+    private final ConcurrentHashMap<Integer, Vault> vaultMap = new ConcurrentHashMap<>();
 
     public VaultPlayer(UUID uuid) {
         this.uuid = uuid;
@@ -29,7 +29,7 @@ public class VaultPlayer {
         AxVaults.getDatabase().loadVaults(uuid);
     }
 
-    public HashMap<Integer, Vault> getVaultMap() {
+    public ConcurrentHashMap<Integer, Vault> getVaultMap() {
         return vaultMap;
     }
 

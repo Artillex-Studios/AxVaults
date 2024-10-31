@@ -42,13 +42,13 @@ public class AdminCommand implements OrphanCommand {
     public void reload(@NotNull CommandSender sender) {
         Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#55FF00[AxVaults] &#AAFFAAReloading configuration..."));
         if (!CONFIG.reload()) {
-            MESSAGEUTILS.sendFormatted(sender, "reload.failed", Collections.singletonMap("%file%", "config.yml"));
+            MESSAGEUTILS.sendLang(sender, "reload.failed", Collections.singletonMap("%file%", "config.yml"));
             return;
         }
         Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#55FF00╠ &#00FF00Reloaded &fconfig.yml&#00FF00!"));
 
         if (!MESSAGES.reload()) {
-            MESSAGEUTILS.sendFormatted(sender, "reload.failed", Collections.singletonMap("%file%", "messages.yml"));
+            MESSAGEUTILS.sendLang(sender, "reload.failed", Collections.singletonMap("%file%", "messages.yml"));
             return;
         }
         Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#55FF00╠ &#00FF00Reloaded &fmessages.yml&#00FF00!"));
