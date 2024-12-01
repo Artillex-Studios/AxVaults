@@ -64,7 +64,24 @@ public class AdminCommand implements OrphanCommand {
 
     @CommandPermission("axvaults.admin.forceopen")
     @Subcommand("forceopen")
-    public void forceopen(@NotNull CommandSender sender, @NotNull Player player) {
+    public void forceOpen(@NotNull CommandSender sender, @NotNull Player player, @Optional @Range(min = 1) Integer number) {
+        if (number != null) {
+            final HashMap<String, String> replacements = new HashMap<>();
+            replacements.put("%num%", "" + number);
+
+            VaultManager.getVaultOfPlayer(player, number, vault -> {
+                if (vault == null) {
+                    MESSAGEUTILS.sendLang(player, "vault.not-unlocked", replacements);
+                    return;
+                }
+
+                vault.open(player);
+                MESSAGEUTILS.sendLang(player, "vault.opened", replacements);
+            });
+            replacements.put("%player%", player.getName());
+            MESSAGEUTILS.sendLang(sender, "force-open-vault", replacements);
+            return;
+        }
         new VaultSelector().open(player);
         MESSAGEUTILS.sendLang(sender, "force-open", Collections.singletonMap("%player%", player.getName()));
     }

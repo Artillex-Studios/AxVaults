@@ -21,6 +21,7 @@ vault-storage-rows: 6
 database:
   # h2, sqlite, mysql
   # for single server setups we recommend h2
+  # mysql is currently experimental
   type: "h2"
 
   # you only need to touch these when using mysql/postgresql

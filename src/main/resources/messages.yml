@@ -72,6 +72,7 @@ set:
 
 no-permission: "&#FF0000You don't have permission to use this!"
 force-open: "&#00FF00Opened vault selector for &f%player%&#55FF00!"
+force-open-vault: "&#00FF00Opening vault &f#%num% &#00FF00for &f%player%&#55FF00!"
 delete: "&fDeleted vault &#FF0000#%num% &fof &#FF0000&#FF0000%player%&f!"
 banned-item: "&#FF0000You can't put this item into vaults!"
 
@@ -105,4 +106,4 @@ commands:
 update-notifier: "&#BBFF88There is a new version of AxVaults available! &#DDDDDD(&#FFFFFFcurrent: &#FF0000%current% &#DDDDDD| &#FFFFFFlatest: &#00FF00%latest%&#DDDDDD)"
 
 # do not change this
-version: 7
+version: 8
