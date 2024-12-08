@@ -73,7 +73,7 @@ blacklisted-items:
     name-contains: "Banned item's name"
 
 # you must define at least 1
-# reloading will add new commands, however a restart is recommended when editing this
+# requires a restart to update
 player-command-aliases:
   - "axvault"
   - "vault"
@@ -83,7 +83,7 @@ player-command-aliases:
   - "vaults"
 
 # you must define at least 1
-# reloading will add new commands, however a restart is recommended when editing this
+# requires a restart to update
 admin-command-aliases:
   - "axvaultsadmin"
   - "axvaultadmin"
