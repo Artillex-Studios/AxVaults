@@ -8,6 +8,8 @@ softdepend:
   - PlaceholderAPI
 
 permissions:
+  axvaults.vault.1:
+    default: false
   axvaults.selector:
     default: true
   axvaults.openremote:
