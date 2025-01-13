@@ -13,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
@@ -52,14 +53,29 @@ public class Vault {
 
     public void setContents(ItemStack[] items, Consumer<Void> consumer) {
         if (future == null) {
-            storage.setContents(items);
+            setContents(items);
             consumer.accept(null);
             return;
         }
         future.thenRun(() -> {
-            storage.setContents(items);
+            setContents(items);
             consumer.accept(null);
         });
+    }
+
+    private void setContents(ItemStack[] items) {
+        if (storage.getSize() < items.length) {
+            for (int i = 0; i < storage.getSize(); i++) {
+                storage.setItem(i, items[i]);
+            }
+            Player player = Bukkit.getPlayer(vaultPlayer.getUUID());
+            for (int i = storage.getSize(); i < items.length; i++) {
+                HashMap<Integer, ItemStack> remaining = storage.addItem(items[i]);
+                if (player != null) remaining.forEach((k, v) -> player.getLocation().getWorld().dropItem(player.getLocation(), v));
+            }
+            return;
+        }
+        storage.setContents(items);
     }
 
     public Inventory getStorage() {
@@ -124,17 +140,6 @@ public class Vault {
         final Inventory newStorage = Bukkit.createInventory(null, vaultPlayer.getRows() * 9, StringUtils.formatToString(title));
         final ItemStack[] contents = storage.getContents();
 
-        int n = -1;
-        for (ItemStack it : contents) {
-            n++;
-            if (n > newStorage.getSize() - 1) {
-                if (it == null) continue;
-                newStorage.addItem(it);
-                continue;
-            }
-            newStorage.setItem(n, it);
-        }
-
         final List<HumanEntity> viewers = new ArrayList<>(storage.getViewers());
         final Iterator<HumanEntity> viewerIterator = viewers.iterator();
 
@@ -144,5 +149,7 @@ public class Vault {
         }
 
         storage = newStorage;
+        storage.clear();
+        setContents(contents);
     }
 }

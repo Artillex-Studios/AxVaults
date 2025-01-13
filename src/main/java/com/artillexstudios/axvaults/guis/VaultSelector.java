@@ -111,14 +111,8 @@ public class VaultSelector {
 
                 it.setType(vault.getIcon());
                 switch (CONFIG.getInt("selector-item-amount-mode", 1)) {
-                    case 1:
-                        it.setAmount(num % 64 == 0 ? 64 : num % 64);
-                        break;
-                    case 3:
-                        it.setAmount(Math.max(1, vault.getSlotsFilled()));
-                        break;
-                    default:
-                        break;
+                    case 1 -> it.setAmount(num % 64 == 0 ? 64 : num % 64);
+                    case 3 -> it.setAmount(Math.max(1, vault.getSlotsFilled()));
                 }
 
                 final GuiItem guiItem = new GuiItem(it);

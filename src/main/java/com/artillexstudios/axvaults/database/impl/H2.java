@@ -57,7 +57,7 @@ public class H2 implements Database {
         convert();
     }
 
-    private void convert() { // todo: clean db
+    private void convert() {
         String test = "SELECT storage FROM axvaults_data LIMIT 1;";
         try (PreparedStatement stmt = conn.prepareStatement(test)) {
             try (ResultSet rs = stmt.executeQuery()) {
