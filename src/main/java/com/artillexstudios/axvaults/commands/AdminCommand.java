@@ -35,6 +35,7 @@ public class AdminCommand implements OrphanCommand {
         for (String m : MESSAGES.getStringList("help")) {
             sender.sendMessage(StringUtils.formatToString(m));
         }
+        sender.sendMessage(StringUtils.formatToString("&e/axvaults nextvault &7- Go to the next vault"));
     }
 
     @CommandPermission("axvaults.admin.reload")
@@ -157,5 +158,27 @@ public class AdminCommand implements OrphanCommand {
     public void converter(@NotNull Player sender) {
         new PlayerVaultsXConverter().run();
         MESSAGEUTILS.sendLang(sender, "converter.started");
+    }
+
+    @CommandPermission("axvaults.admin.nextvault")
+    @Subcommand("nextvault")
+    public void nextVault(@NotNull CommandSender sender, @NotNull Player player) {
+        int nextVaultNum = getNextVaultNumber(player);
+        if (nextVaultNum != -1) {
+            new PlayerCommand().open(player, nextVaultNum, true);
+            MESSAGEUTILS.sendLang(sender, "next-vault.success", Collections.singletonMap("%player%", player.getName()));
+        } else {
+            MESSAGEUTILS.sendLang(sender, "next-vault.no-next-vault", Collections.singletonMap("%player%", player.getName()));
+        }
+    }
+
+    private int getNextVaultNumber(@NotNull Player player) {
+        int maxVaults = CONFIG.getInt("max-vault-amount");
+        for (int i = 1; i <= maxVaults; i++) {
+            if (!VaultManager.getVaultOfPlayer(player, i, vault -> {})) {
+                return i;
+            }
+        }
+        return -1;
     }
 }

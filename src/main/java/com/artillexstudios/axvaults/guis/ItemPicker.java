@@ -90,6 +90,33 @@ public class ItemPicker {
             gui.setItem(rows, 5, item3);
         }
 
+        final Section nextVault;
+        if ((nextVault = MESSAGES.getSection("gui-items.next-vault")) != null) {
+            final GuiItem item4 = new GuiItem(new ItemBuilder(nextVault).get());
+            item4.setAction(event -> {
+                int nextVaultNum = getNextVaultNumber(player);
+                if (nextVaultNum != -1) {
+                    getItemOfVault(player, nextVaultNum, gui, guiItem -> {
+                        if (guiItem != null) {
+                            gui.addItem(guiItem);
+                            gui.update();
+                        }
+                    });
+                }
+            });
+            gui.setItem(rows, 8, item4);
+        }
+
         gui.open(player, cPage);
+    }
+
+    private int getNextVaultNumber(@NotNull Player player) {
+        int maxVaults = CONFIG.getInt("max-vault-amount");
+        for (int i = 1; i <= maxVaults; i++) {
+            if (!VaultManager.getVaultOfPlayer(player, i, vault -> {})) {
+                return i;
+            }
+        }
+        return -1;
     }
 }

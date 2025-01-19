@@ -52,4 +52,23 @@ public class PlayerCommand implements OrphanCommand {
             MESSAGEUTILS.sendLang(sender, "vault.opened", replacements);
         });
     }
+
+    public void nextVault(@NotNull Player sender) {
+        int nextVaultNum = getNextVaultNumber(sender);
+        if (nextVaultNum != -1) {
+            open(sender, nextVaultNum, false);
+        } else {
+            MESSAGEUTILS.sendLang(sender, "vault.no-next-vault");
+        }
+    }
+
+    private int getNextVaultNumber(@NotNull Player player) {
+        int maxVaults = CONFIG.getInt("max-vault-amount");
+        for (int i = 1; i <= maxVaults; i++) {
+            if (!VaultManager.getVaultOfPlayer(player, i, vault -> {})) {
+                return i;
+            }
+        }
+        return -1;
+    }
 }

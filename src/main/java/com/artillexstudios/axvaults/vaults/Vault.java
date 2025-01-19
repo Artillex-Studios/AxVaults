@@ -152,4 +152,27 @@ public class Vault {
         storage.clear();
         setContents(contents);
     }
+
+    public void handleNextVaultArrow(Player player) {
+        int nextVaultNum = getNextVaultNumber(player);
+        if (nextVaultNum != -1) {
+            VaultManager.getVaultOfPlayer(player, nextVaultNum, vault -> {
+                if (vault != null) {
+                    vault.open(player);
+                }
+            });
+        } else {
+            player.sendMessage(MESSAGES.getString("vault.no-next-vault"));
+        }
+    }
+
+    private int getNextVaultNumber(@NotNull Player player) {
+        int maxVaults = CONFIG.getInt("max-vault-amount");
+        for (int i = 1; i <= maxVaults; i++) {
+            if (!VaultManager.getVaultOfPlayer(player, i, vault -> {})) {
+                return i;
+            }
+        }
+        return -1;
+    }
 }
