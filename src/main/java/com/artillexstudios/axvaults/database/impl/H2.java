@@ -6,6 +6,7 @@ import com.artillexstudios.axvaults.AxVaults;
 import com.artillexstudios.axvaults.database.Database;
 import com.artillexstudios.axvaults.placed.PlacedVaults;
 import com.artillexstudios.axvaults.utils.SerializationUtils;
+import com.artillexstudios.axvaults.utils.VaultUtils;
 import com.artillexstudios.axvaults.vaults.Vault;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -95,37 +96,37 @@ public class H2 implements Database {
 
     @Override
     public void saveVault(@NotNull Vault vault) {
-        final String sql = "SELECT * FROM axvaults_data WHERE uuid = ? AND id = ?;";
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, vault.getUUID().toString());
-            stmt.setInt(2, vault.getId());
+        VaultUtils.serialize(vault).thenAccept((bytes) -> {
+            final String sql = "SELECT * FROM axvaults_data WHERE uuid = ? AND id = ?;";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setString(1, vault.getUUID().toString());
+                stmt.setInt(2, vault.getId());
 
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    final String sql2 = "UPDATE axvaults_data SET storage = ?, icon = ? WHERE uuid = ? AND id = ?;";
-                    try (PreparedStatement stmt2 = conn.prepareStatement(sql2)) {
-                        final byte[] bytes = Serializers.ITEM_ARRAY.serialize(vault.getStorage().getContents());
-                        stmt2.setBytes(1, bytes);
-                        stmt2.setString(2, vault.getRealIcon() == null ? null : vault.getRealIcon().name());
-                        stmt2.setString(3, vault.getUUID().toString());
-                        stmt2.setInt(4, vault.getId());
-                        stmt2.executeUpdate();
-                    }
-                } else {
-                    final String sql2 = "INSERT INTO axvaults_data(id, uuid, storage, icon) VALUES (?, ?, ?, ?);";
-                    try (PreparedStatement stmt2 = conn.prepareStatement(sql2)) {
-                        stmt2.setInt(1, vault.getId());
-                        stmt2.setString(2, vault.getUUID().toString());
-                        final byte[] bytes = Serializers.ITEM_ARRAY.serialize(vault.getStorage().getContents());
-                        stmt2.setBytes(3, bytes);
-                        stmt2.setString(4, vault.getRealIcon() == null ? null : vault.getRealIcon().name());
-                        stmt2.executeUpdate();
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        final String sql2 = "UPDATE axvaults_data SET storage = ?, icon = ? WHERE uuid = ? AND id = ?;";
+                        try (PreparedStatement stmt2 = conn.prepareStatement(sql2)) {
+                            stmt2.setBytes(1, bytes);
+                            stmt2.setString(2, vault.getRealIcon() == null ? null : vault.getRealIcon().name());
+                            stmt2.setString(3, vault.getUUID().toString());
+                            stmt2.setInt(4, vault.getId());
+                            stmt2.executeUpdate();
+                        }
+                    } else {
+                        final String sql2 = "INSERT INTO axvaults_data(id, uuid, storage, icon) VALUES (?, ?, ?, ?);";
+                        try (PreparedStatement stmt2 = conn.prepareStatement(sql2)) {
+                            stmt2.setInt(1, vault.getId());
+                            stmt2.setString(2, vault.getUUID().toString());
+                            stmt2.setBytes(3, bytes);
+                            stmt2.setString(4, vault.getRealIcon() == null ? null : vault.getRealIcon().name());
+                            stmt2.executeUpdate();
+                        }
                     }
                 }
+            } catch (SQLException ex) {
+                ex.printStackTrace();
             }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        }
+        });
     }
 
     @Override
@@ -138,7 +139,7 @@ public class H2 implements Database {
                 while (rs.next()) {
                     final ItemStack[] items = Serializers.ITEM_ARRAY.deserialize(rs.getBytes(3));
                     final Vault vault = new Vault(uuid, rs.getInt(1), rs.getString(4) == null ? null : Material.valueOf(rs.getString(4)));
-                    vault.setContents(items, unused -> {});
+                    vault.setContents(items);
                 }
             }
         } catch (SQLException ex) {

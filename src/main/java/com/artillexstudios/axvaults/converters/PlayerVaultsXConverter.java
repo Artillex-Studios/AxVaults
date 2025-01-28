@@ -33,7 +33,7 @@ public class PlayerVaultsXConverter {
                 for (String route : data.getBackingDocument().getRoutesAsStrings(false)) {
                     final int num = Integer.parseInt(route.replace("vault", ""));
                     final Vault vault = new Vault(uuid, num, null);
-                    vault.setContents(getItems(data.getString(route)), unused -> {
+                    vault.setContents(getItems(data.getString(route))).thenRun(() -> {
                         AxVaults.getDatabase().saveVault(vault);
                     });
                     vaults++;

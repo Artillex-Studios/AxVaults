@@ -118,6 +118,7 @@ public final class AxVaults extends AxPlugin {
         AutoSaveScheduler.stop();
         SQLMessaging.stop();
         database.disable();
+        threadedQueue.stop();
     }
 
     public void updateFlags(FeatureFlags flags) {

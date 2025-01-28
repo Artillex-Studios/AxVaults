@@ -3,6 +3,7 @@ package com.artillexstudios.axvaults.vaults;
 import com.artillexstudios.axapi.reflection.ClassUtils;
 import com.artillexstudios.axapi.utils.StringUtils;
 import com.artillexstudios.axvaults.utils.SoundUtils;
+import com.artillexstudios.axvaults.utils.ThreadUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
@@ -29,7 +30,7 @@ public class Vault {
     private Material icon;
     private VaultPlayer vaultPlayer;
     private long lastOpen = System.currentTimeMillis();
-    private CompletableFuture<Void> future = new CompletableFuture<>();
+    private final CompletableFuture<Void> future = new CompletableFuture<>();
 
     public Vault(UUID uuid, int num, Material icon) {
         this.uuid = uuid;
@@ -43,7 +44,6 @@ public class Vault {
             }
             this.storage = Bukkit.createInventory(null, vaultPlayer.getRows() * 9, StringUtils.formatToString(title));
             future.complete(null);
-            future = null;
             vaultPlayer.getVaultMap().put(num, this);
         });
 
@@ -51,31 +51,26 @@ public class Vault {
         VaultManager.getVaults().add(this);
     }
 
-    public void setContents(ItemStack[] items, Consumer<Void> consumer) {
-        if (future == null) {
-            setContents(items);
-            consumer.accept(null);
-            return;
-        }
+    public CompletableFuture<Void> setContents(ItemStack[] items) {
+        CompletableFuture<Void> cf = new CompletableFuture<>();
         future.thenRun(() -> {
-            setContents(items);
-            consumer.accept(null);
+            ThreadUtils.runSync(() -> {
+                if (storage.getSize() < items.length) {
+                    for (int i = 0; i < storage.getSize(); i++) {
+                        storage.setItem(i, items[i]);
+                    }
+                    Player player = Bukkit.getPlayer(vaultPlayer.getUUID());
+                    for (int i = storage.getSize(); i < items.length; i++) {
+                        HashMap<Integer, ItemStack> remaining = storage.addItem(items[i]);
+                        if (player != null) remaining.forEach((k, v) -> player.getLocation().getWorld().dropItem(player.getLocation(), v));
+                    }
+                    return;
+                }
+                storage.setContents(items);
+                cf.complete(null);
+            });
         });
-    }
-
-    private void setContents(ItemStack[] items) {
-        if (storage.getSize() < items.length) {
-            for (int i = 0; i < storage.getSize(); i++) {
-                storage.setItem(i, items[i]);
-            }
-            Player player = Bukkit.getPlayer(vaultPlayer.getUUID());
-            for (int i = storage.getSize(); i < items.length; i++) {
-                HashMap<Integer, ItemStack> remaining = storage.addItem(items[i]);
-                if (player != null) remaining.forEach((k, v) -> player.getLocation().getWorld().dropItem(player.getLocation(), v));
-            }
-            return;
-        }
-        storage.setContents(items);
+        return cf;
     }
 
     public Inventory getStorage() {
@@ -148,8 +143,8 @@ public class Vault {
             viewerIterator.remove();
         }
 
-        storage = newStorage;
         storage.clear();
+        storage = newStorage;
         setContents(contents);
     }
 }
