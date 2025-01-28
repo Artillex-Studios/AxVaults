@@ -205,6 +205,8 @@ public class MySQL implements Database {
     }
 
     private void sendMessage(@NotNull ChangeType changeType, int id, UUID uuid) {
+        if (CONFIG.getString("multi-server-support", "sql").equalsIgnoreCase("none")) return;
+
         final String sql = "INSERT INTO axvaults_messages(event, vault_id, uuid, date) VALUES (?, ?, ?, ?);";
         try (Connection conn = dataSource.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setShort(1, (short) changeType.ordinal());
