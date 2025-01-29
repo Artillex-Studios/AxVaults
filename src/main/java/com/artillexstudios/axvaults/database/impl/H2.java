@@ -96,7 +96,7 @@ public class H2 implements Database {
 
     @Override
     public void saveVault(@NotNull Vault vault) {
-        VaultUtils.serialize(vault).thenAccept((bytes) -> {
+        VaultUtils.serialize(vault).thenAcceptAsync((bytes) -> {
             final String sql = "SELECT * FROM axvaults_data WHERE uuid = ? AND id = ?;";
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setString(1, vault.getUUID().toString());
