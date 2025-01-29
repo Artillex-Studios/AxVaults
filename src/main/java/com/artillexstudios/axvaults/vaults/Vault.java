@@ -19,7 +19,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
 
 import static com.artillexstudios.axvaults.AxVaults.MESSAGES;
 
@@ -31,6 +30,7 @@ public class Vault {
     private VaultPlayer vaultPlayer;
     private long lastOpen = System.currentTimeMillis();
     private final CompletableFuture<Void> future = new CompletableFuture<>();
+    private boolean wasEmpty = false;
 
     public Vault(UUID uuid, int num, Material icon) {
         this.uuid = uuid;
@@ -67,6 +67,7 @@ public class Vault {
                     return;
                 }
                 storage.setContents(items);
+                wasEmpty = storage.isEmpty();
                 cf.complete(null);
             });
         });
@@ -91,6 +92,10 @@ public class Vault {
 
     public void setIcon(Material icon) {
         this.icon = icon;
+    }
+
+    public boolean wasItEmpty() {
+        return wasEmpty;
     }
 
     public Material getIcon() {

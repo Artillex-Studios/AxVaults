@@ -21,6 +21,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Properties;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 public class H2 implements Database {
     private JdbcConnection conn;
@@ -96,7 +97,10 @@ public class H2 implements Database {
 
     @Override
     public void saveVault(@NotNull Vault vault) {
-        VaultUtils.serialize(vault).thenAcceptAsync((bytes) -> {
+        // if the vault was empty when loaded and is still empty, don't bother saving it
+        if (vault.wasItEmpty() && vault.getStorage().isEmpty()) return;
+
+        Consumer<byte[]> consumer = bytes -> {
             final String sql = "SELECT * FROM axvaults_data WHERE uuid = ? AND id = ?;";
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setString(1, vault.getUUID().toString());
@@ -126,7 +130,11 @@ public class H2 implements Database {
             } catch (SQLException ex) {
                 ex.printStackTrace();
             }
-        });
+        };
+
+        // if the server is shutting down, this can't be called async
+        if (Bukkit.isPrimaryThread()) VaultUtils.serialize(vault).thenAccept(consumer);
+        else VaultUtils.serialize(vault).thenAcceptAsync(consumer);
     }
 
     @Override

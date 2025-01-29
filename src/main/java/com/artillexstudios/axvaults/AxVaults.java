@@ -44,7 +44,6 @@ public final class AxVaults extends AxPlugin {
     private static ThreadedQueue<Runnable> threadedQueue;
     private static Database database;
     public static BukkitAudiences BUKKITAUDIENCES;
-    public static BukkitCommandHandler COMMANDHANDLER;
     private static AxMetrics metrics;
 
     public static ThreadedQueue<Runnable> getThreadedQueue() {

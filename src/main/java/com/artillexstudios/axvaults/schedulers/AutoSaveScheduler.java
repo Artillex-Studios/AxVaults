@@ -14,6 +14,7 @@ import static com.artillexstudios.axvaults.AxVaults.CONFIG;
 
 public class AutoSaveScheduler {
     private static ScheduledExecutorService service = null;
+    private static long lastSave = -1;
 
     public static void start() {
         int time = CONFIG.getInt("auto-save-minutes");
@@ -22,16 +23,20 @@ public class AutoSaveScheduler {
         service = Executors.newSingleThreadScheduledExecutor();
         service.scheduleAtFixedRate(() -> {
             try {
-                final Iterator<Vault> iterator = VaultManager.getVaults().iterator();
-                while (iterator.hasNext()) {
-                    final Vault vault = iterator.next();
-                    AxVaults.getDatabase().saveVault(vault);
-                    if (vault.isOpened()) continue;
-                    if (Bukkit.getPlayer(vault.getUUID()) != null) continue;
-                    if (System.currentTimeMillis() - vault.getLastOpen() <= (time - 1) * 1_000L) continue;
-                    VaultManager.removeVault(vault);
-                    iterator.remove();
+                long saveStart = System.currentTimeMillis();
+                synchronized (VaultManager.getVaults()) {
+                    Iterator<Vault> iterator = VaultManager.getVaults().iterator();
+                    while (iterator.hasNext()) {
+                        final Vault vault = iterator.next();
+                        AxVaults.getDatabase().saveVault(vault);
+                        if (vault.isOpened()) continue;
+                        if (Bukkit.getPlayer(vault.getUUID()) != null) continue;
+                        if (System.currentTimeMillis() - vault.getLastOpen() <= (time - 1) * 1_000L) continue;
+                        VaultManager.removeVault(vault);
+                        iterator.remove();
+                    }
                 }
+                lastSave = System.currentTimeMillis() - saveStart;
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
@@ -41,5 +46,9 @@ public class AutoSaveScheduler {
     public static void stop() {
         if (service == null) return;
         service.shutdown();
+    }
+
+    public static long getLastSaveLength() {
+        return lastSave;
     }
 }

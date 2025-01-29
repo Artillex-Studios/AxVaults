@@ -51,6 +51,7 @@ help:
   - "  &7⋆ &f/axvaultsadmin set [number] &7| &#AAFFAAAdd vault to block"
   - "  &7⋆ &f/axvaultsadmin reload &7| &#AAFFAAReload configuration"
   - "  &7⋆ &f/axvaultsadmin delete <player> <vault> &7| &#AAFFAADelete vault of player"
+  - "  &7⋆ &f/axvaultsadmin stats &7| &#AAFFAAServer statistics"
   - "  &7⋆ &f/axvaultsadmin converter <plugin> &7| &#AAFFAAConvert from another plugin"
   - " "
 
@@ -90,6 +91,14 @@ sounds:
   close: "block.barrel.close|1.0|1.0"
   select-icon: "block.barrel.close|1.0|1.0"
 
+stats:
+  - " "
+  - "&#55ff00&lAxVaults &#aaff55Server Stats &7»"
+  - " &7- &fLoaded players: &#55ff00%players%"
+  - " &7- &fLoaded vaults: &#55ff00%vaults%/%vaults2%"
+  - " &7- &fLast autosave length: &#55ff00%auto-save% ms"
+  - " "
+
 converter:
   started: "&#55FF00The converter has started! Check the console for the current status!"
 
@@ -106,4 +115,4 @@ commands:
 update-notifier: "&#BBFF88There is a new version of AxVaults available! &#DDDDDD(&#FFFFFFcurrent: &#FF0000%current% &#DDDDDD| &#FFFFFFlatest: &#00FF00%latest%&#DDDDDD)"
 
 # do not change this
-version: 8
+version: 9
