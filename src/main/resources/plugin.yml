@@ -9,7 +9,7 @@ softdepend:
 
 permissions:
   axvaults.vault.1:
-    default: true
+    default: false
   axvaults.selector:
     default: true
   axvaults.openremote:
