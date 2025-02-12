@@ -91,6 +91,7 @@ public class Vault {
     }
 
     public void setIcon(Material icon) {
+        wasEmpty = false;
         this.icon = icon;
     }
 

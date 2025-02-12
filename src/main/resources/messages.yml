@@ -71,6 +71,9 @@ set:
   no-block: "&#FF0000You must look at a block!"
   removed: "&#FF0000You have removed the vault from this block!"
 
+save:
+  manual: "&#00FF00Saved vaults manually in &f%time%ms&#00FF00! &#DDDDDD(this command is meant for testing and may cause unnecessary lag)"
+
 no-permission: "&#FF0000You don't have permission to use this!"
 force-open: "&#00FF00Opened vault selector for &f%player%&#55FF00!"
 force-open-vault: "&#00FF00Opening vault &f#%num% &#00FF00for &f%player%&#55FF00!"
@@ -115,4 +118,4 @@ commands:
 update-notifier: "&#BBFF88There is a new version of AxVaults available! &#DDDDDD(&#FFFFFFcurrent: &#FF0000%current% &#DDDDDD| &#FFFFFFlatest: &#00FF00%latest%&#DDDDDD)"
 
 # do not change this
-version: 9
+version: 10

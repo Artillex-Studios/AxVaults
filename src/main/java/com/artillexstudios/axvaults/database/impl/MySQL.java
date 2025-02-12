@@ -24,6 +24,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 import static com.artillexstudios.axvaults.AxVaults.CONFIG;
@@ -81,9 +82,9 @@ public class MySQL implements Database {
     }
 
     @Override
-    public void saveVault(@NotNull Vault vault) {
+    public CompletableFuture<Void> saveVault(@NotNull Vault vault) {
         // if the vault was empty when loaded and is still empty, don't bother saving it
-        if (vault.wasItEmpty() && vault.getStorage().isEmpty()) return;
+        if (vault.wasItEmpty() && vault.getStorage().isEmpty()) return CompletableFuture.completedFuture(null);
 
         Consumer<byte[]> consumer = bytes -> {
             final String sql = "SELECT * FROM axvaults_data WHERE uuid = ? AND id = ?;";
@@ -120,8 +121,13 @@ public class MySQL implements Database {
         };
 
         // if the server is shutting down, this can't be called async
-        if (Bukkit.isPrimaryThread()) VaultUtils.serialize(vault).thenAccept(consumer);
-        else VaultUtils.serialize(vault).thenAcceptAsync(consumer);
+        CompletableFuture<Void> local;
+        if (Bukkit.isPrimaryThread()) local = VaultUtils.serialize(vault).thenAccept(consumer);
+        else local = VaultUtils.serialize(vault).thenAcceptAsync(consumer);
+
+        CompletableFuture<Void> cf = new CompletableFuture<>();
+        local.thenRun(() -> cf.complete(null));
+        return cf;
     }
 
     @Override

@@ -23,6 +23,8 @@ import revxrsal.commands.orphan.OrphanCommand;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import static com.artillexstudios.axvaults.AxVaults.CONFIG;
@@ -177,5 +179,22 @@ public class AdminCommand implements OrphanCommand {
     public void converter(@NotNull Player sender) {
         new PlayerVaultsXConverter().run();
         MESSAGEUTILS.sendLang(sender, "converter.started");
+    }
+
+    @CommandPermission("axvaults.admin.save")
+    @Subcommand("save")
+    public void save(@NotNull Player sender) {
+        long time = System.currentTimeMillis();
+        AxVaults.getThreadedQueue().submit(() -> {
+            CompletableFuture<Void>[] futures = new CompletableFuture[VaultManager.getVaults().size()];
+            int i = 0;
+            for (Vault vault : VaultManager.getVaults()) {
+                futures[i] = AxVaults.getDatabase().saveVault(vault);
+                i++;
+            }
+            CompletableFuture.allOf(futures).thenRun(() -> {
+                MESSAGEUTILS.sendLang(sender, "save.manual", Map.of("%time%", "" + (System.currentTimeMillis() - time)));
+            });
+        });
     }
 }
