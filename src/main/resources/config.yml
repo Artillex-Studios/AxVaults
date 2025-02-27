@@ -65,6 +65,15 @@ max-vault-amount: -1
 # if enabled, the icon picker will not close after selecting an item
 selector-stay-open: false
 
+# list of items that CAN be put in vaults
+whitelisted-items:
+  "1":
+    material: "paper"
+    custom-model-data: 100-250
+  "2":
+    material: "paper"
+    custom-model-data: 300-700
+
 # list of items that CAN'T be put in vaults
 # note: the name-contains string shouldn't include any color codes
 blacklisted-items:
