@@ -28,7 +28,6 @@ import com.artillexstudios.axvaults.vaults.VaultManager;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
-import revxrsal.commands.bukkit.BukkitCommandHandler;
 
 import java.io.File;
 
