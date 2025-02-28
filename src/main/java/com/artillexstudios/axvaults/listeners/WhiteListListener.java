@@ -32,23 +32,24 @@ public class WhiteListListener implements Listener {
         final ItemStack it = event.getClick() == ClickType.NUMBER_KEY ? player.getInventory().getItem(event.getHotbarButton()) : event.getCurrentItem();
         if (it == null) return;
         for (String s : CONFIG.getSection("whitelisted-items").getRoutesAsStrings(false)) {
-            boolean banned = false;
-
-            if (CONFIG.getString("whitelisted-items." + s + ".material") != null) {
-                if (it.getType().toString().equalsIgnoreCase(CONFIG.getString("whitelisted-items." + s + ".material"))) continue;
-                banned = true;
+            if (CONFIG.getString("whitelisted-items." + s + ".material") != null
+                && !it.getType().toString().equalsIgnoreCase(CONFIG.getString("whitelisted-items." + s + ".material"))
+            ) {
+                continue;
             }
 
-            if (CONFIG.getString("whitelisted-items." + s + ".custom-model-data") != null) {
-                if (it.getItemMeta() != null && IntRange.parseIntRange(CONFIG.getString("whitelisted-items." + s + ".custom-model-data")).contains(it.getItemMeta().getCustomModelData())) continue;
-                banned = true;
+            if (CONFIG.getString("whitelisted-items." + s + ".custom-model-data") != null
+                && (it.getItemMeta() == null
+                || !it.getItemMeta().hasCustomModelData()
+                || !IntRange.parseIntRange(CONFIG.getString("whitelisted-items." + s + ".custom-model-data")).contains(it.getItemMeta().getCustomModelData()))
+            ) {
+                continue;
             }
 
-            if (banned) {
-                event.setCancelled(true);
-                MESSAGEUTILS.sendLang(player, "banned-item");
-                return;
-            }
+            return;
         }
+
+        event.setCancelled(true);
+        MESSAGEUTILS.sendLang(player, "banned-item");
     }
 }
