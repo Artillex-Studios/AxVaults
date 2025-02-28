@@ -1,5 +1,7 @@
 package com.artillexstudios.axvaults.utils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class IntRange implements Cloneable {
@@ -31,6 +33,16 @@ public class IntRange implements Cloneable {
 
     public int getMax() {
         return max;
+    }
+
+    public List<Integer> getValues() {
+        List<Integer> list = new ArrayList<>();
+
+        for (int i = min; i <= max; i++) {
+            list.add(i);
+        }
+
+        return list;
     }
 
     public boolean contains(int number) {

@@ -4,6 +4,7 @@ import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.block.implementati
 import com.artillexstudios.axapi.reflection.ClassUtils;
 import com.artillexstudios.axapi.utils.ItemBuilder;
 import com.artillexstudios.axapi.utils.StringUtils;
+import com.artillexstudios.axvaults.utils.IntRange;
 import com.artillexstudios.axvaults.vaults.VaultManager;
 import dev.triumphteam.gui.guis.Gui;
 import dev.triumphteam.gui.guis.GuiItem;
@@ -15,6 +16,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.function.Consumer;
 
 import static com.artillexstudios.axvaults.AxVaults.CONFIG;
@@ -43,10 +45,22 @@ public class VaultSelector {
                 .disableAllInteractions()
                 .create();
 
+        List<Integer> slots = MESSAGES.getStringList("guis.selector.slots").stream()
+            .map(IntRange::parseIntRange)
+            .flatMap((range) -> range.getValues().stream())
+            .toList();
+
         for (int i = 0; i < pageSize * (page + 1); i++) {
+            final int index = i; // We have to set this here to ensure the list index is final
             getItemOfVault(player, i + 1, gui, guiItem -> {
                 if (guiItem == null) return;
-                gui.addItem(guiItem);
+
+                if (slots.isEmpty()) {
+                    gui.addItem(guiItem);
+                } else {
+                    int slot = slots.get(index);
+                    gui.setItem(slot, guiItem);
+                }
             });
         }
 
@@ -64,9 +78,14 @@ public class VaultSelector {
                 gui.next();
 
                 for (int i = 0; i < pageSize; i++) {
+                    final int index = i; // We have to set this here to ensure the list index is final
                     getItemOfVault(player, (gui.getCurrentPageNum() * pageSize) + i + 1, gui, guiItem -> {
-                        if (guiItem == null) return;
-                        gui.addItem(guiItem);
+                        if (slots.isEmpty()) {
+                            gui.addItem(guiItem);
+                        } else {
+                            int slot = slots.get(index);
+                            gui.setItem(slot, guiItem);
+                        }
                     });
                 }
             });
@@ -78,6 +97,20 @@ public class VaultSelector {
             final GuiItem item3 = new GuiItem(new ItemBuilder(close).get());
             item3.setAction(event -> event.getWhoClicked().closeInventory());
             gui.setItem(rows, 5, item3);
+        }
+
+        for (String s : MESSAGES.getSection("gui-items").getRoutesAsStrings(false)) {
+            if (s.equals("close") || s.equals("back") || s.equals("previous-page") || s.equals("next-page")) {
+                continue;
+            }
+
+            Section itemSection = MESSAGES.getSection("gui-items." + s);
+            final GuiItem item = new GuiItem(new ItemBuilder(itemSection).get());
+
+            gui.setItem(MESSAGES.getStringList("gui-items.%s.slots".formatted(s)).stream()
+                .map(IntRange::parseIntRange)
+                .flatMap((range) -> range.getValues().stream())
+                .toList(), item);
         }
 
         gui.open(player, page);
