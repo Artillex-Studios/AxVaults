@@ -166,7 +166,9 @@ public class AdminCommand implements OrphanCommand {
         int vaults2 = VaultManager.getPlayers().values().stream().mapToInt(value -> value.getVaultMap().size()).sum();
         replacements.put("%vaults2%", "" + vaults2);
         long lastSave = AutoSaveScheduler.getLastSaveLength();
+        long savedVaults = AutoSaveScheduler.getSavedVaults();
         replacements.put("%auto-save%", lastSave == -1 ? "---" : "" + lastSave);
+        replacements.put("%saved-vaults%", savedVaults == -1 ? "---" : "" + savedVaults);
         List<String> statsMessage = MESSAGES.getStringList("stats");
 
         for (String s : statsMessage) {

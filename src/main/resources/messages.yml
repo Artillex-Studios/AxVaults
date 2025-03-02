@@ -100,6 +100,7 @@ stats:
   - " &7- &fLoaded players: &#55ff00%players%"
   - " &7- &fLoaded vaults: &#55ff00%vaults%/%vaults2%"
   - " &7- &fLast autosave length: &#55ff00%auto-save% ms"
+  - " &7- &fLast autosave saved: &#55ff00%saved-vaults% vaults"
   - " "
 
 converter:

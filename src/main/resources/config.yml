@@ -21,7 +21,6 @@ vault-storage-rows: 6
 database:
   # h2, sqlite, mysql
   # for single server setups we recommend h2
-  # mysql is currently experimental
   type: "h2"
 
   # you only need to touch these when using mysql/postgresql
@@ -39,8 +38,8 @@ database:
 
 # when using mysql/postgresql, how should data be sent between servers?
 # values: none, sql
-# if you don't need multi server support, set to none to disable
-multi-server-support: "sql"
+# multi server is currently experimental, there might be some issues
+multi-server-support: "none"
 
 # modes:
 # 0 - every vault needs a separate permission (axvaults.vault.10 will only give access to vault #10)

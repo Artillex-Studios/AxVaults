@@ -2,13 +2,12 @@ package com.artillexstudios.axvaults;
 
 import com.artillexstudios.axapi.AxPlugin;
 import com.artillexstudios.axapi.config.Config;
-import com.artillexstudios.axapi.data.ThreadedQueue;
+import com.artillexstudios.axapi.executor.ThreadedQueue;
 import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.dvs.versioning.BasicVersioning;
 import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.settings.dumper.DumperSettings;
 import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.settings.general.GeneralSettings;
 import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.settings.loader.LoaderSettings;
 import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.settings.updater.UpdaterSettings;
-import com.artillexstudios.axapi.libs.libby.BukkitLibraryManager;
 import com.artillexstudios.axapi.metrics.AxMetrics;
 import com.artillexstudios.axapi.utils.MessageUtils;
 import com.artillexstudios.axapi.utils.StringUtils;
@@ -32,8 +31,11 @@ import com.artillexstudios.axvaults.vaults.VaultManager;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
+import revxrsal.zapper.DependencyManager;
+import revxrsal.zapper.classloader.URLClassLoaderWrapper;
 
 import java.io.File;
+import java.net.URLClassLoader;
 
 public final class AxVaults extends AxPlugin {
     public static Config CONFIG;
@@ -58,12 +60,7 @@ public final class AxVaults extends AxPlugin {
     }
 
     public void load() {
-        BukkitLibraryManager libraryManager = new BukkitLibraryManager(this, "lib");
-        libraryManager.addMavenCentral();
-
-        for (Libraries lib : Libraries.values()) {
-            libraryManager.loadLibrary(lib.getLibrary());
-        }
+        Libraries.load(new DependencyManager(getDescription(), new File(getDataFolder(), "lib"), URLClassLoaderWrapper.wrap((URLClassLoader) getClassLoader())));
     }
 
     public void enable() {
@@ -100,7 +97,7 @@ public final class AxVaults extends AxPlugin {
         AutoSaveScheduler.start();
         SQLMessaging.start();
 
-        metrics = new AxMetrics(3);
+        metrics = new AxMetrics(this, 3);
         metrics.start();
 
         Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#55ff00[AxVaults] Loaded plugin!"));
@@ -109,7 +106,7 @@ public final class AxVaults extends AxPlugin {
     }
 
     public void disable() {
-        metrics.cancel();
+        if (metrics != null) metrics.cancel();
         for (Vault vault : VaultManager.getVaults()) {
             AxVaults.getDatabase().saveVault(vault);
         }

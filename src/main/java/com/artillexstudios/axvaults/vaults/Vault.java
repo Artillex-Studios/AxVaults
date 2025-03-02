@@ -19,6 +19,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.artillexstudios.axvaults.AxVaults.MESSAGES;
 
@@ -31,6 +32,7 @@ public class Vault {
     private long lastOpen = System.currentTimeMillis();
     private final CompletableFuture<Void> future = new CompletableFuture<>();
     private boolean wasEmpty = false;
+    private AtomicBoolean changed = new AtomicBoolean(false);
 
     public Vault(UUID uuid, int num, Material icon) {
         this.uuid = uuid;
@@ -90,8 +92,13 @@ public class Vault {
         return lastOpen;
     }
 
+    public AtomicBoolean getChangedValue() {
+        return changed;
+    }
+
     public void setIcon(Material icon) {
         wasEmpty = false;
+        changed.set(true);
         this.icon = icon;
     }
 
@@ -119,6 +126,7 @@ public class Vault {
     }
 
     public void open(@NotNull Player player) {
+        changed.set(true);
         if (vaultPlayer.getRows() != storage.getSize()) {
             reload();
         }
