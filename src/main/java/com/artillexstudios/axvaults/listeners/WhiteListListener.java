@@ -41,7 +41,7 @@ public class WhiteListListener implements Listener {
             if (CONFIG.getString("whitelisted-items." + s + ".custom-model-data") != null
                 && (it.getItemMeta() == null
                 || !it.getItemMeta().hasCustomModelData()
-                || !IntRange.parseIntRange(CONFIG.getString("whitelisted-items." + s + ".custom-model-data")).contains(it.getItemMeta().getCustomModelData()))
+                || !IntRange.valueOf(CONFIG.get("whitelisted-items." + s + ".custom-model-data")).contains(it.getItemMeta().getCustomModelData()))
             ) {
                 continue;
             }

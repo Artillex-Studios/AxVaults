@@ -45,8 +45,8 @@ public class VaultSelector {
                 .disableAllInteractions()
                 .create();
 
-        List<Integer> slots = MESSAGES.getStringList("guis.selector.slots").stream()
-            .map(IntRange::parseIntRange)
+        List<Integer> slots = MESSAGES.getList("guis.selector.slots").stream()
+            .map(IntRange::valueOf)
             .flatMap((range) -> range.getValues().stream())
             .toList();
 
@@ -107,8 +107,8 @@ public class VaultSelector {
             Section itemSection = MESSAGES.getSection("gui-items." + s);
             final GuiItem item = new GuiItem(new ItemBuilder(itemSection).get());
 
-            gui.setItem(MESSAGES.getStringList("gui-items.%s.slots".formatted(s)).stream()
-                .map(IntRange::parseIntRange)
+            gui.setItem(MESSAGES.getList("gui-items.%s.slots".formatted(s)).stream()
+                .map(IntRange::valueOf)
                 .flatMap((range) -> range.getValues().stream())
                 .toList(), item);
         }

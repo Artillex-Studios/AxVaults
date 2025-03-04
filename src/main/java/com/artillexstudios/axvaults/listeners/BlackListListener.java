@@ -42,7 +42,7 @@ public class BlackListListener implements Listener {
             if (CONFIG.getString("blacklisted-items." + s + ".custom-model-data") != null) {
                 if (it.getItemMeta() == null
                     || !it.getItemMeta().hasCustomModelData()
-                    || !IntRange.parseIntRange(CONFIG.getString("blacklisted-items." + s + ".custom-model-data")).contains(it.getItemMeta().getCustomModelData())
+                    || !IntRange.valueOf(CONFIG.get("blacklisted-items." + s + ".custom-model-data")).contains(it.getItemMeta().getCustomModelData())
                 ) {
                     continue;
                 }
