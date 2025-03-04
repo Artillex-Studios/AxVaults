@@ -1,5 +1,6 @@
 package com.artillexstudios.axvaults.listeners;
 
+import com.artillexstudios.axvaults.utils.IntRange;
 import com.artillexstudios.axvaults.vaults.Vault;
 import com.artillexstudios.axvaults.vaults.VaultManager;
 import org.bukkit.entity.Player;
@@ -35,6 +36,17 @@ public class BlackListListener implements Listener {
 
             if (CONFIG.getString("blacklisted-items." + s + ".material") != null) {
                 if (!it.getType().toString().equalsIgnoreCase(CONFIG.getString("blacklisted-items." + s + ".material"))) continue;
+                banned = true;
+            }
+
+            if (CONFIG.getString("blacklisted-items." + s + ".custom-model-data") != null) {
+                if (it.getItemMeta() == null
+                    || !it.getItemMeta().hasCustomModelData()
+                    || !IntRange.parseIntRange(CONFIG.getString("blacklisted-items." + s + ".custom-model-data")).contains(it.getItemMeta().getCustomModelData())
+                ) {
+                    continue;
+                }
+
                 banned = true;
             }
 
