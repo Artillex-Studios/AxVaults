@@ -50,27 +50,31 @@ public class VaultSelector {
             });
         }
 
-        final Section prev;
-        if ((prev = MESSAGES.getSection("gui-items.previous-page")) != null) {
-            final GuiItem item1 = new GuiItem(new ItemBuilder(prev).get());
-            item1.setAction(event -> gui.previous());
-            gui.setItem(rows, 3, item1);
-        }
+        boolean hidePagination = CONFIG.getBoolean("hide-pagination", false) && gui.getPagesNum() <= 1;
 
-        final Section next;
-        if ((next = MESSAGES.getSection("gui-items.next-page")) != null) {
-            final GuiItem item2 = new GuiItem(new ItemBuilder(next).get());
-            item2.setAction(event -> {
-                gui.next();
+        if (!hidePagination) {
+            final Section prev;
+            if ((prev = MESSAGES.getSection("gui-items.previous-page")) != null) {
+                final GuiItem item1 = new GuiItem(new ItemBuilder(prev).get());
+                item1.setAction(event -> gui.previous());
+                gui.setItem(rows, 3, item1);
+            }
 
-                for (int i = 0; i < pageSize; i++) {
-                    getItemOfVault(player, (gui.getCurrentPageNum() * pageSize) + i + 1, gui, guiItem -> {
-                        if (guiItem == null) return;
-                        gui.addItem(guiItem);
-                    });
-                }
-            });
-            gui.setItem(rows, 7, item2);
+            final Section next;
+            if ((next = MESSAGES.getSection("gui-items.next-page")) != null) {
+                final GuiItem item2 = new GuiItem(new ItemBuilder(next).get());
+                item2.setAction(event -> {
+                    gui.next();
+
+                    for (int i = 0; i < pageSize; i++) {
+                        getItemOfVault(player, (gui.getCurrentPageNum() * pageSize) + i + 1, gui, guiItem -> {
+                            if (guiItem == null) return;
+                            gui.addItem(guiItem);
+                        });
+                    }
+                });
+                gui.setItem(rows, 7, item2);
+            }
         }
 
         final Section close;
@@ -82,6 +86,7 @@ public class VaultSelector {
 
         gui.open(player, page);
     }
+
 
     private void getItemOfVault(@NotNull Player player, int num, @NotNull PaginatedGui gui, Consumer<GuiItem> consumer) {
         int maxVaults = CONFIG.getInt("max-vault-amount");
