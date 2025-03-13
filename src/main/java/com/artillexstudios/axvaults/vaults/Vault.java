@@ -32,7 +32,7 @@ public class Vault {
     private long lastOpen = System.currentTimeMillis();
     private final CompletableFuture<Void> future = new CompletableFuture<>();
     private boolean wasEmpty = false;
-    private AtomicBoolean changed = new AtomicBoolean(false);
+    private final AtomicBoolean changed = new AtomicBoolean(false);
 
     public Vault(UUID uuid, int num, Material icon) {
         this.uuid = uuid;
