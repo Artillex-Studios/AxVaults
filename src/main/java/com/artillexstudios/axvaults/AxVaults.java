@@ -19,11 +19,7 @@ import com.artillexstudios.axvaults.database.impl.MySQL;
 import com.artillexstudios.axvaults.database.impl.SQLite;
 import com.artillexstudios.axvaults.database.messaging.SQLMessaging;
 import com.artillexstudios.axvaults.libraries.Libraries;
-import com.artillexstudios.axvaults.listeners.BlackListListener;
-import com.artillexstudios.axvaults.listeners.BlockBreakListener;
-import com.artillexstudios.axvaults.listeners.InventoryCloseListener;
-import com.artillexstudios.axvaults.listeners.PlayerInteractListener;
-import com.artillexstudios.axvaults.listeners.PlayerListeners;
+import com.artillexstudios.axvaults.listeners.*;
 import com.artillexstudios.axvaults.schedulers.AutoSaveScheduler;
 import com.artillexstudios.axvaults.utils.UpdateNotifier;
 import com.artillexstudios.axvaults.vaults.Vault;
@@ -88,6 +84,7 @@ public final class AxVaults extends AxPlugin {
 
         getServer().getPluginManager().registerEvents(new PlayerListeners(), this);
         getServer().getPluginManager().registerEvents(new BlackListListener(), this);
+        getServer().getPluginManager().registerEvents(new WhiteListListener(), this);
         getServer().getPluginManager().registerEvents(new PlayerInteractListener(), this);
         getServer().getPluginManager().registerEvents(new BlockBreakListener(), this);
         getServer().getPluginManager().registerEvents(new InventoryCloseListener(), this);
