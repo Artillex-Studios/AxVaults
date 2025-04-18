@@ -185,7 +185,7 @@ public class AdminCommand implements OrphanCommand {
 
     @CommandPermission("axvaults.admin.save")
     @Subcommand("save")
-    public void save(@NotNull Player sender) {
+    public void save(@NotNull CommandSender sender) {
         long time = System.currentTimeMillis();
         AxVaults.getThreadedQueue().submit(() -> {
             CompletableFuture<Void>[] futures = new CompletableFuture[VaultManager.getVaults().size()];

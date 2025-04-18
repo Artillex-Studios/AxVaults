@@ -1,6 +1,6 @@
 package com.artillexstudios.axvaults.guis;
 
-import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.block.implementation.Section;
+import com.artillexstudios.axapi.libs.boostedyaml.block.implementation.Section;
 import com.artillexstudios.axapi.reflection.ClassUtils;
 import com.artillexstudios.axapi.utils.ItemBuilder;
 import com.artillexstudios.axapi.utils.StringUtils;

@@ -98,9 +98,6 @@ public class H2 implements Database {
 
     @Override
     public CompletableFuture<Void> saveVault(@NotNull Vault vault) {
-        // if the vault was empty when loaded and is still empty, don't bother saving it
-        if (vault.wasItEmpty() && vault.getStorage().isEmpty()) return CompletableFuture.completedFuture(null);
-
         Consumer<byte[]> consumer = bytes -> {
             final String sql = "SELECT * FROM axvaults_data WHERE uuid = ? AND id = ?;";
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {

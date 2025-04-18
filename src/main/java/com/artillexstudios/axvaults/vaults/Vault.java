@@ -31,7 +31,6 @@ public class Vault {
     private VaultPlayer vaultPlayer;
     private long lastOpen = System.currentTimeMillis();
     private final CompletableFuture<Void> future = new CompletableFuture<>();
-    private boolean wasEmpty = false;
     private final AtomicBoolean changed = new AtomicBoolean(false);
 
     public Vault(UUID uuid, int num, Material icon) {
@@ -69,7 +68,6 @@ public class Vault {
                     return;
                 }
                 storage.setContents(items);
-                wasEmpty = storage.isEmpty();
                 cf.complete(null);
             });
         });
@@ -92,18 +90,13 @@ public class Vault {
         return lastOpen;
     }
 
-    public AtomicBoolean getChangedValue() {
+    public AtomicBoolean hasChanged() {
         return changed;
     }
 
     public void setIcon(Material icon) {
-        wasEmpty = false;
         changed.set(true);
         this.icon = icon;
-    }
-
-    public boolean wasItEmpty() {
-        return wasEmpty;
     }
 
     public Material getIcon() {

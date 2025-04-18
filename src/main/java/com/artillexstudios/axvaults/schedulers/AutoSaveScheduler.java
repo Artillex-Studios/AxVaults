@@ -36,12 +36,12 @@ public class AutoSaveScheduler {
                     Iterator<Vault> iterator = VaultManager.getVaults().iterator();
                     while (iterator.hasNext()) {
                         final Vault vault = iterator.next();
-                        if (vault.getChangedValue().get()) { // only save if the vault has been touched since the last save
+                        if (vault.hasChanged().get()) { // only save if the vault has been touched since the last save
                             futures.add(AxVaults.getDatabase().saveVault(vault));
                             saved.set(saved.get() + 1);
                         }
                         if (vault.isOpened()) continue;
-                        vault.getChangedValue().set(false); // if the player is not currently editing it, set changed to false
+                        vault.hasChanged().set(false); // if the player is not currently editing it, set changed to false
                         if (Bukkit.getPlayer(vault.getUUID()) != null) continue;
                         if (System.currentTimeMillis() - vault.getLastOpen() <= (time - 1) * 1_000L) continue;
                         VaultManager.removeVault(vault);

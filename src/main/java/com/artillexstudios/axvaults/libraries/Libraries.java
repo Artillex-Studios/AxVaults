@@ -7,13 +7,15 @@ import revxrsal.zapper.repository.Repository;
 
 public enum Libraries {
 
-    HIKARICP("com{}zaxxer:HikariCP:5.1.0", relocation("com{}zaxxer{}hikari", "com.artillexstudios.axvaults.libs.hikari")),
+    HIKARICP("com{}zaxxer:HikariCP:6.3.0", relocation("com{}zaxxer{}hikari", "com.artillexstudios.axvaults.libs.hikari")),
 
-    SQLITE_JDBC("org{}xerial:sqlite-jdbc:3.42.0.0"),
+    SQLITE_JDBC("org{}xerial:sqlite-jdbc:3.49.1.0"),
 
     H2_JDBC("com{}h2database:h2:2.1.214"),
 
-    MYSQL_CONNECTOR("com{}mysql:mysql-connector-j:8.0.33");
+    POSTGRESQL("org{}postgresql:postgresql:42.7.5", relocation("org{}postgresql", "com.artillexstudios.axvaults.libs.postgresql")),
+
+    MYSQL_CONNECTOR("com{}mysql:mysql-connector-j:9.2.0", relocation("com{}mysql", "com.artillexstudios.axvaults.libs.mysql"));
 
     private final String dependency;
     private Relocation relocation;
