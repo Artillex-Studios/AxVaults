@@ -1,6 +1,7 @@
 package com.artillexstudios.axvaults.database.impl;
 
 import com.artillexstudios.axapi.serializers.Serializers;
+import com.artillexstudios.axapi.utils.StringUtils;
 import com.artillexstudios.axvaults.database.Database;
 import com.artillexstudios.axvaults.placed.PlacedVaults;
 import com.artillexstudios.axvaults.utils.VaultUtils;
@@ -31,6 +32,10 @@ import static com.artillexstudios.axvaults.AxVaults.CONFIG;
 
 public class MySQL implements Database {
     private HikariDataSource dataSource;
+
+    public MySQL() {
+        Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#FF0000[AxVaults] MySQL is NOT fully supported! It will continue to work and you can ignore this warning, however there might be issues."));
+    }
 
     @Override
     public String getType() {
@@ -217,7 +222,7 @@ public class MySQL implements Database {
     }
 
     private void sendMessage(@NotNull ChangeType changeType, int id, UUID uuid) {
-        if (CONFIG.getString("multi-server-support", "sql").equalsIgnoreCase("none")) return;
+        if (CONFIG.getString("multi-server-support", "none").equalsIgnoreCase("none")) return;
         
         final String sql = "INSERT INTO axvaults_messages(event, vault_id, uuid, date) VALUES (?, ?, ?, ?);";
         try (Connection conn = dataSource.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -238,7 +243,7 @@ public class MySQL implements Database {
     private final ArrayList<Integer> acknowledged = new ArrayList<>();
     private final HashMap<Integer, Long> sentFromHere = new HashMap<>();
     public void checkForChanges() { // id, event, vault_id, uuid, date
-        if (CONFIG.getString("multi-server-support", "sql").equalsIgnoreCase("none")) return;
+        if (CONFIG.getString("multi-server-support", "none").equalsIgnoreCase("none")) return;
 
         final String sql = "SELECT * FROM axvaults_messages;";
         try (Connection conn = dataSource.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {

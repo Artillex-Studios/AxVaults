@@ -19,27 +19,9 @@ item-picker-rows: 6
 vault-storage-rows: 6
 
 database:
-  # h2, sqlite, mysql
+  # h2, sqlite
   # for single server setups we recommend h2
   type: "h2"
-
-  # you only need to touch these when using mysql/postgresql
-  address: 127.0.0.1
-  port: 3306
-  database: admin
-  username: admin
-  password: "admin"
-  pool:
-    maximum-pool-size: 10
-    minimum-idle: 10
-    maximum-lifetime: 1800000
-    keepalive-time: 0
-    connection-timeout: 5000
-
-# when using mysql/postgresql, how should data be sent between servers?
-# values: none, sql
-# multi server is currently experimental, there might be some issues
-multi-server-support: "none"
 
 # modes:
 # 0 - every vault needs a separate permission (axvaults.vault.10 will only give access to vault #10)
