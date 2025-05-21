@@ -46,6 +46,9 @@ max-vault-amount: -1
 # if enabled, the icon picker will not close after selecting an item
 selector-stay-open: false
 
+# should we hide pagination buttons if there is only 1 page?
+hide-pagination: true
+
 # list of items that CAN'T be put in vaults
 # note: the name-contains string shouldn't include any color codes
 blacklisted-items:
