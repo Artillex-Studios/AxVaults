@@ -7,6 +7,7 @@ import com.artillexstudios.axvaults.guis.VaultSelector;
 import com.artillexstudios.axvaults.schedulers.AutoSaveScheduler;
 import com.artillexstudios.axvaults.vaults.Vault;
 import com.artillexstudios.axvaults.vaults.VaultManager;
+import com.artillexstudios.axvaults.vaults.VaultPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
@@ -20,6 +21,7 @@ import revxrsal.commands.annotation.Subcommand;
 import revxrsal.commands.bukkit.annotation.CommandPermission;
 import revxrsal.commands.orphan.OrphanCommand;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -57,7 +59,7 @@ public class AdminCommand implements OrphanCommand {
         }
         Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#55FF00╠ &#00FF00Reloaded &fmessages.yml&#00FF00!"));
 
-        VaultManager.reload();
+        VaultManager.getVaults().forEach(Vault::reload);
         Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#55FF00╠ &#00FF00Reloaded &fvaults&#00FF00!"));
 
         Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#55FF00╚ &#00FF00Successful reload!"));
@@ -71,7 +73,8 @@ public class AdminCommand implements OrphanCommand {
             final HashMap<String, String> replacements = new HashMap<>();
             replacements.put("%num%", "" + number);
 
-            VaultManager.getVaultOfPlayer(player, number, vault -> {
+            VaultManager.getPlayer(player).thenAccept(vaultPlayer -> {
+                Vault vault = vaultPlayer.getVault(number);
                 if (vault == null) {
                     MESSAGEUTILS.sendLang(player, "vault.not-unlocked", replacements);
                     return;
@@ -95,7 +98,7 @@ public class AdminCommand implements OrphanCommand {
         replacements.put("%player%", player.getName());
 
         if (number == null) {
-            VaultManager.getPlayer(player.getUniqueId(), vaultPlayer -> {
+            VaultManager.getPlayer(player).thenAccept(vaultPlayer -> {
                 replacements.put("%vaults%", vaultPlayer.getVaultMap().values().stream().filter(vault -> vault.getSlotsFilled() != 0).map(vault -> "" + vault.getId()).collect(Collectors.joining(", ")));
                 MESSAGEUTILS.sendLang(sender, "view.info", replacements);
             });
@@ -104,7 +107,7 @@ public class AdminCommand implements OrphanCommand {
 
         replacements.put("%num%", "" + number);
 
-        VaultManager.getPlayer(player.getUniqueId(), vaultPlayer -> {
+        VaultManager.getPlayer(player).thenAccept(vaultPlayer -> {
             final Vault vault = vaultPlayer.getVault(number);
             if (vault == null) {
                 MESSAGEUTILS.sendLang(sender, "view.not-found", replacements);
@@ -122,13 +125,12 @@ public class AdminCommand implements OrphanCommand {
         replacements.put("%player%", player.getName());
         replacements.put("%num%", "" + number);
 
-        VaultManager.getPlayer(player.getUniqueId(), vaultPlayer -> {
+        VaultManager.getPlayer(player).thenAccept(vaultPlayer -> {
             final Vault vault = vaultPlayer.getVault(number);
             if (vault == null) {
                 MESSAGEUTILS.sendLang(sender, "view.not-found", replacements);
                 return;
             }
-            VaultManager.getVaults().remove(vault);
             VaultManager.removeVault(vault);
             AxVaults.getDatabase().deleteVault(player.getUniqueId(), number);
             MESSAGEUTILS.sendLang(sender, "delete", replacements);
@@ -188,15 +190,24 @@ public class AdminCommand implements OrphanCommand {
     public void save(@NotNull CommandSender sender) {
         long time = System.currentTimeMillis();
         AxVaults.getThreadedQueue().submit(() -> {
-            CompletableFuture<Void>[] futures = new CompletableFuture[VaultManager.getVaults().size()];
-            int i = 0;
+            List<CompletableFuture<Void>> futures = new ArrayList<>();
             for (Vault vault : VaultManager.getVaults()) {
-                futures[i] = AxVaults.getDatabase().saveVault(vault);
-                i++;
+                futures.add(AxVaults.getDatabase().saveVault(vault));
             }
-            CompletableFuture.allOf(futures).thenRun(() -> {
+            CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new)).thenRun(() -> {
                 MESSAGEUTILS.sendLang(sender, "save.manual", Map.of("%time%", "" + (System.currentTimeMillis() - time)));
             });
         });
+    }
+
+    @CommandPermission("axvaults.admin.debug")
+    @Subcommand("debug")
+    public void debug(@NotNull CommandSender sender) {
+        sender.sendMessage(StringUtils.formatToString("&#FF0000Printed information in console!"));
+        Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#00FF00[AxVaults] Debug:\n"));
+        Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#AAFFAACached users:"));
+        Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#DDDDDD" + String.join("\n&#DDDDDD", VaultManager.getPlayers().values().stream().map(VaultPlayer::toString).toList())));
+        Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#AAFFAACached vaults:"));
+        Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#DDDDDD" + String.join("\n&#DDDDDD", VaultManager.getVaults().stream().map(Vault::toString).toList())));
     }
 }

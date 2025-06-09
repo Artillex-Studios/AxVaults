@@ -20,19 +20,14 @@ public class InventoryCloseListener implements Listener {
 
     @EventHandler
     public void onClose(@NotNull InventoryCloseEvent event) {
+        Vault vault = VaultManager.getVault(event.getInventory());
+        if (vault == null) return;
         AxVaults.getThreadedQueue().submit(() -> {
-            Vault v = null;
-            for (Vault vault : VaultManager.getVaults()) {
-                if (!vault.getStorage().equals(event.getInventory())) continue;
-                v = vault;
-                break;
-            }
-            if (v == null) return;
-            MESSAGEUTILS.sendLang(event.getPlayer(), "vault.closed", Map.of("%num%", "" + v.getId()));
+            MESSAGEUTILS.sendLang(event.getPlayer(), "vault.closed", Map.of("%num%", "" + vault.getId()));
             SoundUtils.playSound((Player) event.getPlayer(), MESSAGES.getString("sounds.close"));
 
             if (AxVaults.getDatabase() instanceof MySQL db) {
-                AxVaults.getDatabase().saveVault(v);
+                AxVaults.getDatabase().saveVault(vault);
             }
         });
     }

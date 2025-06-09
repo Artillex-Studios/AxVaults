@@ -54,14 +54,21 @@ public class MySQL implements Database {
         hConfig.setKeepaliveTime(CONFIG.getInt("database.pool.keepalive-time"));
         hConfig.setConnectionTimeout(CONFIG.getInt("database.pool.connection-timeout"));
 
-        hConfig.setDriverClassName("com.mysql.jdbc.Driver");
+        hConfig.setDriverClassName("com.mysql.cj.jdbc.Driver");
         hConfig.setJdbcUrl("jdbc:mysql://" + CONFIG.getString("database.address") + ":" + CONFIG.getString("database.port") + "/" + CONFIG.getString("database.database"));
         hConfig.addDataSourceProperty("user", CONFIG.getString("database.username"));
         hConfig.addDataSourceProperty("password", CONFIG.getString("database.password"));
 
         this.dataSource = new HikariDataSource(hConfig);
 
-        final String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS `axvaults_data`( `id` INT(128) NOT NULL, `uuid` VARCHAR(36) NOT NULL, `storage` LONGBLOB, `icon` VARCHAR(128) );";
+        String CREATE_TABLE = """
+            CREATE TABLE IF NOT EXISTS `axvaults_data`(
+              `id` INT(128) NOT NULL,
+              `uuid` VARCHAR(36) NOT NULL,
+              `storage` LONGBLOB,
+              `icon` VARCHAR(128)
+            );
+        """;
 
         try (Connection conn = dataSource.getConnection(); PreparedStatement stmt = conn.prepareStatement(CREATE_TABLE)) {
             stmt.executeUpdate();
@@ -69,7 +76,13 @@ public class MySQL implements Database {
             ex.printStackTrace();
         }
 
-        final String CREATE_TABLE2 = "CREATE TABLE IF NOT EXISTS `axvaults_blocks` ( `location` VARCHAR(255) NOT NULL, `number` INT, PRIMARY KEY (`location`) );";
+        String CREATE_TABLE2 = """
+            CREATE TABLE IF NOT EXISTS `axvaults_blocks` (
+              `location` VARCHAR(255) NOT NULL,
+              `number` INT,
+              PRIMARY KEY (`location`)
+            );
+        """;
 
         try (Connection conn = dataSource.getConnection(); PreparedStatement stmt = conn.prepareStatement(CREATE_TABLE2)) {
             stmt.executeUpdate();
@@ -77,7 +90,16 @@ public class MySQL implements Database {
             ex.printStackTrace();
         }
 
-        final String CREATE_TABLE3 = "CREATE TABLE IF NOT EXISTS axvaults_messages ( id INT NOT NULL AUTO_INCREMENT, event TINYINT, vault_id INT NOT NULL, uuid VARCHAR(36) NOT NULL, date BIGINT NOT NULL, PRIMARY KEY (id) );";
+        String CREATE_TABLE3 = """
+            CREATE TABLE IF NOT EXISTS axvaults_messages (
+              id INT NOT NULL AUTO_INCREMENT,
+              event TINYINT,
+              vault_id INT NOT NULL,
+              uuid VARCHAR(36) NOT NULL,
+              date BIGINT NOT NULL,
+              PRIMARY KEY (id)
+            );
+        """;
 
         try (Connection conn = dataSource.getConnection(); PreparedStatement stmt = conn.prepareStatement(CREATE_TABLE3)) {
             stmt.executeUpdate();
@@ -133,16 +155,17 @@ public class MySQL implements Database {
     }
 
     @Override
-    public void loadVaults(@NotNull UUID uuid) {
+    public void loadVaults(@NotNull VaultPlayer vaultPlayer) {
         final String sql = "SELECT * FROM axvaults_data WHERE uuid = ?;";
         try (Connection conn = dataSource.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, uuid.toString());
+            stmt.setString(1, vaultPlayer.getUUID().toString());
 
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
-                    final ItemStack[] items = Serializers.ITEM_ARRAY.deserialize(rs.getBytes(3));
-                    final Vault vault = new Vault(uuid, rs.getInt(1), rs.getString(4) == null ? null : Material.valueOf(rs.getString(4)));
-                    vault.setContents(items);
+                    ItemStack[] items = Serializers.ITEM_ARRAY.deserialize(rs.getBytes(3));
+                    int id = rs.getInt(1);
+                    Material icon = rs.getString(4) == null ? null : Material.valueOf(rs.getString(4));
+                    new Vault(vaultPlayer, id, icon, items);
                 }
             }
         } catch (SQLException ex) {

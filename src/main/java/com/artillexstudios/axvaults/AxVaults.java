@@ -2,6 +2,7 @@ package com.artillexstudios.axvaults;
 
 import com.artillexstudios.axapi.AxPlugin;
 import com.artillexstudios.axapi.config.Config;
+import com.artillexstudios.axapi.dependencies.DependencyManagerWrapper;
 import com.artillexstudios.axapi.executor.ThreadedQueue;
 import com.artillexstudios.axapi.libs.boostedyaml.dvs.versioning.BasicVersioning;
 import com.artillexstudios.axapi.libs.boostedyaml.settings.dumper.DumperSettings;
@@ -18,8 +19,9 @@ import com.artillexstudios.axvaults.database.impl.H2;
 import com.artillexstudios.axvaults.database.impl.MySQL;
 import com.artillexstudios.axvaults.database.impl.SQLite;
 import com.artillexstudios.axvaults.database.messaging.SQLMessaging;
+import com.artillexstudios.axvaults.hooks.HookManager;
 import com.artillexstudios.axvaults.libraries.Libraries;
-import com.artillexstudios.axvaults.listeners.BlackListListener;
+import com.artillexstudios.axvaults.listeners.BlacklistListener;
 import com.artillexstudios.axvaults.listeners.BlockBreakListener;
 import com.artillexstudios.axvaults.listeners.InventoryCloseListener;
 import com.artillexstudios.axvaults.listeners.PlayerInteractListener;
@@ -32,10 +34,9 @@ import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import revxrsal.zapper.DependencyManager;
-import revxrsal.zapper.classloader.URLClassLoaderWrapper;
+import revxrsal.zapper.relocation.Relocation;
 
 import java.io.File;
-import java.net.URLClassLoader;
 
 public final class AxVaults extends AxPlugin {
     public static Config CONFIG;
@@ -59,15 +60,21 @@ public final class AxVaults extends AxPlugin {
         return database;
     }
 
-    public void load() {
-        Libraries.load(new DependencyManager(getDescription(), new File(getDataFolder(), "lib"), URLClassLoaderWrapper.wrap((URLClassLoader) getClassLoader())));
+    @Override
+    public void dependencies(DependencyManagerWrapper manager) {
+        instance = this;
+
+        DependencyManager dependencyManager = manager.wrapped();
+        for (Libraries lib : Libraries.values()) {
+            dependencyManager.dependency(lib.fetchLibrary());
+            for (Relocation relocation : lib.relocations()) {
+                dependencyManager.relocate(relocation);
+            }
+        }
     }
 
     public void enable() {
-        instance = this;
-
-        int pluginId = 20541;
-        new Metrics(this, pluginId);
+        new Metrics(this, 20541);
 
         CONFIG = new Config(new File(getDataFolder(), "config.yml"), getResource("config.yml"), GeneralSettings.builder().setUseDefaults(false).build(), LoaderSettings.builder().setAutoUpdate(true).build(), DumperSettings.DEFAULT, UpdaterSettings.builder().setVersioning(new BasicVersioning("version")).build());
         MESSAGES = new Config(new File(getDataFolder(), "messages.yml"), getResource("messages.yml"), GeneralSettings.builder().setUseDefaults(false).build(), LoaderSettings.builder().setAutoUpdate(true).build(), DumperSettings.DEFAULT, UpdaterSettings.builder().setVersioning(new BasicVersioning("version")).build());
@@ -77,6 +84,8 @@ public final class AxVaults extends AxPlugin {
 
         threadedQueue = new ThreadedQueue<>("AxVaults-Datastore-thread");
 
+        HookManager.setupHooks();
+
         database = switch (CONFIG.getString("database.type").toLowerCase()) {
             case "sqlite" -> new SQLite();
             case "mysql" -> new MySQL();
@@ -84,10 +93,11 @@ public final class AxVaults extends AxPlugin {
         };
 
         database.setup();
-        database.load();
+
+        threadedQueue.submit(() -> database.load());
 
         getServer().getPluginManager().registerEvents(new PlayerListeners(), this);
-        getServer().getPluginManager().registerEvents(new BlackListListener(), this);
+        getServer().getPluginManager().registerEvents(new BlacklistListener(), this);
         getServer().getPluginManager().registerEvents(new PlayerInteractListener(), this);
         getServer().getPluginManager().registerEvents(new BlockBreakListener(), this);
         getServer().getPluginManager().registerEvents(new InventoryCloseListener(), this);
@@ -118,7 +128,5 @@ public final class AxVaults extends AxPlugin {
 
     public void updateFlags(FeatureFlags flags) {
         flags.USE_LEGACY_HEX_FORMATTER.set(true);
-//        FeatureFlags.PACKET_ENTITY_TRACKER_ENABLED.set(true);
-//        FeatureFlags.HOLOGRAM_UPDATE_TICKS.set(10L);
     }
 }

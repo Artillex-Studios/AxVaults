@@ -46,12 +46,25 @@ max-vault-amount: -1
 # if enabled, the icon picker will not close after selecting an item
 selector-stay-open: false
 
-# list of items that CAN'T be put in vaults
-# note: the name-contains string shouldn't include any color codes
-blacklisted-items:
-  "1":
-    material: "barrier"
-    name-contains: "Banned item's name"
+# list of items that CAN'T be sold in the auction house
+#
+# supported regex: (optional)
+# - 'name' #  only 'name' is disallowed
+# - 'name*' #  disallows text starting with 'name'
+# - '*name' #  disallows text ending with 'name'
+# - '*name*' #  disallows text containing 'name'
+#
+# you can use some sections from our item builder: (https://docs.artillex-studios.com/item-builder.html)
+#  > name
+#  > material / type
+#  > custom-model-data (only the old variant)
+blacklist-items:
+  - custom-model-data: 100
+    material: BARRIER
+    name: "*Some custom item*"
+  - custom-model-data: 150
+    material: BARRIER
+    name: "*Another custom item*"
 
 # you must define at least 1
 # requires a restart to update
@@ -79,4 +92,4 @@ update-notifier:
   on-join: true
 
 # do not change this
-version: 6
+version: 7

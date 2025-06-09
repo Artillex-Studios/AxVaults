@@ -1,9 +1,10 @@
 package com.artillexstudios.axvaults.libraries;
 
-import org.jetbrains.annotations.NotNull;
-import revxrsal.zapper.DependencyManager;
+import revxrsal.zapper.Dependency;
 import revxrsal.zapper.relocation.Relocation;
-import revxrsal.zapper.repository.Repository;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public enum Libraries {
 
@@ -17,36 +18,31 @@ public enum Libraries {
 
     MYSQL_CONNECTOR("com{}mysql:mysql-connector-j:9.2.0", relocation("com{}mysql", "com.artillexstudios.axvaults.libs.mysql"));
 
-    private final String dependency;
-    private Relocation relocation;
+    private final List<Relocation> relocations = new ArrayList<>();
+    private final Dependency library;
 
-    Libraries(String dependency) {
-        this.dependency = dependency.replace("{}", ".");
-    }
-
-    Libraries(String dependency, @NotNull Relocation relocation) {
-        this(dependency);
-        this.relocation = relocation;
-    }
-
-    public void load(Libraries lib, DependencyManager dependencyManager) {
-        dependencyManager.dependency(lib.dependency);
-        if (lib.relocation != null) dependencyManager.relocate(lib.relocation);
+    public Dependency fetchLibrary() {
+        return this.library;
     }
 
     private static Relocation relocation(String from, String to) {
         return new Relocation(from.replace("{}", "."), to);
     }
 
-    public static void load(DependencyManager dependencyManager) {
-        dependencyManager.repository(Repository.mavenCentral());
-        dependencyManager.repository(Repository.jitpack());
-        dependencyManager.repository(Repository.paper());
+    public List<Relocation> relocations() {
+        return List.copyOf(this.relocations);
+    }
 
-        for (Libraries lib : Libraries.values()) {
-            lib.load(lib, dependencyManager);
-        }
+    Libraries(String lib, Relocation relocation) {
+        String[] split = lib.replace("{}", ".").split(":");
 
-        dependencyManager.load();
+        this.library = new Dependency(split[0], split[1], split[2]);
+        this.relocations.add(relocation);
+    }
+
+    Libraries(String lib) {
+        String[] split = lib.replace("{}", ".").split(":");
+
+        this.library = new Dependency(split[0], split[1], split[2]);
     }
 }

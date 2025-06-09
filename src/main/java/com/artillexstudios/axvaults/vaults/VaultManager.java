@@ -1,81 +1,69 @@
 package com.artillexstudios.axvaults.vaults;
 
-import com.artillexstudios.axapi.scheduler.Scheduler;
 import com.artillexstudios.axvaults.AxVaults;
-import org.bukkit.entity.Player;
+import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.inventory.Inventory;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.function.Consumer;
 
 public class VaultManager {
     private static final ConcurrentHashMap<UUID, VaultPlayer> players = new ConcurrentHashMap<>();
-    private static final ConcurrentLinkedQueue<Vault> vaults = new ConcurrentLinkedQueue<>();
-
-    public static void loadPlayer(@NotNull UUID uuid) {
-        getPlayer(uuid, vaultPlayer -> {});
-    }
-
-    public static void getPlayer(@NotNull UUID uuid, Consumer<VaultPlayer> consumer) {
-        VaultPlayer vaultPlayer = players.get(uuid);
-        if (vaultPlayer != null) {
-            consumer.accept(vaultPlayer);
-            return;
-        }
-        vaultPlayer = new VaultPlayer(uuid);
-        players.put(uuid, vaultPlayer);
-
-        VaultPlayer finalVaultPlayer = vaultPlayer;
-        CompletableFuture<Void> future = new CompletableFuture<>();
-        AxVaults.getThreadedQueue().submit(() -> {
-            finalVaultPlayer.load();
-            future.complete(null);
-        });
-        future.thenRun(() -> Scheduler.get().run(scheduledTask -> consumer.accept(finalVaultPlayer)));
-    }
-
-    public static void removePlayer(@NotNull Player player, boolean save) {
-        final VaultPlayer vaultPlayer = players.remove(player.getUniqueId());
-        if (!save || vaultPlayer == null) return;
-        vaultPlayer.save();
-    }
-
-    public static void getVaultOfPlayer(@NotNull Player player, int num, Consumer<Vault> consumer) {
-        getPlayer(player.getUniqueId(), vaultPlayer -> {
-            consumer.accept(vaultPlayer.getVault(num));
-        });
-    }
 
     public static ConcurrentHashMap<UUID, VaultPlayer> getPlayers() {
         return players;
     }
 
-    public static void removeVault(@NotNull Vault vault) {
-        final VaultPlayer player = players.get(vault.getUUID());
-        if (player == null) return;
-        player.removeVault(vault);
-        if (player.getVaultMap().isEmpty()) {
-            players.remove(player.getUUID());
+    public static CompletableFuture<VaultPlayer> getPlayer(@NotNull OfflinePlayer offlinePlayer) {
+        CompletableFuture<VaultPlayer> cf = new CompletableFuture<>();
+
+        VaultPlayer vaultPlayer = players.computeIfAbsent(offlinePlayer.getUniqueId(), VaultPlayer::new);
+        if (vaultPlayer.isLoaded()) {
+            cf.complete(vaultPlayer);
+            return cf;
         }
+
+        AxVaults.getThreadedQueue().submit(() -> vaultPlayer.load(cf));
+        return cf;
     }
 
-    public static int getVaultsOfPlayer(@NotNull Player player) {
-        if (!players.containsKey(player.getUniqueId())) return 0;
-        return players.get(player.getUniqueId()).getVaultMap().values().size();
+    public static void cleanup(VaultPlayer vaultPlayer) {
+        if (!vaultPlayer.getVaultMap().isEmpty()) return;
+        if (Bukkit.getPlayer(vaultPlayer.getUUID()) != null) return;
+        players.remove(vaultPlayer.getUUID());
     }
 
-    public static void reload() {
+    @Unmodifiable
+    public static List<Vault> getVaults() {
+        ArrayList<Vault> vaults = new ArrayList<>();
+        for (VaultPlayer vaultPlayer : players.values()) {
+            vaults.addAll(vaultPlayer.getVaultMap().values());
+        }
+        return Collections.unmodifiableList(vaults);
+    }
+
+    @Nullable
+    public static Vault getVault(Inventory inventory) {
         for (VaultPlayer vaultPlayer : players.values()) {
             for (Vault vault : vaultPlayer.getVaultMap().values()) {
-                vault.reload();
+                if (inventory.equals(vault.getStorage())) return vault;
             }
         }
+        return null;
     }
 
-    public static ConcurrentLinkedQueue<Vault> getVaults() {
-        return vaults;
+    public static boolean removeVault(@NotNull Vault vault) {
+        VaultPlayer vaultPlayer = vault.getVaultPlayer();
+        boolean success = vaultPlayer.removeVault(vault) != null;
+        if (success) cleanup(vaultPlayer);
+        return success;
     }
 }

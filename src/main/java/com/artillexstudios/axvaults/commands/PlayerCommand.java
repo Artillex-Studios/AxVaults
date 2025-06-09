@@ -1,6 +1,7 @@
 package com.artillexstudios.axvaults.commands;
 
 import com.artillexstudios.axvaults.guis.VaultSelector;
+import com.artillexstudios.axvaults.vaults.Vault;
 import com.artillexstudios.axvaults.vaults.VaultManager;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -42,7 +43,8 @@ public class PlayerCommand implements OrphanCommand {
             return;
         }
 
-        VaultManager.getVaultOfPlayer(sender, number, vault -> {
+        VaultManager.getPlayer(sender).thenAccept(vaultPlayer -> {
+            Vault vault = vaultPlayer.getVault(number);
             if (vault == null) {
                 MESSAGEUTILS.sendLang(sender, "vault.not-unlocked", replacements);
                 return;

@@ -4,6 +4,7 @@ import com.artillexstudios.axapi.libs.boostedyaml.block.implementation.Section;
 import com.artillexstudios.axapi.reflection.ClassUtils;
 import com.artillexstudios.axapi.utils.ItemBuilder;
 import com.artillexstudios.axapi.utils.StringUtils;
+import com.artillexstudios.axvaults.vaults.Vault;
 import com.artillexstudios.axvaults.vaults.VaultManager;
 import dev.triumphteam.gui.guis.Gui;
 import dev.triumphteam.gui.guis.GuiItem;
@@ -93,7 +94,8 @@ public class VaultSelector {
         final HashMap<String, String> replacements = new HashMap<>();
         replacements.put("%num%", "" + num);
 
-        VaultManager.getVaultOfPlayer(player, num, vault -> {
+        VaultManager.getPlayer(player).thenAccept(vaultPlayer -> {
+            Vault vault = vaultPlayer.getVault(num);
             if (vault != null) {
                 replacements.put("%used%", "" + vault.getSlotsFilled());
                 replacements.put("%max%", "" + vault.getStorage().getSize());

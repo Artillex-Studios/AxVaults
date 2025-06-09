@@ -1,15 +1,15 @@
 package com.artillexstudios.axvaults.vaults;
 
-import com.artillexstudios.axapi.reflection.ClassUtils;
 import com.artillexstudios.axapi.utils.StringUtils;
+import com.artillexstudios.axvaults.hooks.HookManager;
 import com.artillexstudios.axvaults.utils.SoundUtils;
-import com.artillexstudios.axvaults.utils.ThreadUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,68 +18,55 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.artillexstudios.axvaults.AxVaults.MESSAGES;
 
 public class Vault {
-    private final UUID uuid;
+    private final VaultPlayer vaultPlayer;
     private Inventory storage;
     private final int id;
     private Material icon;
-    private VaultPlayer vaultPlayer;
     private long lastOpen = System.currentTimeMillis();
-    private final CompletableFuture<Void> future = new CompletableFuture<>();
     private final AtomicBoolean changed = new AtomicBoolean(false);
 
-    public Vault(UUID uuid, int num, Material icon) {
-        this.uuid = uuid;
-        this.id = num;
+    public Vault(VaultPlayer vaultPlayer, int id, Material icon, @Nullable ItemStack[] contents) {
+        this.vaultPlayer = vaultPlayer;
+        this.id = id;
 
-        VaultManager.getPlayer(uuid, vaultPlayer -> {
-            this.vaultPlayer = vaultPlayer;
-            String title = MESSAGES.getString("guis.vault.title").replace("%num%", "" + num);
-            if (ClassUtils.INSTANCE.classExists("me.clip.placeholderapi.PlaceholderAPI")) {
-                title = me.clip.placeholderapi.PlaceholderAPI.setPlaceholders(Bukkit.getOfflinePlayer(uuid), title);
-            }
-            this.storage = Bukkit.createInventory(null, vaultPlayer.getRows() * 9, StringUtils.formatToString(title));
-            future.complete(null);
-            vaultPlayer.getVaultMap().put(num, this);
-        });
+        this.storage = Bukkit.createInventory(null, vaultPlayer.getRows() * 9, getTitle());
+        if (contents != null) setContents(contents);
+        vaultPlayer.getVaultMap().put(id, this);
 
         this.icon = icon;
-        VaultManager.getVaults().add(this);
     }
 
-    public CompletableFuture<Void> setContents(ItemStack[] items) {
-        CompletableFuture<Void> cf = new CompletableFuture<>();
-        future.thenRun(() -> {
-            ThreadUtils.runSync(() -> {
-                if (storage.getSize() < items.length) {
-                    for (int i = 0; i < storage.getSize(); i++) {
-                        storage.setItem(i, items[i]);
-                    }
-                    Player player = Bukkit.getPlayer(vaultPlayer.getUUID());
-                    for (int i = storage.getSize(); i < items.length; i++) {
-                        HashMap<Integer, ItemStack> remaining = storage.addItem(items[i]);
-                        if (player != null) remaining.forEach((k, v) -> player.getLocation().getWorld().dropItem(player.getLocation(), v));
-                    }
-                    return;
-                }
-                storage.setContents(items);
-                cf.complete(null);
-            });
-        });
-        return cf;
+    @ApiStatus.Internal
+    public void setContents(ItemStack[] items) {
+        if (storage.getSize() < items.length) {
+            for (int i = 0; i < storage.getSize(); i++) {
+                storage.setItem(i, items[i]);
+            }
+            Player player = Bukkit.getPlayer(vaultPlayer.getUUID());
+            for (int i = storage.getSize(); i < items.length; i++) {
+                HashMap<Integer, ItemStack> remaining = storage.addItem(items[i]);
+                if (player != null) remaining.forEach((k, v) -> player.getLocation().getWorld().dropItem(player.getLocation(), v));
+            }
+            return;
+        }
+        storage.setContents(items);
     }
 
     public Inventory getStorage() {
         return storage;
     }
 
+    public VaultPlayer getVaultPlayer() {
+        return vaultPlayer;
+    }
+
     public UUID getUUID() {
-        return uuid;
+        return vaultPlayer.getUUID();
     }
 
     public int getId() {
@@ -134,16 +121,11 @@ public class Vault {
     }
 
     public void reload() {
-        String title = MESSAGES.getString("guis.vault.title").replace("%num%", "" + id);
-        if (ClassUtils.INSTANCE.classExists("me.clip.placeholderapi.PlaceholderAPI")) {
-            title = me.clip.placeholderapi.PlaceholderAPI.setPlaceholders(Bukkit.getOfflinePlayer(uuid), title);
-        }
+        Inventory newStorage = Bukkit.createInventory(null, vaultPlayer.getRows() * 9, getTitle());
+        ItemStack[] contents = storage.getContents();
 
-        final Inventory newStorage = Bukkit.createInventory(null, vaultPlayer.getRows() * 9, StringUtils.formatToString(title));
-        final ItemStack[] contents = storage.getContents();
-
-        final List<HumanEntity> viewers = new ArrayList<>(storage.getViewers());
-        final Iterator<HumanEntity> viewerIterator = viewers.iterator();
+        List<HumanEntity> viewers = new ArrayList<>(storage.getViewers());
+        Iterator<HumanEntity> viewerIterator = viewers.iterator();
 
         while (viewerIterator.hasNext()) {
             viewerIterator.next().openInventory(newStorage);
@@ -153,5 +135,23 @@ public class Vault {
         storage.clear();
         storage = newStorage;
         setContents(contents);
+    }
+
+    private String getTitle() {
+        String title = MESSAGES.getString("guis.vault.title").replace("%num%", "" + id);
+        title = HookManager.getPlaceholderParser().setPlaceholders(Bukkit.getOfflinePlayer(vaultPlayer.getUUID()), title);
+        return StringUtils.formatToString(title);
+    }
+
+    @Override
+    public String toString() {
+        return "Vault{" +
+                "vaultPlayer=" + vaultPlayer.getUUID() +
+                ", changed=" + changed +
+                ", lastOpen=" + lastOpen +
+                ", icon=" + icon +
+                ", id=" + id +
+                ", storage=" + getSlotsFilled() + "/" + storage.getSize() +
+                '}';
     }
 }

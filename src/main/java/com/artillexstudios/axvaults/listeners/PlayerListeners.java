@@ -15,22 +15,21 @@ public class PlayerListeners implements Listener {
 
     public PlayerListeners() {
         for (Player player : Bukkit.getOnlinePlayers()) {
-            VaultManager.loadPlayer(player.getUniqueId());
+            VaultManager.getPlayer(player);
         }
     }
 
     @EventHandler
     public void onJoin(@NotNull PlayerJoinEvent event) {
-        VaultManager.loadPlayer(event.getPlayer().getUniqueId());
+        VaultManager.getPlayer(event.getPlayer());
         if (AxVaults.getDatabase() instanceof MySQL db) db.checkForChanges();
     }
 
     @EventHandler
     public void onQuit(@NotNull PlayerQuitEvent event) {
-        VaultManager.getPlayer(event.getPlayer().getUniqueId(), vaultPlayer -> {
+        VaultManager.getPlayer(event.getPlayer()).thenAccept(vaultPlayer -> {
             vaultPlayer.save();
             if (AxVaults.getDatabase() instanceof MySQL db) db.checkForChanges();
         });
-//        VaultManager.removePlayer(event.getPlayer());
     }
 }

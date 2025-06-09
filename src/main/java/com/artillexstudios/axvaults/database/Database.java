@@ -1,6 +1,7 @@
 package com.artillexstudios.axvaults.database;
 
 import com.artillexstudios.axvaults.vaults.Vault;
+import com.artillexstudios.axvaults.vaults.VaultPlayer;
 import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -16,7 +17,7 @@ public interface Database {
 
     CompletableFuture<Void> saveVault(@NotNull Vault vault);
 
-    void loadVaults(@NotNull UUID uuid);
+    void loadVaults(@NotNull VaultPlayer vaultPlayer);
 
     boolean isVault(@NotNull Location location);
 
