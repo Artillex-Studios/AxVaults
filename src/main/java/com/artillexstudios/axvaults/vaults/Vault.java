@@ -1,5 +1,6 @@
 package com.artillexstudios.axvaults.vaults;
 
+import com.artillexstudios.axapi.scheduler.Scheduler;
 import com.artillexstudios.axapi.utils.StringUtils;
 import com.artillexstudios.axvaults.hooks.HookManager;
 import com.artillexstudios.axvaults.utils.SoundUtils;
@@ -50,7 +51,11 @@ public class Vault {
             Player player = Bukkit.getPlayer(vaultPlayer.getUUID());
             for (int i = storage.getSize(); i < items.length; i++) {
                 HashMap<Integer, ItemStack> remaining = storage.addItem(items[i]);
-                if (player != null) remaining.forEach((k, v) -> player.getLocation().getWorld().dropItem(player.getLocation(), v));
+                if (player != null) {
+                    Scheduler.get().runAt(player.getLocation(), () -> {
+                        remaining.forEach((k, v) -> player.getLocation().getWorld().dropItem(player.getLocation(), v));
+                    });
+                }
             }
             return;
         }
