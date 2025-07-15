@@ -1,7 +1,8 @@
 package com.artillexstudios.axvaults.listeners;
 
+import com.artillexstudios.axapi.utils.PaperUtils;
 import com.artillexstudios.axvaults.utils.BlacklistUtils;
-import com.artillexstudios.axvaults.vaults.VaultManager;
+import com.artillexstudios.axvaults.vaults.Vault;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.ClickType;
@@ -18,8 +19,11 @@ public class BlacklistListener implements Listener {
 
     @EventHandler
     public void onClick(@NotNull InventoryClickEvent event) {
-        if (VaultManager.getVault(event.getView().getTopInventory()) == null) return;
-        if (BlacklistUtils.isBlacklisted(getItem(event))) {
+        if (!(PaperUtils.getHolder(event.getInventory(), false) instanceof Vault)) {
+            return;
+        }
+
+        if (BlacklistUtils.isBlacklisted(this.getItem(event))) {
             event.setCancelled(true);
             MESSAGEUTILS.sendLang(event.getWhoClicked(), "banned-item");
         }

@@ -46,7 +46,7 @@ max-vault-amount: -1
 # if enabled, the icon picker will not close after selecting an item
 selector-stay-open: false
 
-# list of items that CAN'T be sold in the auction house
+# list of items that CAN'T be put into vaults
 #
 # supported regex: (optional)
 # - 'name' #  only 'name' is disallowed
