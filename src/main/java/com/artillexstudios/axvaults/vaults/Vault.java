@@ -2,6 +2,7 @@ package com.artillexstudios.axvaults.vaults;
 
 import com.artillexstudios.axapi.scheduler.Scheduler;
 import com.artillexstudios.axapi.utils.StringUtils;
+import com.artillexstudios.axvaults.AxVaults;
 import com.artillexstudios.axvaults.hooks.HookManager;
 import com.artillexstudios.axvaults.utils.SoundUtils;
 import org.bukkit.Bukkit;
@@ -9,6 +10,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -23,7 +25,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.artillexstudios.axvaults.AxVaults.MESSAGES;
 
-public class Vault {
+public class Vault implements InventoryHolder {
     private final VaultPlayer vaultPlayer;
     private Inventory storage;
     private final int id;
@@ -35,7 +37,7 @@ public class Vault {
         this.vaultPlayer = vaultPlayer;
         this.id = id;
 
-        this.storage = Bukkit.createInventory(null, vaultPlayer.getRows() * 9, getTitle());
+        this.storage = Bukkit.createInventory(this, vaultPlayer.getRows() * 9, getTitle());
         if (contents != null) setContents(contents);
         vaultPlayer.getVaultMap().put(id, this);
 
@@ -111,6 +113,11 @@ public class Vault {
     }
 
     public void open(@NotNull Player player) {
+        if (AxVaults.stopping) {
+            // The plugin is shutting down, we don't want to allow opening guis
+            return;
+        }
+
         changed.set(true);
         if (vaultPlayer.getRows() != storage.getSize()) {
             reload();
@@ -126,7 +133,7 @@ public class Vault {
     }
 
     public void reload() {
-        Inventory newStorage = Bukkit.createInventory(null, vaultPlayer.getRows() * 9, getTitle());
+        Inventory newStorage = Bukkit.createInventory(this, vaultPlayer.getRows() * 9, getTitle());
         ItemStack[] contents = storage.getContents();
 
         List<HumanEntity> viewers = new ArrayList<>(storage.getViewers());
@@ -158,5 +165,11 @@ public class Vault {
                 ", id=" + id +
                 ", storage=" + getSlotsFilled() + "/" + storage.getSize() +
                 '}';
+    }
+
+    @NotNull
+    @Override
+    public Inventory getInventory() {
+        return this.storage;
     }
 }

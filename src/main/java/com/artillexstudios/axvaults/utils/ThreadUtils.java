@@ -1,6 +1,7 @@
 package com.artillexstudios.axvaults.utils;
 
 import com.artillexstudios.axapi.scheduler.Scheduler;
+import com.artillexstudios.axvaults.AxVaults;
 import org.bukkit.Bukkit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +24,10 @@ public class ThreadUtils {
     }
 
     public static void runSync(Runnable runnable) {
-        if (Bukkit.isPrimaryThread()) runnable.run();
-        else Scheduler.get().run(runnable);
+        if (Bukkit.isPrimaryThread() || AxVaults.stopping) {
+            runnable.run();
+        } else {
+            Scheduler.get().run(runnable);
+        }
     }
 }
