@@ -23,6 +23,7 @@ import com.artillexstudios.axvaults.hooks.HookManager;
 import com.artillexstudios.axvaults.libraries.Libraries;
 import com.artillexstudios.axvaults.listeners.BlacklistListener;
 import com.artillexstudios.axvaults.listeners.BlockBreakListener;
+import com.artillexstudios.axvaults.listeners.InventoryClickListener;
 import com.artillexstudios.axvaults.listeners.InventoryCloseListener;
 import com.artillexstudios.axvaults.listeners.PlayerInteractListener;
 import com.artillexstudios.axvaults.listeners.PlayerListeners;
@@ -106,6 +107,7 @@ public final class AxVaults extends AxPlugin {
         getServer().getPluginManager().registerEvents(new PlayerInteractListener(), this);
         getServer().getPluginManager().registerEvents(new BlockBreakListener(), this);
         getServer().getPluginManager().registerEvents(new InventoryCloseListener(), this);
+        getServer().getPluginManager().registerEvents(new InventoryClickListener(), this);
 
         CommandManager.load();
 
