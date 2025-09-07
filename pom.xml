@@ -3,7 +3,7 @@
 
     <groupId>com.artillexstudios</groupId>
     <artifactId>AxVaults</artifactId>
-    <version>2.9.3</version>
+    <version>2.9.4</version>
     <packaging>jar</packaging>
 
     <name>AxVaults</name>
@@ -114,7 +114,7 @@
         <dependency>
             <groupId>com.artillexstudios.axapi</groupId>
             <artifactId>axapi</artifactId>
-            <version>1.4.732</version>
+            <version>1.4.751</version>
             <scope>compile</scope>
             <classifier>all</classifier>
         </dependency>

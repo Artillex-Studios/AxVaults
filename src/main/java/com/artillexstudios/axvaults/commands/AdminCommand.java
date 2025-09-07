@@ -120,7 +120,7 @@ public class AdminCommand implements OrphanCommand {
 
     @CommandPermission("axvaults.admin.delete")
     @Subcommand("delete")
-    public void delete(@NotNull Player sender, @NotNull OfflinePlayer player, int number) {
+    public void delete(@NotNull CommandSender sender, @NotNull OfflinePlayer player, int number) {
         final HashMap<String, String> replacements = new HashMap<>();
         replacements.put("%player%", player.getName());
         replacements.put("%num%", "" + number);

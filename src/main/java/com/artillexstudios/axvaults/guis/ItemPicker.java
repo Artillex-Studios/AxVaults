@@ -47,7 +47,7 @@ public class ItemPicker {
         for (Material material : Material.values()) {
             ItemStack it = null;
             try {
-                it = new ItemBuilder(material).glow(Objects.equals(vault.getIcon(), material)).get();
+                it = ItemBuilder.create(material).glow(Objects.equals(vault.getIcon(), material)).get();
             } catch (Exception ignored) {}
             if (it == null) continue;
             final ItemMeta meta = it.hasItemMeta() ? it.getItemMeta() : Bukkit.getItemFactory().getItemMeta(it.getType());
@@ -71,21 +71,21 @@ public class ItemPicker {
 
         final Section prev;
         if ((prev = MESSAGES.getSection("gui-items.previous-page")) != null) {
-            final GuiItem item1 = new GuiItem(new ItemBuilder(prev).get());
+            final GuiItem item1 = new GuiItem(ItemBuilder.create(prev).get());
             item1.setAction(event -> gui.previous());
             gui.setItem(rows, 3, item1);
         }
 
         final Section next;
         if ((next = MESSAGES.getSection("gui-items.next-page")) != null) {
-            final GuiItem item2 = new GuiItem(new ItemBuilder(next).get());
+            final GuiItem item2 = new GuiItem(ItemBuilder.create(next).get());
             item2.setAction(event -> gui.next());
             gui.setItem(rows, 7, item2);
         }
 
         final Section back;
         if ((back = MESSAGES.getSection("gui-items.back")) != null) {
-            final GuiItem item3 = new GuiItem(new ItemBuilder(back).get());
+            final GuiItem item3 = new GuiItem(ItemBuilder.create(back).get());
             item3.setAction(event -> new VaultSelector().open(player, oldPage));
             gui.setItem(rows, 5, item3);
         }

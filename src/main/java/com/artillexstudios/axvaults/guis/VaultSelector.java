@@ -53,14 +53,14 @@ public class VaultSelector {
 
         final Section prev;
         if ((prev = MESSAGES.getSection("gui-items.previous-page")) != null) {
-            final GuiItem item1 = new GuiItem(new ItemBuilder(prev).get());
+            final GuiItem item1 = new GuiItem(ItemBuilder.create(prev).get());
             item1.setAction(event -> gui.previous());
             gui.setItem(rows, 3, item1);
         }
 
         final Section next;
         if ((next = MESSAGES.getSection("gui-items.next-page")) != null) {
-            final GuiItem item2 = new GuiItem(new ItemBuilder(next).get());
+            final GuiItem item2 = new GuiItem(ItemBuilder.create(next).get());
             item2.setAction(event -> {
                 gui.next();
 
@@ -76,7 +76,7 @@ public class VaultSelector {
 
         final Section close;
         if ((close = MESSAGES.getSection("gui-items.close")) != null) {
-            final GuiItem item3 = new GuiItem(new ItemBuilder(close).get());
+            final GuiItem item3 = new GuiItem(ItemBuilder.create(close).get());
             item3.setAction(event -> event.getWhoClicked().closeInventory());
             gui.setItem(rows, 5, item3);
         }
@@ -100,7 +100,7 @@ public class VaultSelector {
                 replacements.put("%used%", "" + vault.getSlotsFilled());
                 replacements.put("%max%", "" + vault.getStorage().getSize());
 
-                final ItemBuilder builder = new ItemBuilder(MESSAGES.getSection("guis.selector.item-owned"));
+                final ItemBuilder builder = ItemBuilder.create(MESSAGES.getSection("guis.selector.item-owned"));
                 builder.setLore(MESSAGES.getStringList("guis.selector.item-owned.lore"), replacements);
                 builder.setName(MESSAGES.getString("guis.selector.item-owned.name"), replacements);
 
@@ -138,7 +138,7 @@ public class VaultSelector {
                     return;
                 }
 
-                final ItemBuilder builder = new ItemBuilder(MESSAGES.getSection("guis.selector.item-locked"));
+                final ItemBuilder builder = ItemBuilder.create(MESSAGES.getSection("guis.selector.item-locked"));
                 builder.setLore(MESSAGES.getStringList("guis.selector.item-locked.lore"), replacements);
                 builder.setName(MESSAGES.getString("guis.selector.item-locked.name"), replacements);
 
