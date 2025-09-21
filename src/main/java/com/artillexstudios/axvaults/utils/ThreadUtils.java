@@ -24,7 +24,7 @@ public class ThreadUtils {
     }
 
     public static void runSync(Runnable runnable) {
-        if (Bukkit.isPrimaryThread() || AxVaults.stopping) {
+        if (Bukkit.isPrimaryThread() || AxVaults.isStopping()) {
             runnable.run();
         } else {
             Scheduler.get().run(runnable);

@@ -1,6 +1,7 @@
 package com.artillexstudios.axvaults.commands;
 
 import com.artillexstudios.axvaults.AxVaults;
+import com.artillexstudios.axvaults.utils.CommandMessages;
 import com.artillexstudios.axvaults.vaults.VaultManager;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -29,8 +30,8 @@ public class CommandManager {
             return numbers;
         });
 
-        handler.getTranslator().add(new com.artillexstudios.axvaults.utils.CommandMessages());
-        handler.setLocale(new Locale("en", "US"));
+        handler.getTranslator().add(new CommandMessages());
+        handler.setLocale(Locale.of("en", "US"));
 
         reload();
     }

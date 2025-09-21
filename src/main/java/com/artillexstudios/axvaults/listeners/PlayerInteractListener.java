@@ -18,16 +18,13 @@ public class PlayerInteractListener implements Listener {
         if (!event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) return;
         if (event.getClickedBlock() == null) return;
 
-        final Player player = event.getPlayer();
-        final Location location = event.getClickedBlock().getLocation();
+        Player player = event.getPlayer();
+        Location location = event.getClickedBlock().getLocation();
 
         if (!PlacedVaults.getVaults().containsKey(location)) return;
-
         event.setCancelled(true);
-        event.setUseInteractedBlock(Event.Result.DENY);
-        event.setUseItemInHand(Event.Result.DENY);
 
-        final Integer vault = PlacedVaults.getVaults().get(location);
+        Integer vault = PlacedVaults.getVaults().get(location);
         new PlayerCommand().open(player, vault, true);
     }
 }

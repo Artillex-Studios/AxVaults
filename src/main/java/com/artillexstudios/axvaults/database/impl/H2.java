@@ -129,7 +129,12 @@ public class H2 implements Database {
 
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
-                    ItemStack[] items = Serializers.ITEM_ARRAY.deserialize(rs.getBytes(3));
+                    ItemStack[] items;
+                    try { // temporary solution to prevent a single broken vault data from stopping all data from loading
+                        items = Serializers.ITEM_ARRAY.deserialize(rs.getBytes(3));
+                    } catch (Exception ex) {
+                        continue;
+                    }
                     int id = rs.getInt(1);
                     Material icon = rs.getString(4) == null ? null : Material.valueOf(rs.getString(4));
                     new Vault(vaultPlayer, id, icon, items);

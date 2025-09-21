@@ -10,12 +10,9 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 public class InventoryClickListener implements Listener {
 
     @EventHandler
-    public void onInventoryClickEvent(InventoryClickEvent event) {
-        if (!(PaperUtils.getHolder(event.getInventory(), false) instanceof Vault vault)) {
-            return;
-        }
-
-        if (AxVaults.stopping) {
+    public void onClick(InventoryClickEvent event) {
+        if (!(PaperUtils.getHolder(event.getInventory(), false) instanceof Vault)) return;
+        if (AxVaults.isStopping()) {
             event.setCancelled(true);
             return;
         }

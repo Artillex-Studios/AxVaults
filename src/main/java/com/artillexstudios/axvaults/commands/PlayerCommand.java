@@ -19,7 +19,7 @@ public class PlayerCommand implements OrphanCommand {
 
     @DefaultFor({"~"})
     @AutoComplete("@vaults")
-    public void axvault(@NotNull Player sender, @Optional Integer number) {
+    public void vault(@NotNull Player sender, @Optional Integer number) {
         open(sender, number, false);
     }
 

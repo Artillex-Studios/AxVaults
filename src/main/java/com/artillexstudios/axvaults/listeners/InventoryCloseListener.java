@@ -19,10 +19,8 @@ import static com.artillexstudios.axvaults.AxVaults.MESSAGEUTILS;
 public class InventoryCloseListener implements Listener {
 
     @EventHandler
-    public void onInventoryCloseEvent(@NotNull InventoryCloseEvent event) {
-        if (!(PaperUtils.getHolder(event.getInventory(), false) instanceof Vault vault)) {
-            return;
-        }
+    public void onClose(@NotNull InventoryCloseEvent event) {
+        if (!(PaperUtils.getHolder(event.getInventory(), false) instanceof Vault vault)) return;
 
         AxVaults.getThreadedQueue().submit(() -> {
             MESSAGEUTILS.sendLang(event.getPlayer(), "vault.closed", Map.of("%num%", "" + vault.getId()));

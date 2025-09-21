@@ -114,7 +114,7 @@ public class Vault implements InventoryHolder {
     }
 
     public void open(@NotNull Player player) {
-        if (AxVaults.stopping) {
+        if (AxVaults.isStopping()) {
             // The plugin is shutting down, we don't want to allow opening guis
             return;
         }

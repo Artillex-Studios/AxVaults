@@ -27,8 +27,7 @@ public class VaultManager {
 
         VaultPlayer vaultPlayer = players.computeIfAbsent(offlinePlayer.getUniqueId(), VaultPlayer::new);
         if (vaultPlayer.isLoaded()) {
-            cf.complete(vaultPlayer);
-            return cf;
+            return CompletableFuture.completedFuture(vaultPlayer);
         }
 
         AxVaults.getThreadedQueue().submit(() -> vaultPlayer.load(cf));

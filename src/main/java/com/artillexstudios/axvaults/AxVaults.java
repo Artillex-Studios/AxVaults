@@ -44,7 +44,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public final class AxVaults extends AxPlugin {
-    public static boolean stopping = false;
+    private static boolean stopping = false;
     public static Config CONFIG;
     public static Config MESSAGES;
     public static MessageUtils MESSAGEUTILS;
@@ -64,6 +64,10 @@ public final class AxVaults extends AxPlugin {
 
     public static Database getDatabase() {
         return database;
+    }
+
+    public static boolean isStopping() {
+        return stopping;
     }
 
     @Override
