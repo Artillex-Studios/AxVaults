@@ -1,6 +1,7 @@
 package com.artillexstudios.axvaults.database.impl;
 
 import com.artillexstudios.axapi.serializers.Serializers;
+import com.artillexstudios.axapi.utils.logging.LogUtils;
 import com.artillexstudios.axvaults.AxVaults;
 import com.artillexstudios.axvaults.database.Database;
 import com.artillexstudios.axvaults.placed.PlacedVaults;
@@ -41,13 +42,13 @@ public class H2 implements Database {
         }
 
         String CREATE_TABLE = """
-            CREATE TABLE IF NOT EXISTS `axvaults_data`(
-              `id` INT(128) NOT NULL,
-              `uuid` VARCHAR(36) NOT NULL,
-              `storage` LONGBLOB,
-              `icon` VARCHAR(128)
-            );
-        """;
+                    CREATE TABLE IF NOT EXISTS `axvaults_data`(
+                      `id` INT(128) NOT NULL,
+                      `uuid` VARCHAR(36) NOT NULL,
+                      `storage` LONGBLOB,
+                      `icon` VARCHAR(128)
+                    );
+                """;
 
         try (PreparedStatement stmt = conn.prepareStatement(CREATE_TABLE)) {
             stmt.executeUpdate();
@@ -56,12 +57,12 @@ public class H2 implements Database {
         }
 
         String CREATE_TABLE2 = """
-            CREATE TABLE IF NOT EXISTS `axvaults_blocks` (
-              `location` VARCHAR(255) NOT NULL,
-              `number` INT,
-              PRIMARY KEY (`location`)
-            );
-        """;
+                    CREATE TABLE IF NOT EXISTS `axvaults_blocks` (
+                      `location` VARCHAR(255) NOT NULL,
+                      `number` INT,
+                      PRIMARY KEY (`location`)
+                    );
+                """;
 
         try (PreparedStatement stmt = conn.prepareStatement(CREATE_TABLE2)) {
             stmt.executeUpdate();
@@ -106,11 +107,17 @@ public class H2 implements Database {
 
         // if the server is shutting down, this can't be called async
         CompletableFuture<Void> local;
-        if (Bukkit.isPrimaryThread()) local = VaultUtils.serialize(vault).thenAccept(consumer);
-        else local = VaultUtils.serialize(vault).thenAcceptAsync(consumer);
+        if (Bukkit.isPrimaryThread()) {
+            local = VaultUtils.serialize(vault).thenAccept(consumer);
+        } else {
+            local = VaultUtils.serialize(vault).thenAcceptAsync(consumer);
+        }
 
         CompletableFuture<Void> cf = new CompletableFuture<>();
-        local.thenRun(() -> cf.complete(null));
+        local.exceptionally(throwable -> {
+            LogUtils.error("An exception occurred while saving vaults!", throwable);
+            return null;
+        }).thenRun(() -> cf.complete(null));
         return cf;
     }
 

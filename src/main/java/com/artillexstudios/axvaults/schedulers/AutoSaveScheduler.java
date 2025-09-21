@@ -32,7 +32,7 @@ public class AutoSaveScheduler {
             for (Vault vault : VaultManager.getVaults()) {
                 if (vault.hasChanged().get()) { // only save if the vault has been touched since the last save
                     futures.add(AxVaults.getDatabase().saveVault(vault));
-                    saved.set(saved.get() + 1);
+                    saved.increment();
                 }
                 if (vault.isOpened()) continue;
                 vault.hasChanged().set(false); // if the player is not currently editing it, set changed to false

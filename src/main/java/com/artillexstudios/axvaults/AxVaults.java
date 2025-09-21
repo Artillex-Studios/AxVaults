@@ -23,6 +23,7 @@ import com.artillexstudios.axvaults.hooks.HookManager;
 import com.artillexstudios.axvaults.libraries.Libraries;
 import com.artillexstudios.axvaults.listeners.BlacklistListener;
 import com.artillexstudios.axvaults.listeners.BlockBreakListener;
+import com.artillexstudios.axvaults.listeners.InventoryClickListener;
 import com.artillexstudios.axvaults.listeners.InventoryCloseListener;
 import com.artillexstudios.axvaults.listeners.PlayerInteractListener;
 import com.artillexstudios.axvaults.listeners.PlayerListeners;
@@ -33,12 +34,17 @@ import com.artillexstudios.axvaults.vaults.VaultManager;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.HumanEntity;
 import revxrsal.zapper.DependencyManager;
 import revxrsal.zapper.relocation.Relocation;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public final class AxVaults extends AxPlugin {
+    public static boolean stopping = false;
     public static Config CONFIG;
     public static Config MESSAGES;
     public static MessageUtils MESSAGEUTILS;
@@ -101,6 +107,7 @@ public final class AxVaults extends AxPlugin {
         getServer().getPluginManager().registerEvents(new PlayerInteractListener(), this);
         getServer().getPluginManager().registerEvents(new BlockBreakListener(), this);
         getServer().getPluginManager().registerEvents(new InventoryCloseListener(), this);
+        getServer().getPluginManager().registerEvents(new InventoryClickListener(), this);
 
         CommandManager.load();
 
@@ -116,11 +123,21 @@ public final class AxVaults extends AxPlugin {
     }
 
     public void disable() {
+        stopping = true;
         if (metrics != null) metrics.cancel();
         for (Vault vault : VaultManager.getVaults()) {
-            AxVaults.getDatabase().saveVault(vault);
+            for (HumanEntity humanEntity : new ArrayList<>(vault.getInventory().getViewers())) {
+                humanEntity.closeInventory();
+            }
         }
+
         AutoSaveScheduler.stop();
+        List<CompletableFuture<?>> futures = new ArrayList<>();
+        for (Vault vault : VaultManager.getVaults()) {
+            futures.add(AxVaults.getDatabase().saveVault(vault));
+        }
+
+        CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new)).join();
         SQLMessaging.stop();
         database.disable();
         threadedQueue.stop();

@@ -23,7 +23,7 @@ public class CommandManager {
             if (!player.hasPermission("axvaults.openremote")) return new ArrayList<>();
 
             final ArrayList<String> numbers = new ArrayList<>();
-            for (Integer i : VaultManager.getPlayer(player).join().getVaultMap().keySet()) {
+            for (Integer i : VaultManager.getPlayers().get(player.getUniqueId()).getVaultMap().keySet()) {
                 numbers.add("" + i);
             }
             return numbers;
