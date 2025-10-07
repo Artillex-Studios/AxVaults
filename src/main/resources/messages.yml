@@ -1,6 +1,21 @@
 # DOCUMENTATION: https://docs.artillex-studios.com/axvaults.html
 # ITEM BUILDER: https://docs.artillex-studios.com/item-builder.html
 
+help:
+  - "<gradient:#55ff00:#AAFF00><b>AxVaults</b></gradient> <#88FF88>Help"
+  - " <#88FF88>➤ <white>/axvaults <#DDDDDD>| <#AAFFAA>Open vault selector"
+  - " <#88FF88>➤ <white>/axvaults <number> <#DDDDDD>| <#AAFFAA>Open vault"
+  - " <#88FF88>➤ <white>/axvaultsadmin view <player> <vault> <#DDDDDD>| <#AAFFAA>Open another player's vault"
+  - " <#88FF88>➤ <white>/axvaultsadmin forceopen <player> <#DDDDDD>| <#AAFFAA>Open vault selector to player"
+  - " <#88FF88>➤ <white>/axvaultsadmin set [number] <#DDDDDD>| <#AAFFAA>Add vault to block"
+  - " <#88FF88>➤ <white>/axvaultsadmin reload <#DDDDDD>| <#AAFFAA>Reload configuration"
+  - " <#88FF88>➤ <white>/axvaultsadmin delete <player> <vault> <#DDDDDD>| <#AAFFAA>Delete vault of player"
+  - " <#88FF88>➤ <white>/axvaultsadmin stats <#DDDDDD>| <#AAFFAA>Server statistics"
+  - " <#88FF88>➤ <white>/axvaultsadmin converter <plugin> <#DDDDDD>| <#AAFFAA>Convert from another plugin"
+  - " <#88FF88>➤ <white>/axvaultsadmin save <#DDDDDD>| <#AAFFAA>Manually save all loaded vaults"
+  - " <#88FF88>➤ <white>/axvaultsadmin debug <#DDDDDD>| <#AAFFAA>Print useful information to console"
+  - " "
+
 guis:
   selector:
     title: "&0My Vaults"
@@ -42,18 +57,6 @@ gui-items:
   next-page:
     material: ARROW
     name: "&#FFCC00&lNext Page"
-    
-help:
-  - "&#55ff00&lAxVaults &7» &#AAFFAAHelp:"
-  - " "
-  - "  &7⋆ &f/axvaultsadmin view <player> <vault> &7| &#AAFFAAOpen another player's vault"
-  - "  &7⋆ &f/axvaultsadmin forceopen <player> &7| &#AAFFAAOpen vault selector to player"
-  - "  &7⋆ &f/axvaultsadmin set [number] &7| &#AAFFAAAdd vault to block"
-  - "  &7⋆ &f/axvaultsadmin reload &7| &#AAFFAAReload configuration"
-  - "  &7⋆ &f/axvaultsadmin delete <player> <vault> &7| &#AAFFAADelete vault of player"
-  - "  &7⋆ &f/axvaultsadmin stats &7| &#AAFFAAServer statistics"
-  - "  &7⋆ &f/axvaultsadmin converter <plugin> &7| &#AAFFAAConvert from another plugin"
-  - " "
 
 # you can disable any messages by setting it to ""
 vault:

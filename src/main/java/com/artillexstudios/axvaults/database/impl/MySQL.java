@@ -110,32 +110,49 @@ public class MySQL implements Database {
 
     @Override
     public CompletableFuture<Void> saveVault(@NotNull Vault vault) {
-        Consumer<byte[]> consumer = bytes -> {
-            final String sql = "SELECT * FROM axvaults_data WHERE uuid = ? AND id = ?;";
+        Consumer<Object> consumer = result -> {
+            // delete empty vaults
+            if (result instanceof Boolean bool && bool) {
+                String sql = "DELETE FROM axvaults_data WHERE uuid = ? AND id = ?;";
+                try (Connection conn = dataSource.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)){
+                    stmt.setString(1, vault.getUUID().toString());
+                    stmt.setInt(2, vault.getId());
+                    stmt.executeUpdate();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+                return;
+            }
+
+            if (result == null) {
+                Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#FF0000[AxVaults] Failed to save vault #%s of %s!".formatted(vault.getId(), vault.getUUID().toString())));
+                return;
+            }
+
+            byte[] bytes = (byte[]) result;
+            String sql = "SELECT * FROM axvaults_data WHERE uuid = ? AND id = ?;";
             try (Connection conn = dataSource.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setString(1, vault.getUUID().toString());
                 stmt.setInt(2, vault.getId());
 
                 try (ResultSet rs = stmt.executeQuery()) {
                     if (rs.next()) {
-                        final String sql2 = "UPDATE axvaults_data SET storage = ?, icon = ? WHERE uuid = ? AND id = ?;";
-                        try (PreparedStatement stmt2 = conn.prepareStatement(sql2)) {
+                        sql = "UPDATE axvaults_data SET storage = ?, icon = ? WHERE uuid = ? AND id = ?;";
+                        try (PreparedStatement stmt2 = conn.prepareStatement(sql)) {
                             stmt2.setBytes(1, bytes);
                             stmt2.setString(2, vault.getRealIcon() == null ? null : vault.getRealIcon().name());
                             stmt2.setString(3, vault.getUUID().toString());
                             stmt2.setInt(4, vault.getId());
                             stmt2.executeUpdate();
-                            sendMessage(ChangeType.UPDATE, vault.getId(), vault.getUUID());
                         }
                     } else {
-                        final String sql2 = "INSERT INTO axvaults_data(id, uuid, storage, icon) VALUES (?, ?, ?, ?);";
-                        try (PreparedStatement stmt2 = conn.prepareStatement(sql2)) {
+                        sql = "INSERT INTO axvaults_data(id, uuid, storage, icon) VALUES (?, ?, ?, ?);";
+                        try (PreparedStatement stmt2 = conn.prepareStatement(sql)) {
                             stmt2.setInt(1, vault.getId());
                             stmt2.setString(2, vault.getUUID().toString());
                             stmt2.setBytes(3, bytes);
                             stmt2.setString(4, vault.getRealIcon() == null ? null : vault.getRealIcon().name());
                             stmt2.executeUpdate();
-                            sendMessage(ChangeType.UPDATE, vault.getId(), vault.getUUID());
                         }
                     }
                 }
@@ -162,8 +179,16 @@ public class MySQL implements Database {
 
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
-                    ItemStack[] items = Serializers.ITEM_ARRAY.deserialize(rs.getBytes(3));
                     int id = rs.getInt(1);
+                    ItemStack[] items;
+                    try {
+                        items = Serializers.ITEM_ARRAY.deserialize(rs.getBytes(3));
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                        Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#FF0000[AxVaults] Failed to load vault #%s of %s!".formatted(id, vaultPlayer.getUUID().toString())));
+                        continue;
+                    }
+//                    if (VaultUtils.isDeleteEmptyVaults() && items.length == 0) continue;
                     Material icon = rs.getString(4) == null ? null : Material.valueOf(rs.getString(4));
                     new Vault(vaultPlayer, id, icon, items);
                 }

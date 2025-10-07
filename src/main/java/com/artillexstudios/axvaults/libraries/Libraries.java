@@ -14,7 +14,7 @@ public enum Libraries {
 
     H2_JDBC("com{}h2database:h2:2.1.214"),
 
-    POSTGRESQL("org{}postgresql:postgresql:42.7.5", relocation("org{}postgresql", "com.artillexstudios.axvaults.libs.postgresql")),
+//    POSTGRESQL("org{}postgresql:postgresql:42.7.5", relocation("org{}postgresql", "com.artillexstudios.axvaults.libs.postgresql")),
 
     MYSQL_CONNECTOR("com{}mysql:mysql-connector-j:9.2.0", relocation("com{}mysql", "com.artillexstudios.axvaults.libs.mysql"));
 

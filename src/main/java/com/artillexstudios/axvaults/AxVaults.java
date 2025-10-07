@@ -29,9 +29,9 @@ import com.artillexstudios.axvaults.listeners.PlayerInteractListener;
 import com.artillexstudios.axvaults.listeners.PlayerListeners;
 import com.artillexstudios.axvaults.schedulers.AutoSaveScheduler;
 import com.artillexstudios.axvaults.utils.UpdateNotifier;
+import com.artillexstudios.axvaults.utils.VaultUtils;
 import com.artillexstudios.axvaults.vaults.Vault;
 import com.artillexstudios.axvaults.vaults.VaultManager;
-import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.HumanEntity;
@@ -51,7 +51,6 @@ public final class AxVaults extends AxPlugin {
     private static AxPlugin instance;
     private static ThreadedQueue<Runnable> threadedQueue;
     private static Database database;
-    public static BukkitAudiences BUKKITAUDIENCES;
     private static AxMetrics metrics;
 
     public static ThreadedQueue<Runnable> getThreadedQueue() {
@@ -90,10 +89,10 @@ public final class AxVaults extends AxPlugin {
         MESSAGES = new Config(new File(getDataFolder(), "messages.yml"), getResource("messages.yml"), GeneralSettings.builder().setUseDefaults(false).build(), LoaderSettings.builder().setAutoUpdate(true).build(), DumperSettings.DEFAULT, UpdaterSettings.builder().setKeepAll(true).setVersioning(new BasicVersioning("version")).build());
 
         MESSAGEUTILS = new MessageUtils(MESSAGES.getBackingDocument(), "prefix", CONFIG.getBackingDocument());
-        BUKKITAUDIENCES = BukkitAudiences.create(this);
 
         threadedQueue = new ThreadedQueue<>("AxVaults-Datastore-thread");
 
+        VaultUtils.reload();
         HookManager.setupHooks();
 
         database = switch (CONFIG.getString("database.type").toLowerCase()) {

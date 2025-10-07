@@ -1,10 +1,9 @@
 package com.artillexstudios.axvaults.listeners;
 
-import com.artillexstudios.axvaults.commands.PlayerCommand;
+import com.artillexstudios.axvaults.commands.subcommands.Open;
 import com.artillexstudios.axvaults.placed.PlacedVaults;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
@@ -25,6 +24,6 @@ public class PlayerInteractListener implements Listener {
         event.setCancelled(true);
 
         Integer vault = PlacedVaults.getVaults().get(location);
-        new PlayerCommand().open(player, vault, true);
+        Open.INSTANCE.execute(player, vault, true);
     }
 }

@@ -1,6 +1,6 @@
 # DOCUMENTATION: https://docs.artillex-studios.com/axvaults.html
 
-prefix: "&#55ff00&lAxVaults &7» "
+prefix: "<gradient:#55ff00:#AAFF00><b>AxVaults</b></gradient> &7» "
 
 # this setting is not reloadable, you have to restart the server
 # how often should the plugin save vaults from ram to the database?
@@ -45,6 +45,16 @@ max-vault-amount: -1
 
 # if enabled, the icon picker will not close after selecting an item
 selector-stay-open: false
+
+# should the plugin delete emptied vaults from the database?
+# you shouldn't have to disable this unless a developers tells you to
+delete-empty-vaults: true
+
+# should items be serialized asynchronously?
+# only enable if you are having performance issues
+# this setting might cause unexcepted bugs, like item loss
+# we suggest creating a spark report and sending it to the developers before using this
+async-item-serializer: false
 
 # list of items that CAN'T be put into vaults
 #
@@ -92,4 +102,4 @@ update-notifier:
   on-join: true
 
 # do not change this
-version: 7
+version: 8
