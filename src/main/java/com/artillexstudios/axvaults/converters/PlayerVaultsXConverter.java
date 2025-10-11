@@ -48,11 +48,10 @@ public class PlayerVaultsXConverter {
 
     private ItemStack[] getItems(String base64) {
         try {
-            byte[] bytes = Base64Coder.decodeLines(base64);
             final Class<?> cl = Class.forName("com.drtshock.playervaults.vaultmanagement.CardboardBoxSerialization");
-            final Method method = cl.getDeclaredMethod("readInventory", byte[].class);
+            final Method method = cl.getDeclaredMethod("fromStorage", String.class, String.class);
             method.setAccessible(true);
-            return (ItemStack[]) method.invoke(null, bytes);
+            return (ItemStack[]) method.invoke(null, base64, "AxVaults");
         } catch (Exception ex) {
             ex.printStackTrace();
         }
