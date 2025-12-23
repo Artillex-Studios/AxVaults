@@ -8,7 +8,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.regex.Pattern;
 
-public class SoundUtils {
+public class  SoundUtils {
     private static final Pattern SPLIT = Pattern.compile("\\|");
 
     // entity_player_levelup|0.5|0.2

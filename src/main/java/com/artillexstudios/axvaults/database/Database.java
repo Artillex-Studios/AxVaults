@@ -7,7 +7,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
 public interface Database {
 
@@ -15,7 +14,7 @@ public interface Database {
 
     void setup();
 
-    CompletableFuture<Void> saveVault(@NotNull Vault vault);
+    void saveVault(Vault vault, Object result);
 
     void loadVaults(@NotNull VaultPlayer vaultPlayer);
 

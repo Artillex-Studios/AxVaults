@@ -2,13 +2,12 @@ package com.artillexstudios.axvaults.converters;
 
 import com.artillexstudios.axapi.config.Config;
 import com.artillexstudios.axapi.utils.StringUtils;
-import com.artillexstudios.axvaults.AxVaults;
+import com.artillexstudios.axvaults.utils.VaultUtils;
 import com.artillexstudios.axvaults.vaults.Vault;
 import com.artillexstudios.axvaults.vaults.VaultManager;
 import com.artillexstudios.axvaults.vaults.VaultPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.ItemStack;
-import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
 
 import java.io.File;
 import java.lang.reflect.Method;
@@ -36,7 +35,7 @@ public class PlayerVaultsXConverter {
                     final int num = Integer.parseInt(route.replace("vault", ""));
                     VaultPlayer vaultPlayer = VaultManager.getPlayer(Bukkit.getOfflinePlayer(uuid)).join();
                     final Vault vault = new Vault(vaultPlayer, num, null, getItems(data.getString(route)));
-                    AxVaults.getDatabase().saveVault(vault);
+                    VaultUtils.save(vault);
                     vaults++;
                 }
             }

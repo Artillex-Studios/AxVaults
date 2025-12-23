@@ -2,11 +2,10 @@ package com.artillexstudios.axvaults.database.impl;
 
 import com.artillexstudios.axapi.serializers.Serializers;
 import com.artillexstudios.axapi.utils.StringUtils;
-import com.artillexstudios.axapi.utils.logging.LogUtils;
 import com.artillexstudios.axvaults.AxVaults;
 import com.artillexstudios.axvaults.database.Database;
 import com.artillexstudios.axvaults.placed.PlacedVaults;
-import com.artillexstudios.axvaults.utils.VaultUtils;
+import com.artillexstudios.axvaults.utils.ThreadUtils;
 import com.artillexstudios.axvaults.vaults.Vault;
 import com.artillexstudios.axvaults.vaults.VaultPlayer;
 import org.bukkit.Bukkit;
@@ -22,8 +21,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Properties;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
 
 public class H2 implements Database {
     private JdbcConnection conn;
@@ -73,72 +70,55 @@ public class H2 implements Database {
     }
 
     @Override
-    public CompletableFuture<Void> saveVault(@NotNull Vault vault) {
-        Consumer<Object> consumer = result -> {
-            // delete empty vaults
-            if (result instanceof Boolean bool && bool) {
-                String sql = "DELETE FROM axvaults_data WHERE uuid = ? AND id = ?;";
-                try (PreparedStatement stmt = conn.prepareStatement(sql)){
-                    stmt.setString(1, vault.getUUID().toString());
-                    stmt.setInt(2, vault.getId());
-                    stmt.executeUpdate();
-                } catch (SQLException ex) {
-                    ex.printStackTrace();
-                }
-                return;
-            }
-
-            if (result == null) {
-                Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#FF0000[AxVaults] Failed to save vault #%s of %s!".formatted(vault.getId(), vault.getUUID().toString())));
-                return;
-            }
-
-            byte[] bytes = (byte[]) result;
-            String sql = "SELECT * FROM axvaults_data WHERE uuid = ? AND id = ?;";
-            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+    public void saveVault(Vault vault, Object result) {
+        // delete empty vaults
+        if (result instanceof Boolean bool && bool) {
+            String sql = "DELETE FROM axvaults_data WHERE uuid = ? AND id = ?;";
+            try (PreparedStatement stmt = conn.prepareStatement(sql)){
                 stmt.setString(1, vault.getUUID().toString());
                 stmt.setInt(2, vault.getId());
-
-                try (ResultSet rs = stmt.executeQuery()) {
-                    if (rs.next()) {
-                        sql = "UPDATE axvaults_data SET storage = ?, icon = ? WHERE uuid = ? AND id = ?;";
-                        try (PreparedStatement stmt2 = conn.prepareStatement(sql)) {
-                            stmt2.setBytes(1, bytes);
-                            stmt2.setString(2, vault.getRealIcon() == null ? null : vault.getRealIcon().name());
-                            stmt2.setString(3, vault.getUUID().toString());
-                            stmt2.setInt(4, vault.getId());
-                            stmt2.executeUpdate();
-                        }
-                    } else {
-                        sql = "INSERT INTO axvaults_data(id, uuid, storage, icon) VALUES (?, ?, ?, ?);";
-                        try (PreparedStatement stmt2 = conn.prepareStatement(sql)) {
-                            stmt2.setInt(1, vault.getId());
-                            stmt2.setString(2, vault.getUUID().toString());
-                            stmt2.setBytes(3, bytes);
-                            stmt2.setString(4, vault.getRealIcon() == null ? null : vault.getRealIcon().name());
-                            stmt2.executeUpdate();
-                        }
-                    }
-                }
+                stmt.executeUpdate();
             } catch (SQLException ex) {
                 ex.printStackTrace();
             }
-        };
-
-        // if the server is shutting down, this can't be called async
-        CompletableFuture<Void> local;
-        if (Bukkit.isPrimaryThread()) {
-            local = VaultUtils.serialize(vault).thenAccept(consumer);
-        } else {
-            local = VaultUtils.serialize(vault).thenAcceptAsync(consumer);
+            return;
         }
 
-        CompletableFuture<Void> cf = new CompletableFuture<>();
-        local.exceptionally(throwable -> {
-            LogUtils.error("An exception occurred while saving vaults!", throwable);
-            return null;
-        }).thenRun(() -> cf.complete(null));
-        return cf;
+        if (result == null) {
+            Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#FF0000[AxVaults] Failed to save vault #%s of %s!".formatted(vault.getId(), vault.getUUID().toString())));
+            return;
+        }
+
+        byte[] bytes = (byte[]) result;
+        String sql = "SELECT * FROM axvaults_data WHERE uuid = ? AND id = ?;";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, vault.getUUID().toString());
+            stmt.setInt(2, vault.getId());
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    sql = "UPDATE axvaults_data SET storage = ?, icon = ? WHERE uuid = ? AND id = ?;";
+                    try (PreparedStatement stmt2 = conn.prepareStatement(sql)) {
+                        stmt2.setBytes(1, bytes);
+                        stmt2.setString(2, vault.getRealIcon() == null ? null : vault.getRealIcon().name());
+                        stmt2.setString(3, vault.getUUID().toString());
+                        stmt2.setInt(4, vault.getId());
+                        stmt2.executeUpdate();
+                    }
+                } else {
+                    sql = "INSERT INTO axvaults_data(id, uuid, storage, icon) VALUES (?, ?, ?, ?);";
+                    try (PreparedStatement stmt2 = conn.prepareStatement(sql)) {
+                        stmt2.setInt(1, vault.getId());
+                        stmt2.setString(2, vault.getUUID().toString());
+                        stmt2.setBytes(3, bytes);
+                        stmt2.setString(4, vault.getRealIcon() == null ? null : vault.getRealIcon().name());
+                        stmt2.executeUpdate();
+                    }
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
     }
 
     @Override
@@ -160,7 +140,7 @@ public class H2 implements Database {
                     }
 //                    if (VaultUtils.isDeleteEmptyVaults() && items.length == 0) continue;
                     Material icon = rs.getString(4) == null ? null : Material.valueOf(rs.getString(4));
-                    new Vault(vaultPlayer, id, icon, items);
+                    ThreadUtils.runSync(() -> new Vault(vaultPlayer, id, icon, items));
                 }
             }
         } catch (SQLException ex) {

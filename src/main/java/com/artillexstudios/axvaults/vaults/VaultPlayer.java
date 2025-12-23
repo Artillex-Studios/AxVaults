@@ -2,6 +2,8 @@ package com.artillexstudios.axvaults.vaults;
 
 import com.artillexstudios.axvaults.AxVaults;
 import com.artillexstudios.axvaults.utils.PermissionUtils;
+import com.artillexstudios.axvaults.utils.ThreadUtils;
+import com.artillexstudios.axvaults.utils.VaultUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
@@ -35,10 +37,14 @@ public class VaultPlayer {
         return loaded;
     }
 
-    public void load(CompletableFuture<VaultPlayer> cf) {
+    public void load() {
         AxVaults.getDatabase().loadVaults(this);
         loaded = true;
-        cf.complete(this);
+    }
+
+    public void load(CompletableFuture<VaultPlayer> cf) {
+        load();
+        ThreadUtils.runSync(() -> cf.complete(this));
     }
 
     public ConcurrentHashMap<Integer, Vault> getVaultMap() {
@@ -81,7 +87,7 @@ public class VaultPlayer {
     public void save() {
         AxVaults.getThreadedQueue().submit(() -> {
             for (Vault vault : vaultMap.values()) {
-                AxVaults.getDatabase().saveVault(vault);
+                VaultUtils.save(vault);
             }
         });
 

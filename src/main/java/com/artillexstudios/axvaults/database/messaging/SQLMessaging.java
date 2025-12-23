@@ -1,9 +1,9 @@
 package com.artillexstudios.axvaults.database.messaging;
 
+import com.artillexstudios.axapi.executor.ExceptionReportingScheduledThreadPool;
 import com.artillexstudios.axvaults.AxVaults;
 import com.artillexstudios.axvaults.database.impl.MySQL;
 
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -26,7 +26,7 @@ public class SQLMessaging {
             return;
         }
         if (executor != null) executor.shutdown();
-        executor = Executors.newSingleThreadScheduledExecutor();
+        executor = new ExceptionReportingScheduledThreadPool(1);
         executor.scheduleAtFixedRate(db::checkForChanges, 5, 5, TimeUnit.SECONDS);
         executor.scheduleAtFixedRate(db::removeOldChanges, 10, 10, TimeUnit.SECONDS);
     }

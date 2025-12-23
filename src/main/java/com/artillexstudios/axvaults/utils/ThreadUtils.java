@@ -23,6 +23,16 @@ public class ThreadUtils {
         }
     }
 
+    public static void runAsync(Runnable runnable) {
+        if (AxVaults.isStopping()) {
+            runSync(runnable);
+        } else if (!Bukkit.isPrimaryThread()) {
+            runnable.run();
+        } else {
+            AxVaults.getThreadedQueue().submit(runnable);
+        }
+    }
+
     public static void runSync(Runnable runnable) {
         if (Bukkit.isPrimaryThread() || AxVaults.isStopping()) {
             runnable.run();

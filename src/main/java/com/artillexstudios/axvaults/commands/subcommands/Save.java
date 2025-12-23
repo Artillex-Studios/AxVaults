@@ -1,6 +1,7 @@
 package com.artillexstudios.axvaults.commands.subcommands;
 
 import com.artillexstudios.axvaults.AxVaults;
+import com.artillexstudios.axvaults.utils.VaultUtils;
 import com.artillexstudios.axvaults.vaults.Vault;
 import com.artillexstudios.axvaults.vaults.VaultManager;
 import org.bukkit.command.CommandSender;
@@ -20,7 +21,7 @@ public enum Save {
         AxVaults.getThreadedQueue().submit(() -> {
             List<CompletableFuture<Void>> futures = new ArrayList<>();
             for (Vault vault : VaultManager.getVaults()) {
-                futures.add(AxVaults.getDatabase().saveVault(vault));
+                VaultUtils.save(vault);
             }
             CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new)).thenRun(() -> {
                 MESSAGEUTILS.sendLang(sender, "save.manual", Map.of("%time%", "" + (System.currentTimeMillis() - time)));

@@ -101,5 +101,9 @@ update-notifier:
   # if enabled, it will broadcast the update message to all players who have the <plugin-name>.update-notify permission
   on-join: true
 
+# prints information about the plugin
+# this can cause a lot of spam, only use if a developer asks you to
+debug: false
+
 # do not change this
-version: 8
+version: 9

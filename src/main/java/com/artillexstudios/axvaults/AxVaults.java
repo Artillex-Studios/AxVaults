@@ -28,6 +28,7 @@ import com.artillexstudios.axvaults.listeners.InventoryCloseListener;
 import com.artillexstudios.axvaults.listeners.PlayerInteractListener;
 import com.artillexstudios.axvaults.listeners.PlayerListeners;
 import com.artillexstudios.axvaults.schedulers.AutoSaveScheduler;
+import com.artillexstudios.axvaults.utils.DebugUtils;
 import com.artillexstudios.axvaults.utils.UpdateNotifier;
 import com.artillexstudios.axvaults.utils.VaultUtils;
 import com.artillexstudios.axvaults.vaults.Vault;
@@ -94,6 +95,7 @@ public final class AxVaults extends AxPlugin {
 
         VaultUtils.reload();
         HookManager.setupHooks();
+        DebugUtils.init(CONFIG);
 
         database = switch (CONFIG.getString("database.type").toLowerCase()) {
             case "sqlite" -> new SQLite();
@@ -137,7 +139,7 @@ public final class AxVaults extends AxPlugin {
         AutoSaveScheduler.stop();
         List<CompletableFuture<?>> futures = new ArrayList<>();
         for (Vault vault : VaultManager.getVaults()) {
-            futures.add(AxVaults.getDatabase().saveVault(vault));
+            futures.add(VaultUtils.save(vault));
         }
 
         CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new)).join();

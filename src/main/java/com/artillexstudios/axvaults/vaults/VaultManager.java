@@ -22,6 +22,13 @@ public class VaultManager {
         return players;
     }
 
+    public static void loadPlayer(@NotNull OfflinePlayer offlinePlayer) {
+        if (players.containsKey(offlinePlayer.getUniqueId())) return;
+
+        VaultPlayer vaultPlayer = new VaultPlayer(offlinePlayer.getUniqueId());
+        AxVaults.getThreadedQueue().submit(vaultPlayer::load);
+    }
+
     public static CompletableFuture<VaultPlayer> getPlayer(@NotNull OfflinePlayer offlinePlayer) {
         CompletableFuture<VaultPlayer> cf = new CompletableFuture<>();
 
@@ -32,6 +39,11 @@ public class VaultManager {
 
         AxVaults.getThreadedQueue().submit(() -> vaultPlayer.load(cf));
         return cf;
+    }
+
+    @Nullable
+    public static VaultPlayer getPlayerOrNull(@NotNull OfflinePlayer offlinePlayer) {
+        return players.get(offlinePlayer.getUniqueId());
     }
 
     public static void cleanup(VaultPlayer vaultPlayer) {

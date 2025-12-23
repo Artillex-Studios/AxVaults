@@ -3,6 +3,7 @@ package com.artillexstudios.axvaults.commands;
 import com.artillexstudios.axvaults.AxVaults;
 import com.artillexstudios.axvaults.utils.CommandMessages;
 import com.artillexstudios.axvaults.vaults.VaultManager;
+import com.artillexstudios.axvaults.vaults.VaultPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import revxrsal.commands.bukkit.BukkitCommandHandler;
@@ -23,9 +24,11 @@ public class CommandManager {
             final Player player = Bukkit.getPlayer(sender.getUniqueId());
             if (!player.hasPermission("axvaults.openremote")) return new ArrayList<>();
 
-            final ArrayList<String> numbers = new ArrayList<>();
-            for (Integer i : VaultManager.getPlayers().get(player.getUniqueId()).getVaultMap().keySet()) {
-                numbers.add("" + i);
+            ArrayList<String> numbers = new ArrayList<>();
+            VaultPlayer vaultPlayer = VaultManager.getPlayerOrNull(player);
+            if (vaultPlayer == null) return numbers;
+            for (Integer i : vaultPlayer.getVaultMap().keySet()) {
+                numbers.add(String.valueOf(i));
             }
             return numbers;
         });

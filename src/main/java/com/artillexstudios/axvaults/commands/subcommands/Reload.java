@@ -1,6 +1,7 @@
 package com.artillexstudios.axvaults.commands.subcommands;
 
 import com.artillexstudios.axapi.utils.StringUtils;
+import com.artillexstudios.axvaults.utils.DebugUtils;
 import com.artillexstudios.axvaults.utils.VaultUtils;
 import com.artillexstudios.axvaults.vaults.Vault;
 import com.artillexstudios.axvaults.vaults.VaultManager;
@@ -31,6 +32,7 @@ public enum Reload {
         Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#55FF00╠ &#00FF00Reloaded &fmessages.yml&#00FF00!"));
 
         VaultUtils.reload();
+        DebugUtils.reload();
         VaultManager.getVaults().forEach(Vault::reload);
         Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#55FF00╠ &#00FF00Reloaded &fvaults&#00FF00!"));
 

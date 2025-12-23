@@ -2,7 +2,7 @@ package com.artillexstudios.axvaults.schedulers;
 
 import com.artillexstudios.axapi.executor.ExceptionReportingScheduledThreadPool;
 import com.artillexstudios.axapi.utils.mutable.MutableInteger;
-import com.artillexstudios.axvaults.AxVaults;
+import com.artillexstudios.axvaults.utils.VaultUtils;
 import com.artillexstudios.axvaults.vaults.Vault;
 import com.artillexstudios.axvaults.vaults.VaultManager;
 import org.bukkit.Bukkit;
@@ -31,7 +31,7 @@ public class AutoSaveScheduler {
             List<CompletableFuture<Void>> futures = new ArrayList<>();
             for (Vault vault : VaultManager.getVaults()) {
                 if (vault.hasChanged().get()) { // only save if the vault has been touched since the last save
-                    futures.add(AxVaults.getDatabase().saveVault(vault));
+                    futures.add(VaultUtils.save(vault));
                     saved.increment();
                 }
                 if (vault.isOpened()) continue;
