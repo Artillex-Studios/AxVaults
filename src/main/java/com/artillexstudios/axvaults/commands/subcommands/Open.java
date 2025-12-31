@@ -19,7 +19,9 @@ public enum Open {
                 MESSAGEUTILS.sendLang(sender, "no-permission");
                 return;
             }
-            new VaultSelector().open(sender);
+            VaultManager.getPlayer(sender).thenAccept(vaultPlayer -> {
+                new VaultSelector(sender, vaultPlayer).open();
+            });
             return;
         }
 

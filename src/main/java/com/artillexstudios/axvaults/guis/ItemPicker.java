@@ -6,6 +6,7 @@ import com.artillexstudios.axapi.utils.ItemBuilder;
 import com.artillexstudios.axapi.utils.StringUtils;
 import com.artillexstudios.axvaults.utils.SoundUtils;
 import com.artillexstudios.axvaults.vaults.Vault;
+import com.artillexstudios.axvaults.vaults.VaultPlayer;
 import dev.triumphteam.gui.guis.Gui;
 import dev.triumphteam.gui.guis.GuiItem;
 import dev.triumphteam.gui.guis.PaginatedGui;
@@ -23,12 +24,19 @@ import static com.artillexstudios.axvaults.AxVaults.CONFIG;
 import static com.artillexstudios.axvaults.AxVaults.MESSAGES;
 
 public class ItemPicker {
+    private final Player player;
+    private final VaultPlayer vaultPlayer;
 
-    public void open(@NotNull Player player, @NotNull Vault vault) {
-        open(player, vault, 1, 1);
+    public ItemPicker(Player player, VaultPlayer vaultPlayer) {
+        this.player = player;
+        this.vaultPlayer = vaultPlayer;
     }
 
-    public void open(@NotNull Player player, @NotNull Vault vault, int oldPage, int cPage) {
+    public void open(@NotNull Vault vault) {
+        open(vault, 1, 1);
+    }
+
+    public void open(@NotNull Vault vault, int oldPage, int cPage) {
         int rows = CONFIG.getInt("item-picker-rows", 6);
         int pageSize = rows * 9 - 9;
 
@@ -62,9 +70,9 @@ public class ItemPicker {
                 else vault.setIcon(material);
                 SoundUtils.playSound(player, MESSAGES.getString("sounds.select-icon"));
                 if (CONFIG.getBoolean("selector-stay-open", true))
-                    open(player, vault, oldPage, gui.getCurrentPageNum());
+                    open(vault, oldPage, gui.getCurrentPageNum());
                 else
-                    new VaultSelector().open(player, oldPage);
+                    new VaultSelector(player, vaultPlayer).open(oldPage);
             });
             gui.addItem(guiItem);
         }
@@ -86,7 +94,7 @@ public class ItemPicker {
         final Section back;
         if ((back = MESSAGES.getSection("gui-items.back")) != null) {
             final GuiItem item3 = new GuiItem(ItemBuilder.create(back).get());
-            item3.setAction(event -> new VaultSelector().open(player, oldPage));
+            item3.setAction(event -> new VaultSelector(player, vaultPlayer).open(oldPage));
             gui.setItem(rows, 5, item3);
         }
 

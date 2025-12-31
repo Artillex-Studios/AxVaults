@@ -17,6 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class VaultManager {
     private static final ConcurrentHashMap<UUID, VaultPlayer> players = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<UUID, CompletableFuture<VaultPlayer>> loadingPlayers = new ConcurrentHashMap<>();
 
     public static ConcurrentHashMap<UUID, VaultPlayer> getPlayers() {
         return players;
@@ -29,7 +30,11 @@ public class VaultManager {
         AxVaults.getThreadedQueue().submit(vaultPlayer::load);
     }
 
+    // the future is always completed from the main thread
     public static CompletableFuture<VaultPlayer> getPlayer(@NotNull OfflinePlayer offlinePlayer) {
+        CompletableFuture<VaultPlayer> loading = loadingPlayers.get(offlinePlayer.getUniqueId());
+        if (loading != null) return loading;
+
         CompletableFuture<VaultPlayer> cf = new CompletableFuture<>();
 
         VaultPlayer vaultPlayer = players.computeIfAbsent(offlinePlayer.getUniqueId(), VaultPlayer::new);
@@ -37,6 +42,7 @@ public class VaultManager {
             return CompletableFuture.completedFuture(vaultPlayer);
         }
 
+        loadingPlayers.put(offlinePlayer.getUniqueId(), cf);
         AxVaults.getThreadedQueue().submit(() -> vaultPlayer.load(cf));
         return cf;
     }
@@ -50,6 +56,7 @@ public class VaultManager {
         if (!vaultPlayer.getVaultMap().isEmpty()) return;
         if (Bukkit.getPlayer(vaultPlayer.getUUID()) != null) return;
         players.remove(vaultPlayer.getUUID());
+        loadingPlayers.remove(vaultPlayer.getUUID());
     }
 
     @Unmodifiable

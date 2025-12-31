@@ -56,7 +56,9 @@ public class VaultPlayer {
         Player player = Bukkit.getPlayer(uuid);
         if (player != null) {
             if (!PermissionUtils.hasPermission(player, num)) return null;
-            if (!vaultMap.containsKey(num)) return addVault(new Vault(this, num, null, null));
+            if (!vaultMap.containsKey(num)) {
+                return addVault(new Vault(this, num, null, null));
+            }
         }
         if (!vaultMap.containsKey(num)) return null;
         return vaultMap.get(num);

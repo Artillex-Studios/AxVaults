@@ -16,11 +16,12 @@ public enum ForceOpen {
     INSTANCE;
 
     public void execute(CommandSender sender, Player player, @Nullable Integer number) {
-        if (number != null) {
-            final HashMap<String, String> replacements = new HashMap<>();
-            replacements.put("%num%", "" + number);
+        VaultManager.getPlayer(player).thenAccept(vaultPlayer -> {
+            if (number != null) {
+                HashMap<String, String> replacements = new HashMap<>();
+                replacements.put("%num%", "" + number);
+                replacements.put("%player%", player.getName());
 
-            VaultManager.getPlayer(player).thenAccept(vaultPlayer -> {
                 Vault vault = vaultPlayer.getVault(number);
                 if (vault == null) {
                     MESSAGEUTILS.sendLang(player, "vault.not-unlocked", replacements);
@@ -29,12 +30,12 @@ public enum ForceOpen {
 
                 vault.open(player);
                 MESSAGEUTILS.sendLang(player, "vault.opened", replacements);
-            });
-            replacements.put("%player%", player.getName());
-            MESSAGEUTILS.sendLang(sender, "force-open-vault", replacements);
-            return;
-        }
-        new VaultSelector().open(player);
-        MESSAGEUTILS.sendLang(sender, "force-open", Collections.singletonMap("%player%", player.getName()));
+                MESSAGEUTILS.sendLang(sender, "force-open-vault", replacements);
+                return;
+            }
+            new VaultSelector(player, vaultPlayer).open();
+            MESSAGEUTILS.sendLang(sender, "force-open", Collections.singletonMap("%player%", player.getName()));
+        });
+
     }
 }

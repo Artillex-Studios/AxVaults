@@ -5,7 +5,7 @@ import com.artillexstudios.axapi.reflection.ClassUtils;
 import com.artillexstudios.axapi.utils.ItemBuilder;
 import com.artillexstudios.axapi.utils.StringUtils;
 import com.artillexstudios.axvaults.vaults.Vault;
-import com.artillexstudios.axvaults.vaults.VaultManager;
+import com.artillexstudios.axvaults.vaults.VaultPlayer;
 import dev.triumphteam.gui.guis.Gui;
 import dev.triumphteam.gui.guis.GuiItem;
 import dev.triumphteam.gui.guis.PaginatedGui;
@@ -23,12 +23,19 @@ import static com.artillexstudios.axvaults.AxVaults.MESSAGES;
 import static com.artillexstudios.axvaults.AxVaults.MESSAGEUTILS;
 
 public class VaultSelector {
+    private final Player player;
+    private final VaultPlayer vaultPlayer;
 
-    public void open(@NotNull Player player) {
-        open(player, 1);
+    public VaultSelector(Player player, VaultPlayer vaultPlayer) {
+        this.player = player;
+        this.vaultPlayer = vaultPlayer;
     }
 
-    public void open(@NotNull Player player, int page) {
+    public void open() {
+        open(1);
+    }
+
+    public void open(int page) {
         int rows = CONFIG.getInt("vault-selector-rows", 6);
         int pageSize = rows * 9 - 9;
 
@@ -94,60 +101,60 @@ public class VaultSelector {
         final HashMap<String, String> replacements = new HashMap<>();
         replacements.put("%num%", "" + num);
 
-        VaultManager.getPlayer(player).thenAccept(vaultPlayer -> {
-            Vault vault = vaultPlayer.getVault(num);
-            if (vault != null) {
-                replacements.put("%used%", "" + vault.getSlotsFilled());
-                replacements.put("%max%", "" + vault.getStorage().getSize());
+        Vault vault = vaultPlayer.getVault(num);
+        if (vault != null) {
+            replacements.put("%used%", "" + vault.getSlotsFilled());
+            replacements.put("%max%", "" + vault.getStorage().getSize());
 
-                final ItemBuilder builder = ItemBuilder.create(MESSAGES.getSection("guis.selector.item-owned"));
-                builder.setLore(MESSAGES.getStringList("guis.selector.item-owned.lore"), replacements);
-                builder.setName(MESSAGES.getString("guis.selector.item-owned.name"), replacements);
+            final ItemBuilder builder = ItemBuilder.create(MESSAGES.getSection("guis.selector.item-owned"));
+            builder.setLore(MESSAGES.getStringList("guis.selector.item-owned.lore"), replacements);
+            builder.setName(MESSAGES.getString("guis.selector.item-owned.name"), replacements);
 
-                final ItemStack it = builder.get();
-                if (it.hasItemMeta()) {
-                    final ItemMeta meta = it.getItemMeta();
-                    meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
-                    it.setItemMeta(meta);
-                }
+            final ItemStack it = builder.get();
+            if (it.hasItemMeta()) {
+                final ItemMeta meta = it.getItemMeta();
+                meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+                it.setItemMeta(meta);
+            }
 
-                it.setType(vault.getIcon());
-                switch (CONFIG.getInt("selector-item-amount-mode", 1)) {
-                    case 1 -> it.setAmount(num % 64 == 0 ? 64 : num % 64);
-                    case 3 -> it.setAmount(Math.max(1, vault.getSlotsFilled()));
-                }
+            it.setType(vault.getIcon());
+            switch (CONFIG.getInt("selector-item-amount-mode", 1)) {
+                case 1 -> it.setAmount(num % 64 == 0 ? 64 : num % 64);
+                case 3 -> it.setAmount(Math.max(1, vault.getSlotsFilled()));
+            }
 
-                final GuiItem guiItem = new GuiItem(it);
-                guiItem.setAction(event -> {
-                    if (event.isShiftClick()) {
-                        if (!player.hasPermission("axvaults.itempicker")) {
-                            MESSAGEUTILS.sendLang(event.getWhoClicked(), "no-permission");
-                            return;
-                        }
-                        new ItemPicker().open(player, vault, gui.getCurrentPageNum(), 1);
+            final GuiItem guiItem = new GuiItem(it);
+            guiItem.setAction(event -> {
+                if (event.isShiftClick()) {
+                    if (!player.hasPermission("axvaults.itempicker")) {
+                        MESSAGEUTILS.sendLang(event.getWhoClicked(), "no-permission");
                         return;
                     }
-
-                    MESSAGEUTILS.sendLang(event.getWhoClicked(), "vault.opened", replacements);
-                    vault.open(player);
-                });
-                consumer.accept(guiItem);
-            } else {
-                if (!CONFIG.getBoolean("show-locked-vaults", true)) {
-                    consumer.accept(null);
+                    new ItemPicker(player, vaultPlayer).open(vault, gui.getCurrentPageNum(), 1);
                     return;
                 }
 
-                final ItemBuilder builder = ItemBuilder.create(MESSAGES.getSection("guis.selector.item-locked"));
-                builder.setLore(MESSAGES.getStringList("guis.selector.item-locked.lore"), replacements);
-                builder.setName(MESSAGES.getString("guis.selector.item-locked.name"), replacements);
-
-                final ItemStack it = builder.get();
-                if (CONFIG.getInt("selector-item-amount-mode", 1) == 1)
-                    it.setAmount(num % 64 == 0 ? 64 : num % 64);
-
-                consumer.accept(new GuiItem(it));
+                MESSAGEUTILS.sendLang(event.getWhoClicked(), "vault.opened", replacements);
+                vault.open(player);
+            });
+            gui.update();
+            consumer.accept(guiItem);
+        } else {
+            if (!CONFIG.getBoolean("show-locked-vaults", true)) {
+                consumer.accept(null);
+                return;
             }
-        });
+
+            final ItemBuilder builder = ItemBuilder.create(MESSAGES.getSection("guis.selector.item-locked"));
+            builder.setLore(MESSAGES.getStringList("guis.selector.item-locked.lore"), replacements);
+            builder.setName(MESSAGES.getString("guis.selector.item-locked.name"), replacements);
+
+            final ItemStack it = builder.get();
+            if (CONFIG.getInt("selector-item-amount-mode", 1) == 1)
+                it.setAmount(num % 64 == 0 ? 64 : num % 64);
+
+            gui.update();
+            consumer.accept(new GuiItem(it));
+        }
     }
 }

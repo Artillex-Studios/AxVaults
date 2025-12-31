@@ -2,9 +2,7 @@ package com.artillexstudios.axvaults.listeners;
 
 import com.artillexstudios.axapi.utils.PaperUtils;
 import com.artillexstudios.axvaults.AxVaults;
-import com.artillexstudios.axvaults.database.impl.MySQL;
 import com.artillexstudios.axvaults.utils.SoundUtils;
-import com.artillexstudios.axvaults.utils.VaultUtils;
 import com.artillexstudios.axvaults.vaults.Vault;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
