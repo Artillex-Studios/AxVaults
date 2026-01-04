@@ -126,7 +126,6 @@ public class Vault implements InventoryHolder {
         player.openInventory(storage);
         SoundUtils.playSound(player, MESSAGES.getString("sounds.open"));
         lastOpen = System.currentTimeMillis();
-        // todo: on close reopen selector (only when it was used)
     }
 
     public boolean isOpened() {

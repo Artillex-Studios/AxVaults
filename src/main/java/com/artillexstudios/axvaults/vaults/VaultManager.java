@@ -44,6 +44,7 @@ public class VaultManager {
 
         loadingPlayers.put(offlinePlayer.getUniqueId(), cf);
         AxVaults.getThreadedQueue().submit(() -> vaultPlayer.load(cf));
+        cf.thenRun(() -> loadingPlayers.remove(offlinePlayer.getUniqueId()));
         return cf;
     }
 

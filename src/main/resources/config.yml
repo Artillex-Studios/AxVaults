@@ -43,6 +43,15 @@ selector-item-amount-mode: 1
 # set to -1 to show an unlimited amount of vaults
 max-vault-amount: -1
 
+# when clicking outside of the vault, should the vault selector be opened?
+clicking-outside-open-selector: false
+
+# block types that will open the vault selector when right-clicked
+# list of valid materials: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Material.html
+# note: this is only recommended if you want to replace for example ender chests with the vault selector
+# to turn a single block into a vault or a selector just use the /axvaultadmin set [vault] command
+vault-selector-blocks: []
+
 # if enabled, the icon picker will not close after selecting an item
 selector-stay-open: false
 
@@ -106,4 +115,4 @@ update-notifier:
 debug: false
 
 # do not change this
-version: 9
+version: 10
