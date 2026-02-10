@@ -17,5 +17,7 @@ public enum Debug {
         Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#DDDDDD" + String.join("\n&#DDDDDD", VaultManager.getPlayers().values().stream().map(VaultPlayer::toString).toList())));
         Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#AAFFAACached vaults:"));
         Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#DDDDDD" + String.join("\n&#DDDDDD", VaultManager.getVaults().stream().map(Vault::toString).toList())));
+        Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#AAFFAALoading players:"));
+        Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#DDDDDD" + String.join("\n&#DDDDDD", VaultManager.getLoadingPlayers().keySet().stream().map(uuid -> Bukkit.getOfflinePlayer(uuid).getName()).toList())));
     }
 }

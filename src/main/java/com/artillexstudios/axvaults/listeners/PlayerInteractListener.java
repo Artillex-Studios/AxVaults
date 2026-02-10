@@ -47,9 +47,9 @@ public class PlayerInteractListener implements Listener {
         } else if (!selectorMaterials.contains(event.getClickedBlock().getType())) {
             return;
         }
+        event.setCancelled(true);
         if (cooldown.hasCooldown(player)) return;
         cooldown.addCooldown(player, 100L);
-        event.setCancelled(true);
         Open.INSTANCE.execute(player, vault, true);
     }
 }

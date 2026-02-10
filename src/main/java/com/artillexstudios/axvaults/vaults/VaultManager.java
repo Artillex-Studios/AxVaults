@@ -4,6 +4,7 @@ import com.artillexstudios.axvaults.AxVaults;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.inventory.Inventory;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
@@ -21,6 +22,11 @@ public class VaultManager {
 
     public static ConcurrentHashMap<UUID, VaultPlayer> getPlayers() {
         return players;
+    }
+
+    @ApiStatus.Internal
+    public static ConcurrentHashMap<UUID, CompletableFuture<VaultPlayer>> getLoadingPlayers() {
+        return loadingPlayers;
     }
 
     public static void loadPlayer(@NotNull OfflinePlayer offlinePlayer) {
