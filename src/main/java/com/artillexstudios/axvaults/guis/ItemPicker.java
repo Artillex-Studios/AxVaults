@@ -4,6 +4,7 @@ import com.artillexstudios.axapi.libs.boostedyaml.block.implementation.Section;
 import com.artillexstudios.axapi.reflection.ClassUtils;
 import com.artillexstudios.axapi.utils.ItemBuilder;
 import com.artillexstudios.axapi.utils.StringUtils;
+import com.artillexstudios.axvaults.utils.IconUtils;
 import com.artillexstudios.axvaults.utils.SoundUtils;
 import com.artillexstudios.axvaults.vaults.Vault;
 import com.artillexstudios.axvaults.vaults.VaultPlayer;
@@ -11,7 +12,6 @@ import dev.triumphteam.gui.guis.Gui;
 import dev.triumphteam.gui.guis.GuiItem;
 import dev.triumphteam.gui.guis.PaginatedGui;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -52,12 +52,15 @@ public class ItemPicker {
                 .disableAllInteractions()
                 .create();
 
-        for (Material material : Material.values()) {
+        for (IconUtils.IconItem iconItem : IconUtils.getAllowedIconItems()) {
+            final var material = iconItem.material();
             ItemStack it = null;
             try {
                 it = ItemBuilder.create(material).glow(Objects.equals(vault.getIcon(), material)).get();
             } catch (Exception ignored) {}
             if (it == null) continue;
+
+            IconUtils.applyCustomModelData(it, iconItem.customModelData());
             final ItemMeta meta = it.hasItemMeta() ? it.getItemMeta() : Bukkit.getItemFactory().getItemMeta(it.getType());
             if (meta == null) continue;
 
