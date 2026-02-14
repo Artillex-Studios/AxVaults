@@ -55,6 +55,22 @@ vault-selector-blocks: []
 # if enabled, the icon picker will not close after selecting an item
 selector-stay-open: false
 
+
+# limits which items can be selected as vault icons
+# supports either a plain material list:
+# allowed-vault-icons:
+#   - minecraft:chest
+#   - DIAMOND
+#
+# or map entries to provide optional custom-model-data:
+# allowed-vault-icons:
+#   - material: minecraft:chest
+#   - material: minecraft:paper
+#     custom-model-data: 100
+#
+# if this list is empty or missing, all items are allowed
+allowed-vault-icons: []
+
 # should the plugin delete emptied vaults from the database?
 # you shouldn't have to disable this unless a developers tells you to
 delete-empty-vaults: true
