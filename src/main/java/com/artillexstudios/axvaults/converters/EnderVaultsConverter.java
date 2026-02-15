@@ -1,6 +1,7 @@
 package com.artillexstudios.axvaults.converters;
 
 import com.artillexstudios.axapi.config.Config;
+import com.artillexstudios.axapi.utils.StringUtils;
 import com.artillexstudios.axvaults.utils.VaultUtils;
 import com.artillexstudios.axvaults.vaults.Vault;
 import com.artillexstudios.axvaults.vaults.VaultManager;
@@ -17,59 +18,63 @@ import java.util.UUID;
 public class EnderVaultsConverter {
 
     public void run() {
-
-        File path = new File(Bukkit.getWorldContainer(), "plugins/EnderVaults/data");
-
+        final File path = new File(Bukkit.getWorldContainer(), "plugins/EnderVaults/data");
         if (!path.exists()) {
-            Bukkit.getConsoleSender().sendMessage("§c[AxVaults] EnderVaults folder not found!");
+            Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#FF0000[AxVaults] Failed converting! EnderVaults folder not found!"));
             return;
         }
 
-        int players = 0;
         int vaults = 0;
+        int players = 0;
+        final File[] playerFolders = path.listFiles();
+        if (playerFolders == null) {
+            Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#FF0000[AxVaults] Failed converting! Could not access EnderVaults data folder!"));
+            return;
+        }
 
-        for (File file : path.listFiles()) {
+        for (File playerFolder : playerFolders) {
+            if (!playerFolder.isDirectory()) continue;
 
-            if (!file.isFile()) continue;
-
-            UUID uuid;
+            final UUID uuid;
             try {
-                uuid = UUID.fromString(file.getName());
+                uuid = UUID.fromString(playerFolder.getName());
             } catch (Exception ex) {
                 continue;
             }
 
-            Config config = new Config(file);
+            boolean hasConvertedVault = false;
+            final VaultPlayer vaultPlayer = VaultManager.getPlayer(Bukkit.getOfflinePlayer(uuid)).join();
+            final File[] vaultFiles = playerFolder.listFiles();
+            if (vaultFiles == null) continue;
 
-            if (!config.contains("contents")) continue;
+            for (File vaultFile : vaultFiles) {
+                if (!vaultFile.isFile() || !vaultFile.getName().endsWith(".yaml")) continue;
 
-            players++;
+                final Config data = new Config(vaultFile);
+                if (!data.contains("contents")) continue;
 
-            int number = 1;
-            if (config.contains("metadata.order")) {
-                try {
-                    number = Integer.parseInt(config.getString("metadata.order"));
-                } catch (Exception ignored) {}
+                int number = 1;
+                if (data.contains("metadata.order")) {
+                    try {
+                        number = Integer.parseInt(data.getString("metadata.order"));
+                    } catch (Exception ignored) {
+                    }
+                }
+                if (number < 1) number = 1;
+
+                final ItemStack[] contents = deserialize(data.getString("contents"));
+                if (contents == null) continue;
+
+                final Vault vault = new Vault(vaultPlayer, number, null, contents);
+                VaultUtils.save(vault);
+
+                hasConvertedVault = true;
+                vaults++;
             }
 
-            String base64 = config.getString("contents");
-            ItemStack[] contents = deserialize(base64);
-
-            if (contents == null) continue;
-
-            VaultPlayer vaultPlayer = VaultManager
-                    .getPlayer(Bukkit.getOfflinePlayer(uuid))
-                    .join();
-
-            Vault vault = new Vault(vaultPlayer, number, null, contents);
-            VaultUtils.save(vault);
-
-            vaults++;
+            if (hasConvertedVault) players++;
         }
-
-        Bukkit.getConsoleSender().sendMessage(
-                "§a[AxVaults] Converted " + vaults + " vault(s) of " + players + " player(s)!"
-        );
+        Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#33FF33[AxVaults] Finished converting " + vaults + " vaults of " + players + " players!"));
     }
 
     private ItemStack[] deserialize(String base64) {
