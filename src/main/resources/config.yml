@@ -62,11 +62,12 @@ selector-stay-open: false
 #   - minecraft:chest
 #   - DIAMOND
 #
-# or map entries to provide optional custom-model-data:
+# or map entries to provide optional custom-model-data and name:
 #allowed-vault-icons:
 #   - material: minecraft:chest
 #   - material: 'DIRT'
 #     custom-model-data: 100
+#     name: 'test'
 #   - material: 'minecraft:paper'
 #
 # if this list is empty or missing, all items are allowed

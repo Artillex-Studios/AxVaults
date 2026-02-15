@@ -119,7 +119,8 @@ public class VaultSelector {
             }
 
             it.setType(vault.getIcon());
-            IconUtils.applyCustomModelData(it, IconUtils.getCustomModelData(vault.getIcon()));
+            IconUtils.applyModifiers(it, IconUtils.getCustomModelData(vault.getIcon()), IconUtils.getName(vault.getIcon()));
+
             switch (CONFIG.getInt("selector-item-amount-mode", 1)) {
                 case 1 -> it.setAmount(num % 64 == 0 ? 64 : num % 64);
                 case 3 -> it.setAmount(Math.max(1, vault.getSlotsFilled()));

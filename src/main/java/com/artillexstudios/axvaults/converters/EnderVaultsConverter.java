@@ -44,26 +44,30 @@ public class EnderVaultsConverter {
 
             boolean hasConvertedVault = false;
             final VaultPlayer vaultPlayer = VaultManager.getPlayer(Bukkit.getOfflinePlayer(uuid)).join();
+            Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#33FF33[AxVaults] EnderVaultsConverter: processing player " + Bukkit.getOfflinePlayer(uuid).getName()));
+
             final File[] vaultFiles = playerFolder.listFiles();
             if (vaultFiles == null) continue;
 
             for (File vaultFile : vaultFiles) {
+                Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#33FF33[AxVaults]EnderVaultsConverter: processing file " + vaultFile.getName()));
                 if (!vaultFile.isFile() || !vaultFile.getName().endsWith(".yaml")) continue;
+                Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#33FF33[AxVaults] EnderVaultsConverter: is yml " + vaultFile.getName()));
 
                 final Config data = new Config(vaultFile);
-                if (!data.contains("contents")) continue;
 
                 int number = 1;
-                if (data.contains("metadata.order")) {
-                    try {
-                        number = Integer.parseInt(data.getString("metadata.order"));
-                    } catch (Exception ignored) {
-                    }
-                }
+                try {
+                    number = Integer.parseInt(data.getString("metadata.order"));
+                } catch (Exception ignored) {}
+
                 if (number < 1) number = 1;
 
                 final ItemStack[] contents = deserialize(data.getString("contents"));
-                if (contents == null) continue;
+                if (contents == null) {
+                    Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#FF0000[AxVaults] contents missing for " + uuid + "/" + vaultFile.getName()));
+                    continue;
+                }
 
                 final Vault vault = new Vault(vaultPlayer, number, null, contents);
                 VaultUtils.save(vault);
@@ -72,7 +76,8 @@ public class EnderVaultsConverter {
                 vaults++;
             }
 
-            if (hasConvertedVault) players++;
+            if (hasConvertedVault)
+                players++;
         }
         Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#33FF33[AxVaults] Finished converting " + vaults + " vaults of " + players + " players!"));
     }

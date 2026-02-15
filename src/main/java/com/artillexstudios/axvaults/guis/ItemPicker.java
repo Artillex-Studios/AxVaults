@@ -61,7 +61,8 @@ public class ItemPicker {
             } catch (Exception ignored) {}
             if (it == null) continue;
 
-            IconUtils.applyCustomModelData(it, iconItem.customModelData());
+            IconUtils.applyModifiers(it, iconItem.customModelData(), iconItem.itemName());
+
             final ItemMeta meta = it.hasItemMeta() ? it.getItemMeta() : Bukkit.getItemFactory().getItemMeta(it.getType());
             if (meta == null) continue;
 

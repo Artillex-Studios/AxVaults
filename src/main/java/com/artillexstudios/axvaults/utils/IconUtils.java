@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.logging.Logger;
+//import java.util.logging.Logger;
 
 import static com.artillexstudios.axvaults.AxVaults.CONFIG;
 
@@ -28,7 +28,7 @@ public class IconUtils {
         // Default behaviour
         if (listIcons == null || listIcons.isEmpty()) {
             for (Material material : Material.values())
-                icons.add(new IconItem(material, null));
+                icons.add(new IconItem(material, null, null));
 
             return icons;
         }
@@ -48,7 +48,12 @@ public class IconUtils {
             if (rawCmd instanceof Number number)
                 customModelData = number.intValue();
 
-            icons.add(new IconItem(material, customModelData));
+            String itemName = null;
+            Object rawName = map.get("name");
+            if (rawName instanceof String name)
+                itemName = name;
+
+            icons.add(new IconItem(material, customModelData, itemName));
         }
 
         return icons;
@@ -63,11 +68,26 @@ public class IconUtils {
         return null;
     }
 
-    public static void applyCustomModelData(@NotNull ItemStack item, @Nullable Integer customModelData) {
-        if (customModelData == null) return;
+    @Nullable
+    public static String getName(@NotNull Material material) {
+        for (IconItem icon : getAllowedIconItems()) {
+            if (!icon.material().equals(material)) continue;
+            return icon.itemName();
+        }
+        return null;
+    }
+
+    public static void applyModifiers(@NotNull ItemStack item, @Nullable Integer customModelData, @Nullable String name) {
         ItemMeta meta = item.getItemMeta();
-        if (meta == null) return;
-        meta.setCustomModelData(customModelData);
+        if (meta == null)
+            return;
+
+        if (customModelData != null)
+            meta.setCustomModelData(customModelData);
+
+        if (name != null)
+            meta.setDisplayName(name);
+
         item.setItemMeta(meta);
     }
 
@@ -79,6 +99,6 @@ public class IconUtils {
         return Material.matchMaterial(material.toUpperCase(Locale.ENGLISH));
     }
 
-    public record IconItem(@NotNull Material material, @Nullable Integer customModelData) {
+    public record IconItem(@NotNull Material material, @Nullable Integer customModelData, @Nullable String itemName) {
     }
 }
