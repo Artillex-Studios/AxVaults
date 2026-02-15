@@ -4,6 +4,7 @@ import com.artillexstudios.axapi.libs.boostedyaml.block.implementation.Section;
 import com.artillexstudios.axapi.reflection.ClassUtils;
 import com.artillexstudios.axapi.utils.ItemBuilder;
 import com.artillexstudios.axapi.utils.StringUtils;
+import com.artillexstudios.axvaults.utils.IconUtils;
 import com.artillexstudios.axvaults.vaults.Vault;
 import com.artillexstudios.axvaults.vaults.VaultPlayer;
 import dev.triumphteam.gui.guis.Gui;
@@ -118,6 +119,7 @@ public class VaultSelector {
             }
 
             it.setType(vault.getIcon());
+            IconUtils.applyCustomModelData(it, IconUtils.getCustomModelData(vault.getIcon()));
             switch (CONFIG.getInt("selector-item-amount-mode", 1)) {
                 case 1 -> it.setAmount(num % 64 == 0 ? 64 : num % 64);
                 case 3 -> it.setAmount(Math.max(1, vault.getSlotsFilled()));
