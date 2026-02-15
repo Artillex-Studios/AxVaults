@@ -58,15 +58,16 @@ selector-stay-open: false
 
 # limits which items can be selected as vault icons
 # supports either a plain material list:
-# allowed-vault-icons:
+#allowed-vault-icons:
 #   - minecraft:chest
 #   - DIAMOND
 #
 # or map entries to provide optional custom-model-data:
-# allowed-vault-icons:
+#allowed-vault-icons:
 #   - material: minecraft:chest
-#   - material: minecraft:paper
+#   - material: 'DIRT'
 #     custom-model-data: 100
+#   - material: 'minecraft:paper'
 #
 # if this list is empty or missing, all items are allowed
 allowed-vault-icons: []

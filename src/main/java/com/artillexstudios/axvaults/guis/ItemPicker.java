@@ -54,6 +54,7 @@ public class ItemPicker {
 
         for (IconUtils.IconItem iconItem : IconUtils.getAllowedIconItems()) {
             final var material = iconItem.material();
+
             ItemStack it = null;
             try {
                 it = ItemBuilder.create(material).glow(Objects.equals(vault.getIcon(), material)).get();

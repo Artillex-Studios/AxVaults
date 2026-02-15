@@ -10,18 +10,45 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import static com.artillexstudios.axvaults.AxVaults.CONFIG;
 
 public class IconUtils {
 
+    //static Logger logger = Logger.getAnonymousLogger();
+
     @NotNull
     public static List<IconItem> getAllowedIconItems() {
-        List<IconItem> icons = getConfiguredIconItems();
-        if (!icons.isEmpty()) return icons;
 
-        for (Material material : Material.values()) {
-            icons.add(new IconItem(material, null));
+        List<IconItem> icons = new ArrayList<>();
+
+        List<Map<String, Object>> listIcons = CONFIG.getMapList("allowed-vault-icons");
+
+        // Default behaviour
+        if (listIcons == null || listIcons.isEmpty()) {
+            for (Material material : Material.values())
+                icons.add(new IconItem(material, null));
+
+            return icons;
+        }
+
+        // Else read config lines
+        for (Map<String, Object> map : listIcons) {
+            //logger.info("Found new entry " + map);
+
+            Object rawMaterial = map.get("material");
+            if (!(rawMaterial instanceof String materialName)) continue;
+
+            Material material = parseMaterial(materialName);
+            if (material == null) continue; // Skip this config line
+
+            Integer customModelData = null;
+            Object rawCmd = map.get("custom-model-data");
+            if (rawCmd instanceof Number number)
+                customModelData = number.intValue();
+
+            icons.add(new IconItem(material, customModelData));
         }
 
         return icons;
@@ -29,7 +56,7 @@ public class IconUtils {
 
     @Nullable
     public static Integer getCustomModelData(@NotNull Material material) {
-        for (IconItem icon : getConfiguredIconItems()) {
+        for (IconItem icon : getAllowedIconItems()) {
             if (!icon.material().equals(material)) continue;
             return icon.customModelData();
         }
@@ -42,38 +69,6 @@ public class IconUtils {
         if (meta == null) return;
         meta.setCustomModelData(customModelData);
         item.setItemMeta(meta);
-    }
-
-    @NotNull
-    private static List<IconItem> getConfiguredIconItems() {
-        List<IconItem> icons = new ArrayList<>();
-
-        for (String material : CONFIG.getStringList("allowed-vault-icons")) {
-            Material parsed = parseMaterial(material);
-            if (parsed == null) continue;
-            icons.add(new IconItem(parsed, null));
-        }
-
-        List<Map<String, Object>> mapped = CONFIG.getMapList("allowed-vault-icons");
-        if (mapped != null) {
-            for (Map<String, Object> map : mapped) {
-                Object rawMaterial = map.get("material");
-                if (!(rawMaterial instanceof String material)) continue;
-
-                Material parsed = parseMaterial(material);
-                if (parsed == null) continue;
-
-                Integer customModelData = null;
-                Object rawCmd = map.get("custom-model-data");
-                if (rawCmd instanceof Number number) {
-                    customModelData = number.intValue();
-                }
-
-                icons.add(new IconItem(parsed, customModelData));
-            }
-        }
-
-        return icons;
     }
 
     @Nullable
