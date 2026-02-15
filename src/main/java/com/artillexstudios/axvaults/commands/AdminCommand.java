@@ -66,8 +66,14 @@ public class AdminCommand implements OrphanCommand {
 
     @CommandPermission("axvaults.admin.converter")
     @Subcommand("converter PlayerVaultsX")
-    public void converter(CommandSender sender) {
-        Converter.INSTANCE.execute(sender);
+    public void converterPlayerVaultsX(CommandSender sender) {
+        Converter.INSTANCE.executePlayerVaultsX(sender);
+    }
+
+    @CommandPermission("axvaults.admin.converter")
+    @Subcommand("converter EnderVaults")
+    public void converterEnderVaults(CommandSender sender) {
+        Converter.INSTANCE.executeEnderVaults(sender);
     }
 
     @CommandPermission("axvaults.admin.save")
