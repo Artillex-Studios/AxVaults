@@ -51,8 +51,7 @@ public class EnderVaultsConverter {
 
             for (File vaultFile : vaultFiles) {
                 Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#33FF33[AxVaults]EnderVaultsConverter: processing file " + vaultFile.getName()));
-                if (!vaultFile.isFile() || !vaultFile.getName().endsWith(".yaml")) continue;
-                Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#33FF33[AxVaults] EnderVaultsConverter: is yml " + vaultFile.getName()));
+                if (!vaultFile.isFile() || !vaultFile.getName().endsWith(".yml")) continue;
 
                 final Config data = new Config(vaultFile);
 
@@ -63,13 +62,15 @@ public class EnderVaultsConverter {
 
                 if (number < 1) number = 1;
 
+                Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#33FF33[AxVaults]EnderVaultsConverter: processing contents"));
+
                 final ItemStack[] contents = deserialize(data.getString("contents"));
                 if (contents == null) {
                     Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#FF0000[AxVaults] contents missing for " + uuid + "/" + vaultFile.getName()));
                     continue;
                 }
 
-                final Vault vault = new Vault(vaultPlayer, number, null, contents);
+                final Vault vault = new Vault(vaultPlayer, number, null, null, contents);
                 VaultUtils.save(vault);
 
                 hasConvertedVault = true;

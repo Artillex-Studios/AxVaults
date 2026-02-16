@@ -1,6 +1,8 @@
 package com.artillexstudios.axvaults.utils;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
@@ -10,13 +12,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-//import java.util.logging.Logger;
+
+//import com.artillexstudios.axapi.utils.logging.LogUtils;
 
 import static com.artillexstudios.axvaults.AxVaults.CONFIG;
+import static com.artillexstudios.axvaults.AxVaults.MESSAGES;
 
 public class IconUtils {
-
-    //static Logger logger = Logger.getAnonymousLogger();
 
     @NotNull
     public static List<IconItem> getAllowedIconItems() {
@@ -35,13 +37,13 @@ public class IconUtils {
 
         // Else read config lines
         for (Map<String, Object> map : listIcons) {
-            //logger.info("Found new entry " + map);
+            //LogUtils.info("Found new entry " + map);
 
             Object rawMaterial = map.get("material");
             if (!(rawMaterial instanceof String materialName)) continue;
 
             Material material = parseMaterial(materialName);
-            if (material == null) continue; // Skip this config line
+            if (material == null) continue; // Skip this config line if not valid
 
             Integer customModelData = null;
             Object rawCmd = map.get("custom-model-data");
@@ -59,25 +61,7 @@ public class IconUtils {
         return icons;
     }
 
-    @Nullable
-    public static Integer getCustomModelData(@NotNull Material material) {
-        for (IconItem icon : getAllowedIconItems()) {
-            if (!icon.material().equals(material)) continue;
-            return icon.customModelData();
-        }
-        return null;
-    }
-
-    @Nullable
-    public static String getName(@NotNull Material material) {
-        for (IconItem icon : getAllowedIconItems()) {
-            if (!icon.material().equals(material)) continue;
-            return icon.itemName();
-        }
-        return null;
-    }
-
-    public static void applyModifiers(@NotNull ItemStack item, @Nullable Integer customModelData, @Nullable String name) {
+    public static void applyModifiers(@NotNull ItemStack item, @Nullable Integer customModelData, @Nullable String name, boolean isIconPickerGui) {
         ItemMeta meta = item.getItemMeta();
         if (meta == null)
             return;
@@ -85,9 +69,17 @@ public class IconUtils {
         if (customModelData != null)
             meta.setCustomModelData(customModelData);
 
-        if (name != null)
-            meta.setDisplayName(name);
+        if (isIconPickerGui) {
+            if (name != null) {
+                meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', name));
+            } else {
+                String defaultName = MESSAGES.getString("guis.item-picker.defaultName");
+                meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', defaultName));
+            }
+            meta.setLore(new ArrayList<>());
+        }
 
+        meta.addItemFlags(ItemFlag.values());
         item.setItemMeta(meta);
     }
 

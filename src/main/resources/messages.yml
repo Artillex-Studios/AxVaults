@@ -41,6 +41,7 @@ guis:
         - "&#FF0000&l(!) &#FF0000Locked Vault"
   item-picker:
     title: "&0Item Picker"
+    defaultName: "&3Click to select"
   vault:
     title: "&0Vault #%num%"
 

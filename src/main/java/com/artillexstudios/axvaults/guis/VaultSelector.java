@@ -11,9 +11,7 @@ import dev.triumphteam.gui.guis.Gui;
 import dev.triumphteam.gui.guis.GuiItem;
 import dev.triumphteam.gui.guis.PaginatedGui;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
@@ -59,15 +57,18 @@ public class VaultSelector {
             });
         }
 
+        int maxVaults = CONFIG.getInt("max-vault-amount");
+        boolean hasMultiplePages = maxVaults > ((rows-1) * 9);
+
         final Section prev;
-        if ((prev = MESSAGES.getSection("gui-items.previous-page")) != null) {
+        if ((prev = MESSAGES.getSection("gui-items.previous-page")) != null && hasMultiplePages) {
             final GuiItem item1 = new GuiItem(ItemBuilder.create(prev).get());
             item1.setAction(event -> gui.previous());
             gui.setItem(rows, 3, item1);
         }
 
         final Section next;
-        if ((next = MESSAGES.getSection("gui-items.next-page")) != null) {
+        if ((next = MESSAGES.getSection("gui-items.next-page")) != null && hasMultiplePages) {
             final GuiItem item2 = new GuiItem(ItemBuilder.create(next).get());
             item2.setAction(event -> {
                 gui.next();
@@ -112,14 +113,9 @@ public class VaultSelector {
             builder.setName(MESSAGES.getString("guis.selector.item-owned.name"), replacements);
 
             final ItemStack it = builder.get();
-            if (it.hasItemMeta()) {
-                final ItemMeta meta = it.getItemMeta();
-                meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
-                it.setItemMeta(meta);
-            }
 
-            it.setType(vault.getIcon());
-            IconUtils.applyModifiers(it, IconUtils.getCustomModelData(vault.getIcon()), IconUtils.getName(vault.getIcon()));
+            it.setType(vault.getIconMaterial());
+            IconUtils.applyModifiers(it, vault.getIconCustomModelData(), null, false);
 
             switch (CONFIG.getInt("selector-item-amount-mode", 1)) {
                 case 1 -> it.setAmount(num % 64 == 0 ? 64 : num % 64);
@@ -153,6 +149,7 @@ public class VaultSelector {
             builder.setName(MESSAGES.getString("guis.selector.item-locked.name"), replacements);
 
             final ItemStack it = builder.get();
+
             if (CONFIG.getInt("selector-item-amount-mode", 1) == 1)
                 it.setAmount(num % 64 == 0 ? 64 : num % 64);
 

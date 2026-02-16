@@ -19,7 +19,7 @@ item-picker-rows: 6
 vault-storage-rows: 6
 
 database:
-  # h2, sqlite
+  # h2, sqlite, mysql
   # for single server setups we recommend h2
   type: "h2"
 
