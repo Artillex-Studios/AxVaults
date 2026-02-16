@@ -166,7 +166,7 @@ public class EnderVaultsConverter {
 
                 Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#33FF33[AxVaults]EnderVaultsConverter: processing contents"));
 
-                final ItemStack[] contents = deserialize(data.getString("contents"));
+                final ItemStack[] contents = ConverterItemReplacer.apply(deserialize(data.getString("contents")));
                 if (contents == null) {
                     Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#FF0000[AxVaults] contents missing for " + uuid + "/" + vaultFile.getName()));
                     continue;
