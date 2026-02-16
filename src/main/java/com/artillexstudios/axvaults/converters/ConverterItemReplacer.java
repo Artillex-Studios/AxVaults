@@ -13,10 +13,16 @@ import static com.artillexstudios.axvaults.AxVaults.CONFIG;
 public class ConverterItemReplacer {
 
     public static ItemStack[] apply(ItemStack[] contents) {
-        if (contents == null || contents.length == 0) return contents;
+        return applyWithStats(contents).contents();
+    }
+
+    public static ApplyResult applyWithStats(ItemStack[] contents) {
+        if (contents == null || contents.length == 0) return new ApplyResult(contents, 0);
 
         final List<ReplacementRule> replacementRules = loadRules();
-        if (replacementRules.isEmpty()) return contents;
+        if (replacementRules.isEmpty()) return new ApplyResult(contents, 0);
+
+        int replacedItems = 0;
 
         for (int i = 0; i < contents.length; i++) {
             final ItemStack itemStack = contents[i];
@@ -27,11 +33,15 @@ public class ConverterItemReplacer {
                 if (!replacementRule.matches(materialId)) continue;
 
                 contents[i] = new ItemStack(replacementRule.material(), replacementRule.amount());
+                replacedItems++;
                 break;
             }
         }
 
-        return contents;
+        return new ApplyResult(contents, replacedItems);
+    }
+
+    public record ApplyResult(ItemStack[] contents, int replacedItems) {
     }
 
     private static List<ReplacementRule> loadRules() {

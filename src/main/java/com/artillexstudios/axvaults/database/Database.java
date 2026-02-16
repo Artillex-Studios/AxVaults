@@ -26,6 +26,8 @@ public interface Database {
 
     void deleteVault(@NotNull UUID uuid, int num);
 
+    VaultItemReplaceResult replaceItemsInVaults();
+
     void load();
 
     void disable();
