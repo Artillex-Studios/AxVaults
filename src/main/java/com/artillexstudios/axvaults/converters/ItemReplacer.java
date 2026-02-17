@@ -1,7 +1,10 @@
 package com.artillexstudios.axvaults.converters;
 
+import com.artillexstudios.axapi.utils.StringUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,17 +13,15 @@ import java.util.Map;
 
 import static com.artillexstudios.axvaults.AxVaults.CONFIG;
 
-public class ConverterItemReplacer {
+public class ItemReplacer {
 
-    public static ItemStack[] apply(ItemStack[] contents) {
-        return applyWithStats(contents).contents();
-    }
+    public static ItemStack[] apply(ItemStack[] contents, List<ReplacementRule> replacementRules, String playerName) {
 
-    public static ApplyResult applyWithStats(ItemStack[] contents) {
-        if (contents == null || contents.length == 0) return new ApplyResult(contents, 0);
+        if (contents == null || contents.length == 0)
+            return contents;
 
-        final List<ReplacementRule> replacementRules = loadRules();
-        if (replacementRules.isEmpty()) return new ApplyResult(contents, 0);
+        if (replacementRules.isEmpty())
+            return contents;
 
         int replacedItems = 0;
 
@@ -29,23 +30,29 @@ public class ConverterItemReplacer {
             if (itemStack == null || itemStack.getType() == Material.AIR) continue;
 
             final String materialId = getMaterialId(itemStack.getType());
+
             for (ReplacementRule replacementRule : replacementRules) {
+
                 if (!replacementRule.matches(materialId)) continue;
+
+                Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#33FF33[AxVaults] Replacing " + contents[i] + " by " + replacementRule.material + " x" + replacementRule.amount));
 
                 contents[i] = new ItemStack(replacementRule.material(), replacementRule.amount());
                 replacedItems++;
+
                 break;
             }
         }
 
-        return new ApplyResult(contents, replacedItems);
+        if (replacedItems > 0)
+            Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#33FF33[AxVaults] Replaced " + replacedItems + " items for player " + playerName));
+
+        return contents;
     }
 
-    public record ApplyResult(ItemStack[] contents, int replacedItems) {
-    }
+    public static List<ReplacementRule> loadRules() {
+        final List<Map<String, Object>> mapList = CONFIG.getMapList("item-replacements");
 
-    private static List<ReplacementRule> loadRules() {
-        final List<Map<String, Object>> mapList = CONFIG.getMapList("converter-item-replacements");
         if (mapList == null || mapList.isEmpty()) return List.of();
 
         final List<ReplacementRule> rules = new ArrayList<>();
@@ -53,10 +60,13 @@ public class ConverterItemReplacer {
             final List<String> contains = getContainsMatchers(map.get("contains"));
             if (contains.isEmpty()) continue;
 
-            final Material replacementMaterial = parseMaterial(map.get("replacement-material"));
+            final Material replacementMaterial = parseMaterial(map.get("replacement-material").toString());
             if (replacementMaterial == null || replacementMaterial == Material.AIR) continue;
 
             final int amount = getAmount(map.get("replacement-amount"));
+
+            Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#33FF33[AxVaults] Replacement rule: " + contains + " => " + replacementMaterial + ": " + amount));
+
             rules.add(new ReplacementRule(contains, replacementMaterial, amount));
         }
 
@@ -81,12 +91,12 @@ public class ConverterItemReplacer {
         return contains;
     }
 
-    private static Material parseMaterial(Object rawMaterial) {
-        if (!(rawMaterial instanceof String materialName) || materialName.isBlank()) return null;
-
-        Material parsed = Material.matchMaterial(materialName, true);
+    @Nullable
+    private static Material parseMaterial(@Nullable String material) {
+        if (material == null || material.isBlank()) return null;
+        Material parsed = Material.matchMaterial(material, true);
         if (parsed != null) return parsed;
-        return Material.matchMaterial(materialName.toUpperCase(Locale.ENGLISH));
+        return Material.matchMaterial(material.toUpperCase(Locale.ENGLISH));
     }
 
     private static int getAmount(Object rawAmount) {
@@ -100,12 +110,10 @@ public class ConverterItemReplacer {
     }
 
     private static String getMaterialId(Material material) {
-        final String namespaced = material.getKey().toString().toLowerCase(Locale.ENGLISH);
-        final String legacyName = material.name().toLowerCase(Locale.ENGLISH);
-        return namespaced + ":" + legacyName;
+        return material.getKey().toString().toLowerCase(Locale.ENGLISH);
     }
 
-    private record ReplacementRule(List<String> contains, Material material, int amount) {
+    public record ReplacementRule(List<String> contains, Material material, int amount) {
 
         private boolean matches(String materialId) {
             for (String matcher : contains) {

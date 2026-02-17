@@ -2,9 +2,8 @@ package com.artillexstudios.axvaults.database.impl;
 
 import com.artillexstudios.axapi.serializers.Serializers;
 import com.artillexstudios.axapi.utils.StringUtils;
-import com.artillexstudios.axvaults.converters.ConverterItemReplacer;
+import com.artillexstudios.axvaults.converters.ItemReplacer;
 import com.artillexstudios.axvaults.database.Database;
-import com.artillexstudios.axvaults.database.VaultItemReplaceResult;
 import com.artillexstudios.axvaults.placed.PlacedVaults;
 import com.artillexstudios.axvaults.utils.ThreadUtils;
 import com.artillexstudios.axvaults.vaults.Vault;
@@ -24,11 +23,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.UUID;
+import java.util.*;
 
 import static com.artillexstudios.axvaults.AxVaults.CONFIG;
+import static com.artillexstudios.axvaults.converters.ItemReplacer.loadRules;
 
 public class MySQL implements Database {
     private HikariDataSource dataSource;
@@ -246,17 +244,16 @@ public class MySQL implements Database {
 
 
     @Override
-    public VaultItemReplaceResult replaceItemsInVaults() {
-        int processedVaults = 0;
+    public int replaceItemsInVaults() {
         int updatedVaults = 0;
-        int replacedItems = 0;
 
         final String sql = "SELECT * FROM axvaults_data;";
         final String updateSql = "UPDATE axvaults_data SET storage = ? WHERE uuid = ? AND id = ?;";
 
+        final List<ItemReplacer.ReplacementRule> replacementRules = loadRules();
+
         try (Connection conn = dataSource.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
             while (rs.next()) {
-                processedVaults++;
 
                 final UUID uuid = UUID.fromString(rs.getString(2));
                 final int id = rs.getInt(1);
@@ -269,12 +266,12 @@ public class MySQL implements Database {
                     continue;
                 }
 
-                final ConverterItemReplacer.ApplyResult applyResult = ConverterItemReplacer.applyWithStats(items);
-                if (applyResult.replacedItems() < 1) continue;
+                final ItemStack[] applyResult = ItemReplacer.apply(items, replacementRules, Bukkit.getOfflinePlayer(uuid).getName());
+                if (Arrays.equals(items, applyResult)) continue;
 
                 final byte[] serialized;
                 try {
-                    serialized = Serializers.ITEM_ARRAY.serialize(applyResult.contents());
+                    serialized = Serializers.ITEM_ARRAY.serialize(applyResult);
                 } catch (Exception ex) {
                     ex.printStackTrace();
                     continue;
@@ -288,7 +285,6 @@ public class MySQL implements Database {
                 }
 
                 updatedVaults++;
-                replacedItems += applyResult.replacedItems();
 
                 final VaultPlayer vaultPlayer = VaultManager.getPlayers().get(uuid);
                 if (vaultPlayer == null) continue;
@@ -296,13 +292,13 @@ public class MySQL implements Database {
                 final Vault vault = vaultPlayer.getVault(id);
                 if (vault == null) continue;
 
-                ThreadUtils.runSync(() -> vault.setContents(applyResult.contents()));
+                ThreadUtils.runSync(() -> vault.setContents(applyResult));
             }
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
 
-        return new VaultItemReplaceResult(processedVaults, updatedVaults, replacedItems);
+        return updatedVaults;
     }
 
     @Override

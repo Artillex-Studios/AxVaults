@@ -77,7 +77,6 @@ public class AdminCommand implements OrphanCommand {
         Converter.INSTANCE.executeEnderVaults(sender);
     }
 
-
     @CommandPermission("axvaults.admin.replaceitems")
     @Subcommand("replaceitems")
     public void replaceItems(CommandSender sender) {

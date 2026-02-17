@@ -73,18 +73,18 @@ selector-stay-open: false
 # if this list is empty or missing, all items are allowed
 allowed-vault-icons: []
 
-# allows replacing specific converted items with another material and amount
+# allows you to replace specific items with another material and amount
 # if all values in 'contains' are found in the material id, the item is replaced
 # examples:
 #   minecraft:diamond_sword matches ['diamond']
-#   spartianweaponry:diamond_halberd matches ['spartianweaponry', 'diamond']
-#converter-item-replacements:
+#   spartanweaponry:diamond_halberd matches ['spartanweaponry', 'diamond']
+#item-replacements:
 #  - contains:
-#      - 'spartianweaponry'
+#      - 'spartanweaponry'
 #      - 'diamond'
-#    replacement-material: 'DIAMOND_SWORD'
+#    replacement-material: DIAMOND_SWORD
 #    replacement-amount: 1
-converter-item-replacements: []
+item-replacements: []
 
 # should the plugin delete emptied vaults from the database?
 # you shouldn't have to disable this unless a developers tells you to
