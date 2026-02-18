@@ -35,6 +35,8 @@ public class EnderVaultsConverter {
     private Method nbtTagListSizeMethod;
     private Method nbtTagListGetMethod;
     private Method nbtTagCompoundIsEmptyMethod;
+    private Method nbtTagCompoundGetStringMethod;
+    private Method nbtTagCompoundSetStringMethod;
     private Method nbtItemStackCreateMethod;
     private Method asBukkitCopy;
     private Constructor<?> nbtReadLimiterConstructor;
@@ -93,6 +95,8 @@ public class EnderVaultsConverter {
             nbtTagListSizeMethod = findMethod(nbtTagListClass, new String[]{"size"});
             nbtTagListGetMethod = findMethod(nbtTagListClass, new String[]{"get", "k", "getCompound"}, int.class);
             nbtTagCompoundIsEmptyMethod = findMethod(nbtTagCompoundClass, new String[]{"isEmpty", "g"});
+            nbtTagCompoundGetStringMethod = findMethod(nbtTagCompoundClass, new String[]{"getString", "l"}, String.class);
+            nbtTagCompoundSetStringMethod = findMethod(nbtTagCompoundClass, new String[]{"putString", "a", "setString"}, String.class, String.class);
             if (nbtTagListSizeMethod == null || nbtTagListGetMethod == null || nbtTagCompoundIsEmptyMethod == null) {
                 throw new NoSuchMethodException("Unable to find required NBT list/compound methods");
             }
@@ -226,6 +230,7 @@ public class EnderVaultsConverter {
             Object nbtTagCompound = nbtTagListGetMethod.invoke(nbtTagList, i);
             boolean isEmpty = (boolean) nbtTagCompoundIsEmptyMethod.invoke(nbtTagCompound);
             if (!isEmpty) {
+                remapSpartanWeaponryMaterialId(nbtTagCompound);
                 Array.set(items, i, nbtItemStackCreateMethod.invoke(null, nbtTagCompound));
             }
         }
@@ -258,6 +263,22 @@ public class EnderVaultsConverter {
 
     private ItemStack toBukkitItem(Object itemStack) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         return (ItemStack) asBukkitCopy.invoke(null, itemStack);
+    }
+
+    private void remapSpartanWeaponryMaterialId(Object nbtTagCompound) throws InvocationTargetException, IllegalAccessException {
+        if (nbtTagCompoundGetStringMethod == null || nbtTagCompoundSetStringMethod == null) return;
+
+        String materialId = (String) nbtTagCompoundGetStringMethod.invoke(nbtTagCompound, "id");
+        if (materialId == null || !materialId.startsWith("spartanweaponry:")) return;
+
+        final int separatorIndex = materialId.lastIndexOf('_');
+        final int namespaceSeparatorIndex = materialId.indexOf(':');
+        if (separatorIndex <= namespaceSeparatorIndex + 1 || separatorIndex >= materialId.length() - 1) return;
+
+        String name = materialId.substring(namespaceSeparatorIndex + 1, separatorIndex);
+        String material = materialId.substring(separatorIndex + 1);
+        String remappedId = "spartanweaponry:" + material + "_" + name;
+        nbtTagCompoundSetStringMethod.invoke(nbtTagCompound, "id", remappedId);
     }
 
     private Class<?> findClass(String... classNames) throws ClassNotFoundException {
