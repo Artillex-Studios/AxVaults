@@ -3,12 +3,10 @@ package com.artillexstudios.axvaults.database.impl;
 import com.artillexstudios.axapi.serializers.Serializers;
 import com.artillexstudios.axapi.utils.StringUtils;
 import com.artillexstudios.axvaults.AxVaults;
-import com.artillexstudios.axvaults.converters.ItemReplacer;
 import com.artillexstudios.axvaults.database.Database;
 import com.artillexstudios.axvaults.placed.PlacedVaults;
 import com.artillexstudios.axvaults.utils.ThreadUtils;
 import com.artillexstudios.axvaults.vaults.Vault;
-import com.artillexstudios.axvaults.vaults.VaultManager;
 import com.artillexstudios.axvaults.vaults.VaultPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -22,8 +20,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
-
-import static com.artillexstudios.axvaults.converters.ItemReplacer.loadRules;
 
 public class H2 implements Database {
     private JdbcConnection conn;
@@ -209,73 +205,12 @@ public class H2 implements Database {
         }
     }
 
-
-    @Override
-    public int replaceItemsInVaults() {
-        int updatedVaults = 0;
-
-        final String sql = "SELECT * FROM axvaults_data;";
-        final String updateSql = "UPDATE axvaults_data SET storage = ? WHERE uuid = ? AND id = ?;";
-
-        final List<ItemReplacer.ReplacementRule> replacementRules = loadRules();
-
-        try (PreparedStatement stmt = conn.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
-            while (rs.next()) {
-
-                final UUID uuid = UUID.fromString(rs.getString(2));
-                final int id = rs.getInt(1);
-
-                final ItemStack[] items;
-                try {
-                    items = Serializers.ITEM_ARRAY.deserialize(rs.getBytes(3));
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                    continue;
-                }
-
-                final ItemStack[] applyResult = ItemReplacer.apply(items, replacementRules, Bukkit.getOfflinePlayer(uuid).getName());
-
-                if (Arrays.equals(items, applyResult)) continue;
-
-                final byte[] serialized;
-                try {
-                    serialized = Serializers.ITEM_ARRAY.serialize(applyResult);
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                    continue;
-                }
-
-                try (PreparedStatement updateStmt = conn.prepareStatement(updateSql)) {
-                    updateStmt.setBytes(1, serialized);
-                    updateStmt.setString(2, uuid.toString());
-                    updateStmt.setInt(3, id);
-                    updateStmt.executeUpdate();
-                }
-
-                updatedVaults++;
-
-                final VaultPlayer vaultPlayer = VaultManager.getPlayers().get(uuid);
-                if (vaultPlayer == null) continue;
-
-                final Vault vault = vaultPlayer.getVault(id);
-                if (vault == null) continue;
-
-                ThreadUtils.runSync(() -> vault.setContents(applyResult));
-            }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        }
-
-        return updatedVaults;
-    }
-
-
     @Override
     public Set<UUID> getVaultOwners() {
         final Set<UUID> owners = new HashSet<>();
         final String sql = "SELECT DISTINCT uuid FROM axvaults_data;";
 
-        try (Connection conn = dataSource.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
+        try (PreparedStatement stmt = conn.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
             while (rs.next()) {
                 try {
                     owners.add(UUID.fromString(rs.getString(1)));

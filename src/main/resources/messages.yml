@@ -113,7 +113,6 @@ converter:
 
 replace-items:
   started: "&#55FF00Item replacement has started for all vaults!"
-  finished: "&#55FF00Finished replacing items! Updated Vaults: &f%updated%&#55FF00"
 
 commands:
   invalid-value: "&#FF0000Invalid parameter: &#BB0000%value%"

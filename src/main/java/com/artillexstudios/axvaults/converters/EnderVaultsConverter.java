@@ -20,8 +20,9 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Base64;
-import java.util.UUID;
+import java.util.*;
+
+import static com.artillexstudios.axvaults.converters.VaultItemReplacer.*;
 
 public class EnderVaultsConverter {
 
@@ -43,6 +44,7 @@ public class EnderVaultsConverter {
         String cbVersion = Bukkit.getServer().getClass().getPackage().getName();
         cbVersion = cbVersion.substring(cbVersion.lastIndexOf('.') + 1);
 
+        // Inspired from EnderVaults github
         try {
             nbtToolsClass = findClass(
                     "net.minecraft.nbt.NbtIo",
@@ -135,6 +137,9 @@ public class EnderVaultsConverter {
             return;
         }
 
+        final List<VaultItemReplacer.ReplacementRule> replacementRules = loadRules();
+        if (replacementRules.isEmpty()) return;
+
         for (File playerFolder : playerFolders) {
             if (!playerFolder.isDirectory()) continue;
 
@@ -147,13 +152,14 @@ public class EnderVaultsConverter {
 
             boolean hasConvertedVault = false;
             final VaultPlayer vaultPlayer = VaultManager.getPlayer(Bukkit.getOfflinePlayer(uuid)).join();
-            Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#33FF33[AxVaults] EnderVaultsConverter: processing player " + Bukkit.getOfflinePlayer(uuid).getName()));
+
+            //TODO ENABLE
+            //Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#33FF33[AxVaults] EnderVaultsConverter: processing player " + Bukkit.getOfflinePlayer(uuid).getName()));
 
             final File[] vaultFiles = playerFolder.listFiles();
             if (vaultFiles == null) continue;
 
             for (File vaultFile : vaultFiles) {
-                Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#33FF33[AxVaults]EnderVaultsConverter: processing file " + vaultFile.getName()));
                 if (!vaultFile.isFile() || !vaultFile.getName().endsWith(".yml")) continue;
 
                 final Config data = new Config(vaultFile);
@@ -166,9 +172,14 @@ public class EnderVaultsConverter {
                 if (number < 1) number = 1;
                 final int vaultNumber = number;
 
-                Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#33FF33[AxVaults]EnderVaultsConverter: processing contents"));
+                final ItemStack[] initialItems = deserialize(data.getString("contents"), Bukkit.getOfflinePlayer(uuid).getName());
 
-                final ItemStack[] contents = deserialize(data.getString("contents"));
+                if (initialItems == null || isVeryEmpty(initialItems)) continue;
+
+                final ItemStack[] contents = apply(initialItems, replacementRules, Bukkit.getOfflinePlayer(uuid).getName());
+
+                // or veryempty on contents
+
                 if (contents == null) {
                     Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#FF0000[AxVaults] contents missing for " + uuid + "/" + vaultFile.getName()));
                     continue;
@@ -182,7 +193,7 @@ public class EnderVaultsConverter {
                         vault.setContents(contents);
                     }
 
-                    VaultUtils.save(vault);
+                    VaultUtils.save(vault); // TODO TOCHANGE
                 });
 
                 hasConvertedVault = true;
@@ -222,11 +233,12 @@ public class EnderVaultsConverter {
         return (Object[]) items;
     }
 
-    private ItemStack[] deserialize(String base64) {
+    private ItemStack[] deserialize(String base64, String playerName) {
         try {
 
             Object[] nmsItemStacks = this.decode(base64);
             ItemStack[] inventoryContents = new ItemStack[nmsItemStacks.length];
+
             for (int i = 0; i < nmsItemStacks.length; i++) {
                 try {
                     inventoryContents[i] = toBukkitItem(nmsItemStacks[i]);

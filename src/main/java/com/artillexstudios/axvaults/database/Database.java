@@ -27,8 +27,6 @@ public interface Database {
 
     void deleteVault(@NotNull UUID uuid, int num);
 
-    int replaceItemsInVaults();
-
     Set<UUID> getVaultOwners();
 
     void load();

@@ -91,8 +91,12 @@ public class Vault implements InventoryHolder {
         return changed;
     }
 
+    public void setChanged(boolean bool) {
+        changed.set(bool);
+    }
+
     public void setIcon(Material icon, Integer iconCustomModelData) {
-        changed.set(true);
+        setChanged(true);
         this.icon = icon;
         this.iconCustomModelData = iconCustomModelData;
     }
@@ -126,7 +130,7 @@ public class Vault implements InventoryHolder {
             return;
         }
 
-        changed.set(true);
+        setChanged(true);
         if (vaultPlayer.getRows() != storage.getSize()) {
             reload();
         }

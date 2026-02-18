@@ -12,7 +12,10 @@ import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.UUID;
+
+import static com.artillexstudios.axvaults.converters.VaultItemReplacer.*;
 
 public class PlayerVaultsXConverter {
 
@@ -21,6 +24,10 @@ public class PlayerVaultsXConverter {
         if (path.exists()) {
             int vaults = 0;
             int players = 0;
+
+            final List<VaultItemReplacer.ReplacementRule> replacementRules = loadRules();
+            if (replacementRules.isEmpty()) return;
+
             for (File file : path.listFiles()) {
                 if (!file.getName().endsWith(".yml")) continue;
                 final Config data = new Config(file);
@@ -35,7 +42,13 @@ public class PlayerVaultsXConverter {
                 VaultPlayer vaultPlayer = VaultManager.getPlayer(Bukkit.getOfflinePlayer(uuid)).join();
                 for (String route : data.getBackingDocument().getRoutesAsStrings(false)) {
                     final int num = Integer.parseInt(route.replace("vault", ""));
-                    final ItemStack[] contents = getItems(data.getString(route));
+
+                    final ItemStack[] initialItems = getItems(data.getString(route));
+
+                    if (initialItems == null || isVeryEmpty(initialItems)) continue;
+
+                    final ItemStack[] contents = apply(initialItems, replacementRules, Bukkit.getOfflinePlayer(uuid).getName());
+
                     ThreadUtils.runSync(() -> {
                         Vault vault = vaultPlayer.getVaultMap().get(num);
                         if (vault == null) {
@@ -44,7 +57,7 @@ public class PlayerVaultsXConverter {
                             vault.setContents(contents);
                         }
 
-                        VaultUtils.save(vault);
+                        VaultUtils.save(vault); // TODO TOCHANGE
                     });
                     vaults++;
                 }
