@@ -24,6 +24,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 import static com.artillexstudios.axvaults.converters.ItemReplacer.loadRules;
@@ -268,6 +270,26 @@ public class SQLite implements Database {
         }
 
         return updatedVaults;
+    }
+
+
+    @Override
+    public Set<UUID> getVaultOwners() {
+        final Set<UUID> owners = new HashSet<>();
+        final String sql = "SELECT DISTINCT uuid FROM axvaults_data;";
+
+        try (PreparedStatement stmt = conn.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                try {
+                    owners.add(UUID.fromString(rs.getString(1)));
+                } catch (IllegalArgumentException ignored) {
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+
+        return owners;
     }
 
     @Override

@@ -269,6 +269,26 @@ public class H2 implements Database {
         return updatedVaults;
     }
 
+
+    @Override
+    public Set<UUID> getVaultOwners() {
+        final Set<UUID> owners = new HashSet<>();
+        final String sql = "SELECT DISTINCT uuid FROM axvaults_data;";
+
+        try (Connection conn = dataSource.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                try {
+                    owners.add(UUID.fromString(rs.getString(1)));
+                } catch (IllegalArgumentException ignored) {
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+
+        return owners;
+    }
+
     @Override
     public void load() {
         final String sql = "SELECT * FROM axvaults_blocks;";

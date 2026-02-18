@@ -2,6 +2,7 @@ package com.artillexstudios.axvaults.converters;
 
 import com.artillexstudios.axapi.config.Config;
 import com.artillexstudios.axapi.utils.StringUtils;
+import com.artillexstudios.axvaults.utils.ThreadUtils;
 import com.artillexstudios.axvaults.utils.VaultUtils;
 import com.artillexstudios.axvaults.vaults.Vault;
 import com.artillexstudios.axvaults.vaults.VaultManager;
@@ -35,8 +36,16 @@ public class PlayerVaultsXConverter {
                 for (String route : data.getBackingDocument().getRoutesAsStrings(false)) {
                     final int num = Integer.parseInt(route.replace("vault", ""));
                     final ItemStack[] contents = getItems(data.getString(route));
-                    final Vault vault = new Vault(vaultPlayer, num, null, null, contents);
-                    VaultUtils.save(vault);
+                    ThreadUtils.runSync(() -> {
+                        Vault vault = vaultPlayer.getVaultMap().get(num);
+                        if (vault == null) {
+                            vault = new Vault(vaultPlayer, num, null, null, contents);
+                        } else {
+                            vault.setContents(contents);
+                        }
+
+                        VaultUtils.save(vault);
+                    });
                     vaults++;
                 }
             }

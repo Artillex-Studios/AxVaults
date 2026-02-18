@@ -3,6 +3,7 @@ package com.artillexstudios.axvaults.converters;
 import com.artillexstudios.axapi.config.Config;
 import com.artillexstudios.axapi.utils.StringUtils;
 import com.artillexstudios.axapi.utils.logging.LogUtils;
+import com.artillexstudios.axvaults.utils.ThreadUtils;
 import com.artillexstudios.axvaults.utils.VaultUtils;
 import com.artillexstudios.axvaults.vaults.Vault;
 import com.artillexstudios.axvaults.vaults.VaultManager;
@@ -163,6 +164,7 @@ public class EnderVaultsConverter {
                 } catch (Exception ignored) {}
 
                 if (number < 1) number = 1;
+                final int vaultNumber = number;
 
                 Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#33FF33[AxVaults]EnderVaultsConverter: processing contents"));
 
@@ -172,8 +174,16 @@ public class EnderVaultsConverter {
                     continue;
                 }
 
-                final Vault vault = new Vault(vaultPlayer, number, null, null, contents);
-                VaultUtils.save(vault);
+                ThreadUtils.runSync(() -> {
+                    Vault vault = vaultPlayer.getVaultMap().get(vaultNumber);
+                    if (vault == null) {
+                        vault = new Vault(vaultPlayer, vaultNumber, null, null, contents);
+                    } else {
+                        vault.setContents(contents);
+                    }
+
+                    VaultUtils.save(vault);
+                });
 
                 hasConvertedVault = true;
                 vaults++;
