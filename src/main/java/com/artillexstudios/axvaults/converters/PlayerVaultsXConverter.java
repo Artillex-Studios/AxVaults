@@ -40,6 +40,9 @@ public class PlayerVaultsXConverter {
                 players++;
 
                 VaultPlayer vaultPlayer = VaultManager.getPlayer(Bukkit.getOfflinePlayer(uuid)).join();
+
+                Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#33FF33[AxVaults] PlayerVaultsXConverter: processing player " + Bukkit.getOfflinePlayer(uuid).getName()));
+
                 for (String route : data.getBackingDocument().getRoutesAsStrings(false)) {
                     final int num = Integer.parseInt(route.replace("vault", ""));
 
@@ -57,7 +60,7 @@ public class PlayerVaultsXConverter {
                             vault.setContents(contents);
                         }
 
-                        VaultUtils.save(vault); // TODO TOCHANGE
+                        VaultUtils.save(vault);
                     });
                     vaults++;
                 }

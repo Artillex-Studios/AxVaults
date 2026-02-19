@@ -2,6 +2,8 @@ package com.artillexstudios.axvaults.converters;
 
 import com.artillexstudios.axvaults.AxVaults;
 import com.artillexstudios.axapi.utils.StringUtils;
+import com.artillexstudios.axvaults.utils.ThreadUtils;
+import com.artillexstudios.axvaults.utils.VaultUtils;
 import com.artillexstudios.axvaults.vaults.Vault;
 import com.artillexstudios.axvaults.vaults.VaultManager;
 import org.bukkit.Bukkit;
@@ -31,8 +33,6 @@ public class VaultItemReplacer {
             final OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
             VaultManager.getPlayer(offlinePlayer).thenAccept(vaultPlayer -> {
 
-                Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#FF0000[AxVaults] Playername: " + offlinePlayer.getName()));
-
                 final List<Vault> vaults = new ArrayList<>(vaultPlayer.getVaultMap().values());
                 for (Vault vault : vaults) {
                     final ItemStack[] initialItems = vault.getStorage().getContents();
@@ -41,11 +41,14 @@ public class VaultItemReplacer {
 
                     final ItemStack[] replacedItems = apply(initialItems, replacementRules, offlinePlayer.getName());
 
-                    if (Arrays.equals(initialItems, replacedItems)) continue;
+                    Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#FF0000[AxVaults] ItemReplacer: updating vault for " + offlinePlayer.getName()));
 
-                    vault.setContents(replacedItems);
-                    vault.setChanged(true);
-                    updatedVaults.getAndIncrement();
+                    ThreadUtils.runSync(() -> {
+                        vault.setContents(replacedItems);
+
+                        VaultUtils.save(vault);
+                        updatedVaults.getAndIncrement();
+                    });
                 }
             });
         }

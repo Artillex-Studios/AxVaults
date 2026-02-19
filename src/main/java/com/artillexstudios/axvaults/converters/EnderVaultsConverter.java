@@ -22,7 +22,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
 
-import static com.artillexstudios.axvaults.converters.VaultItemReplacer.*;
+import static com.artillexstudios.axvaults.converters.VaultItemReplacer.isVeryEmpty;
 
 public class EnderVaultsConverter {
 
@@ -141,9 +141,6 @@ public class EnderVaultsConverter {
             return;
         }
 
-        final List<VaultItemReplacer.ReplacementRule> replacementRules = loadRules();
-        if (replacementRules.isEmpty()) return;
-
         for (File playerFolder : playerFolders) {
             if (!playerFolder.isDirectory()) continue;
 
@@ -157,8 +154,7 @@ public class EnderVaultsConverter {
             boolean hasConvertedVault = false;
             final VaultPlayer vaultPlayer = VaultManager.getPlayer(Bukkit.getOfflinePlayer(uuid)).join();
 
-            //TODO ENABLE
-            //Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#33FF33[AxVaults] EnderVaultsConverter: processing player " + Bukkit.getOfflinePlayer(uuid).getName()));
+            Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#33FF33[AxVaults] EnderVaultsConverter: processing player " + Bukkit.getOfflinePlayer(uuid).getName()));
 
             final File[] vaultFiles = playerFolder.listFiles();
             if (vaultFiles == null) continue;
@@ -176,18 +172,16 @@ public class EnderVaultsConverter {
                 if (number < 1) number = 1;
                 final int vaultNumber = number;
 
-                final ItemStack[] initialItems = deserialize(data.getString("contents"), Bukkit.getOfflinePlayer(uuid).getName());
-
-                if (initialItems == null || isVeryEmpty(initialItems)) continue;
-
-                final ItemStack[] contents = apply(initialItems, replacementRules, Bukkit.getOfflinePlayer(uuid).getName());
-
-                // or veryempty on contents
+                final ItemStack[] contents = deserialize(data.getString("contents"), Bukkit.getOfflinePlayer(uuid).getName());
 
                 if (contents == null) {
                     Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#FF0000[AxVaults] contents missing for " + uuid + "/" + vaultFile.getName()));
                     continue;
                 }
+
+                if (isVeryEmpty(contents)) continue; // Empty vault
+
+                Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#FF0000[AxVaults] EnderVaultsConverter: updating vault for " + Bukkit.getOfflinePlayer(uuid).getName()));
 
                 ThreadUtils.runSync(() -> {
                     Vault vault = vaultPlayer.getVaultMap().get(vaultNumber);
@@ -197,7 +191,7 @@ public class EnderVaultsConverter {
                         vault.setContents(contents);
                     }
 
-                    VaultUtils.save(vault); // TODO TOCHANGE
+                    VaultUtils.save(vault);
                 });
 
                 hasConvertedVault = true;
@@ -265,6 +259,7 @@ public class EnderVaultsConverter {
         return (ItemStack) asBukkitCopy.invoke(null, itemStack);
     }
 
+    // In old versions of SpartanWeaponry mod, item ids where "spartanweaponry:diamond_saber" but it changes to "spartanweaponry:saber_diamond"
     private void remapSpartanWeaponryMaterialId(Object nbtTagCompound) throws InvocationTargetException, IllegalAccessException {
         if (nbtTagCompoundGetStringMethod == null || nbtTagCompoundSetStringMethod == null) return;
 
