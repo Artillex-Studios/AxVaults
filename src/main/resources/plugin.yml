@@ -30,5 +30,7 @@ permissions:
     default: op
   axvaults.admin.converter:
     default: op
+  axvaults.admin.replaceitems:
+    default: op
   axvaults.admin.save:
     default: op

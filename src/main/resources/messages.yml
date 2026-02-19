@@ -12,6 +12,7 @@ help:
   - " <#88FF88>➤ <white>/axvaultsadmin delete <player> <vault> <#DDDDDD>| <#AAFFAA>Delete vault of player"
   - " <#88FF88>➤ <white>/axvaultsadmin stats <#DDDDDD>| <#AAFFAA>Server statistics"
   - " <#88FF88>➤ <white>/axvaultsadmin converter <plugin> <#DDDDDD>| <#AAFFAA>Convert from another plugin"
+  - " <#88FF88>➤ <white>/axvaultsadmin replaceitems <#DDDDDD>| <#AAFFAA>Replace configured items in all vaults"
   - " <#88FF88>➤ <white>/axvaultsadmin save <#DDDDDD>| <#AAFFAA>Manually save all loaded vaults"
   - " <#88FF88>➤ <white>/axvaultsadmin debug <#DDDDDD>| <#AAFFAA>Print useful information to console"
   - " "
@@ -41,6 +42,7 @@ guis:
         - "&#FF0000&l(!) &#FF0000Locked Vault"
   item-picker:
     title: "&0Item Picker"
+    defaultName: "&3Click to select"
   vault:
     title: "&0Vault #%num%"
 
@@ -108,6 +110,9 @@ stats:
 
 converter:
   started: "&#55FF00The converter has started! Check the console for the current status!"
+
+replace-items:
+  started: "&#55FF00Item replacement has started for all vaults!"
 
 commands:
   invalid-value: "&#FF0000Invalid parameter: &#BB0000%value%"

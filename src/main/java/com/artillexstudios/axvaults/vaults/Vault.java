@@ -30,10 +30,11 @@ public class Vault implements InventoryHolder {
     private Inventory storage;
     private final int id;
     private Material icon;
+    private Integer iconCustomModelData;
     private long lastOpen = System.currentTimeMillis();
     private final AtomicBoolean changed = new AtomicBoolean(false);
 
-    public Vault(VaultPlayer vaultPlayer, int id, Material icon, @Nullable ItemStack[] contents) {
+    public Vault(VaultPlayer vaultPlayer, int id, Material icon, Integer iconCustomModelData, @Nullable ItemStack[] contents) {
         this.vaultPlayer = vaultPlayer;
         this.id = id;
 
@@ -42,6 +43,7 @@ public class Vault implements InventoryHolder {
         vaultPlayer.getVaultMap().put(id, this);
 
         this.icon = icon;
+        this.iconCustomModelData = iconCustomModelData;
     }
 
     @ApiStatus.Internal
@@ -89,14 +91,23 @@ public class Vault implements InventoryHolder {
         return changed;
     }
 
-    public void setIcon(Material icon) {
-        changed.set(true);
-        this.icon = icon;
+    public void setChanged(boolean bool) {
+        changed.set(bool);
     }
 
-    public Material getIcon() {
+    public void setIcon(Material icon, Integer iconCustomModelData) {
+        setChanged(true);
+        this.icon = icon;
+        this.iconCustomModelData = iconCustomModelData;
+    }
+
+    public Material getIconMaterial() {
         if (icon == null) return Material.valueOf(MESSAGES.getString("guis.selector.item-owned.material", "BARREL"));
         return icon;
+    }
+
+    public Integer getIconCustomModelData() {
+        return iconCustomModelData;
     }
 
     @Nullable
@@ -119,7 +130,7 @@ public class Vault implements InventoryHolder {
             return;
         }
 
-        changed.set(true);
+        setChanged(true);
         if (vaultPlayer.getRows() != storage.getSize()) {
             reload();
         }
@@ -162,6 +173,7 @@ public class Vault implements InventoryHolder {
                 ", changed=" + changed +
                 ", lastOpen=" + lastOpen +
                 ", icon=" + icon +
+                ", iconCustomModelData=" + iconCustomModelData +
                 ", id=" + id +
                 ", storage=" + getSlotsFilled() + "/" + storage.getSize() +
                 '}';

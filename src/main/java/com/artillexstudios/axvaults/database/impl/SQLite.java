@@ -20,6 +20,9 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 public class SQLite implements Database {
@@ -44,7 +47,8 @@ public class SQLite implements Database {
               `id` INT(128) NOT NULL,
               `uuid` VARCHAR(36) NOT NULL,
               `storage` LONGBLOB,
-              `icon` VARCHAR(128)
+              `icon` VARCHAR(128),
+              `iconCustomModelData` INT(128)
             );
         """;
 
@@ -97,21 +101,23 @@ public class SQLite implements Database {
 
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
-                    sql = "UPDATE axvaults_data SET storage = ?, icon = ? WHERE uuid = ? AND id = ?;";
+                    sql = "UPDATE axvaults_data SET storage = ?, icon = ?, iconCustomModelData = ? WHERE uuid = ? AND id = ?;";
                     try (PreparedStatement stmt2 = conn.prepareStatement(sql)) {
                         stmt2.setBytes(1, bytes);
                         stmt2.setString(2, vault.getRealIcon() == null ? null : vault.getRealIcon().name());
-                        stmt2.setString(3, vault.getUUID().toString());
-                        stmt2.setInt(4, vault.getId());
+                        stmt2.setString(3, vault.getIconCustomModelData() == null ? null : vault.getIconCustomModelData().toString());
+                        stmt2.setString(4, vault.getUUID().toString());
+                        stmt2.setInt(5, vault.getId());
                         stmt2.executeUpdate();
                     }
                 } else {
-                    sql = "INSERT INTO axvaults_data(id, uuid, storage, icon) VALUES (?, ?, ?, ?);";
+                    sql = "INSERT INTO axvaults_data(id, uuid, storage, icon, iconCustomModelData) VALUES (?, ?, ?, ?, ?);";
                     try (PreparedStatement stmt2 = conn.prepareStatement(sql)) {
                         stmt2.setInt(1, vault.getId());
                         stmt2.setString(2, vault.getUUID().toString());
                         stmt2.setBytes(3, bytes);
                         stmt2.setString(4, vault.getRealIcon() == null ? null : vault.getRealIcon().name());
+                        stmt2.setString(5, vault.getIconCustomModelData() == null ? null : vault.getIconCustomModelData().toString());
                         stmt2.executeUpdate();
                     }
                 }
@@ -138,9 +144,9 @@ public class SQLite implements Database {
                         Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#FF0000[AxVaults] Failed to load vault #%s of %s!".formatted(id, vaultPlayer.getUUID().toString())));
                         continue;
                     }
-//                    if (VaultUtils.isDeleteEmptyVaults() && items.length == 0) continue;
                     Material icon = rs.getString(4) == null ? null : Material.valueOf(rs.getString(4));
-                    ThreadUtils.runSync(() -> new Vault(vaultPlayer, id, icon, items));
+                    Integer iconCustomModelData = rs.getString(5) == null ? null : Integer.valueOf(rs.getString(5));
+                    ThreadUtils.runSync(() -> new Vault(vaultPlayer, id, icon, iconCustomModelData, items));
                 }
             }
         } catch (SQLException ex) {
@@ -200,6 +206,25 @@ public class SQLite implements Database {
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
+    }
+
+    @Override
+    public Set<UUID> getVaultOwners() {
+        final Set<UUID> owners = new HashSet<>();
+        final String sql = "SELECT DISTINCT uuid FROM axvaults_data;";
+
+        try (PreparedStatement stmt = conn.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                try {
+                    owners.add(UUID.fromString(rs.getString(1)));
+                } catch (IllegalArgumentException ignored) {
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+
+        return owners;
     }
 
     @Override

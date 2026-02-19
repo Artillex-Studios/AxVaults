@@ -4,20 +4,18 @@ import com.artillexstudios.axapi.libs.boostedyaml.block.implementation.Section;
 import com.artillexstudios.axapi.reflection.ClassUtils;
 import com.artillexstudios.axapi.utils.ItemBuilder;
 import com.artillexstudios.axapi.utils.StringUtils;
+import com.artillexstudios.axvaults.utils.IconUtils;
 import com.artillexstudios.axvaults.utils.SoundUtils;
 import com.artillexstudios.axvaults.vaults.Vault;
 import com.artillexstudios.axvaults.vaults.VaultPlayer;
 import dev.triumphteam.gui.guis.Gui;
 import dev.triumphteam.gui.guis.GuiItem;
 import dev.triumphteam.gui.guis.PaginatedGui;
-import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.Objects;
 
 import static com.artillexstudios.axvaults.AxVaults.CONFIG;
@@ -52,22 +50,27 @@ public class ItemPicker {
                 .disableAllInteractions()
                 .create();
 
-        for (Material material : Material.values()) {
+        List<IconUtils.IconItem> iconItems = IconUtils.getAllowedIconItems();
+        int nbIcons = iconItems.size();
+
+        for (IconUtils.IconItem iconItem : iconItems) {
+            final var material = iconItem.material();
+
             ItemStack it = null;
             try {
-                it = ItemBuilder.create(material).glow(Objects.equals(vault.getIcon(), material)).get();
+                it = ItemBuilder.create(material).glow(Objects.equals(vault.getIconMaterial(), material)).get();
             } catch (Exception ignored) {}
             if (it == null) continue;
-            final ItemMeta meta = it.hasItemMeta() ? it.getItemMeta() : Bukkit.getItemFactory().getItemMeta(it.getType());
-            if (meta == null) continue;
 
-            meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
-            it.setItemMeta(meta);
+            final var customModelData = iconItem.customModelData();
+            final var itemName = iconItem.itemName();
+
+            IconUtils.applyModifiers(it, customModelData, itemName, true);
 
             final GuiItem guiItem = new GuiItem(it);
             guiItem.setAction(event -> {
-                if (vault.getIcon().equals(material)) vault.setIcon(null);
-                else vault.setIcon(material);
+                vault.setIcon(material, customModelData);
+
                 SoundUtils.playSound(player, MESSAGES.getString("sounds.select-icon"));
                 if (CONFIG.getBoolean("selector-stay-open", true))
                     open(vault, oldPage, gui.getCurrentPageNum());
@@ -77,15 +80,17 @@ public class ItemPicker {
             gui.addItem(guiItem);
         }
 
+        boolean hasMultiplePages = nbIcons > ((rows-1) * 9);
+
         final Section prev;
-        if ((prev = MESSAGES.getSection("gui-items.previous-page")) != null) {
+        if ((prev = MESSAGES.getSection("gui-items.previous-page")) != null && hasMultiplePages) {
             final GuiItem item1 = new GuiItem(ItemBuilder.create(prev).get());
             item1.setAction(event -> gui.previous());
             gui.setItem(rows, 3, item1);
         }
 
         final Section next;
-        if ((next = MESSAGES.getSection("gui-items.next-page")) != null) {
+        if ((next = MESSAGES.getSection("gui-items.next-page")) != null && hasMultiplePages) {
             final GuiItem item2 = new GuiItem(ItemBuilder.create(next).get());
             item2.setAction(event -> gui.next());
             gui.setItem(rows, 7, item2);

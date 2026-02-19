@@ -57,7 +57,7 @@ public class VaultPlayer {
         if (player != null) {
             if (!PermissionUtils.hasPermission(player, num)) return null;
             if (!vaultMap.containsKey(num)) {
-                return addVault(new Vault(this, num, null, null));
+                return addVault(new Vault(this, num, null, null, null));
             }
         }
         if (!vaultMap.containsKey(num)) return null;

@@ -2,6 +2,7 @@ package com.artillexstudios.axvaults.converters;
 
 import com.artillexstudios.axapi.config.Config;
 import com.artillexstudios.axapi.utils.StringUtils;
+import com.artillexstudios.axvaults.utils.ThreadUtils;
 import com.artillexstudios.axvaults.utils.VaultUtils;
 import com.artillexstudios.axvaults.vaults.Vault;
 import com.artillexstudios.axvaults.vaults.VaultManager;
@@ -11,7 +12,10 @@ import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.UUID;
+
+import static com.artillexstudios.axvaults.converters.VaultItemReplacer.*;
 
 public class PlayerVaultsXConverter {
 
@@ -20,6 +24,10 @@ public class PlayerVaultsXConverter {
         if (path.exists()) {
             int vaults = 0;
             int players = 0;
+
+            final List<VaultItemReplacer.ReplacementRule> replacementRules = loadRules();
+            if (replacementRules.isEmpty()) return;
+
             for (File file : path.listFiles()) {
                 if (!file.getName().endsWith(".yml")) continue;
                 final Config data = new Config(file);
@@ -32,10 +40,28 @@ public class PlayerVaultsXConverter {
                 players++;
 
                 VaultPlayer vaultPlayer = VaultManager.getPlayer(Bukkit.getOfflinePlayer(uuid)).join();
+
+                Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#33FF33[AxVaults] PlayerVaultsXConverter: processing player " + Bukkit.getOfflinePlayer(uuid).getName()));
+
                 for (String route : data.getBackingDocument().getRoutesAsStrings(false)) {
                     final int num = Integer.parseInt(route.replace("vault", ""));
-                    final Vault vault = new Vault(vaultPlayer, num, null, getItems(data.getString(route)));
-                    VaultUtils.save(vault);
+
+                    final ItemStack[] initialItems = getItems(data.getString(route));
+
+                    if (initialItems == null || isVeryEmpty(initialItems)) continue;
+
+                    final ItemStack[] contents = apply(initialItems, replacementRules, Bukkit.getOfflinePlayer(uuid).getName());
+
+                    ThreadUtils.runSync(() -> {
+                        Vault vault = vaultPlayer.getVaultMap().get(num);
+                        if (vault == null) {
+                            vault = new Vault(vaultPlayer, num, null, null, contents);
+                        } else {
+                            vault.setContents(contents);
+                        }
+
+                        VaultUtils.save(vault);
+                    });
                     vaults++;
                 }
             }
