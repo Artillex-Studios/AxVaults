@@ -8,7 +8,7 @@ import java.util.List;
 
 public enum Libraries {
 
-    HIKARICP("com{}zaxxer:HikariCP:6.3.0", relocation("com{}zaxxer{}hikari", "com.artillexstudios.axvaults.libs.hikari")),
+    HIKARICP("com{}zaxxer:HikariCP:7.0.2", relocation("com{}zaxxer{}hikari", "com.artillexstudios.axvaults.libs.hikari")),
 
     SQLITE_JDBC("org{}xerial:sqlite-jdbc:3.49.1.0"),
 
