@@ -124,7 +124,8 @@ public final class AxVaults extends AxPlugin {
 
         Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#55ff00[AxVaults] Loaded plugin!"));
 
-        if (CONFIG.getBoolean("update-notifier.enabled", true)) new UpdateNotifier(this, 5417);
+        UpdateNotifier.init(CONFIG, MESSAGES);
+        if (CONFIG.getBoolean("update-notifier.enabled", true)) new UpdateNotifier();
     }
 
     public void disable() {
