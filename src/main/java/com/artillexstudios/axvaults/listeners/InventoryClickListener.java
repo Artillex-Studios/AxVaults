@@ -24,7 +24,7 @@ public class InventoryClickListener implements Listener {
             return;
         }
         boolean openSelector = CONFIG.getBoolean("clicking-outside-open-selector", false);
-        if (openSelector && player.hasPermission("axvaults.selector") && event.getAction() == InventoryAction.NOTHING && event.getClickedInventory() == null) {
+        if (openSelector && event.getAction() == InventoryAction.NOTHING && event.getClickedInventory() == null) {
             VaultManager.getPlayer(player).thenAccept(vaultPlayer -> {
                 new VaultSelector(player, vaultPlayer).open();
             });

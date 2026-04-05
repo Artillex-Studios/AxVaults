@@ -6,6 +6,7 @@ import com.artillexstudios.axvaults.commands.subcommands.Delete;
 import com.artillexstudios.axvaults.commands.subcommands.ForceOpen;
 import com.artillexstudios.axvaults.commands.subcommands.Help;
 import com.artillexstudios.axvaults.commands.subcommands.Reload;
+import com.artillexstudios.axvaults.commands.subcommands.ReplaceItems;
 import com.artillexstudios.axvaults.commands.subcommands.Save;
 import com.artillexstudios.axvaults.commands.subcommands.Set;
 import com.artillexstudios.axvaults.commands.subcommands.Stats;
@@ -66,8 +67,20 @@ public class AdminCommand implements OrphanCommand {
 
     @CommandPermission("axvaults.admin.converter")
     @Subcommand("converter PlayerVaultsX")
-    public void converter(CommandSender sender) {
-        Converter.INSTANCE.execute(sender);
+    public void converterPlayerVaultsX(CommandSender sender) {
+        Converter.INSTANCE.executePlayerVaultsX(sender);
+    }
+
+    @CommandPermission("axvaults.admin.converter")
+    @Subcommand("converter EnderVaults")
+    public void converterEnderVaults(CommandSender sender) {
+        Converter.INSTANCE.executeEnderVaults(sender);
+    }
+
+    @CommandPermission("axvaults.admin.replaceitems")
+    @Subcommand("replaceitems")
+    public void replaceItems(CommandSender sender) {
+        ReplaceItems.INSTANCE.execute(sender);
     }
 
     @CommandPermission("axvaults.admin.save")
