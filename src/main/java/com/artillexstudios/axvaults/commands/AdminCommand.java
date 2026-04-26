@@ -14,9 +14,11 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import revxrsal.commands.annotation.DefaultFor;
+import revxrsal.commands.annotation.Flag;
 import revxrsal.commands.annotation.Optional;
 import revxrsal.commands.annotation.Range;
 import revxrsal.commands.annotation.Subcommand;
+import revxrsal.commands.annotation.Switch;
 import revxrsal.commands.bukkit.annotation.CommandPermission;
 import revxrsal.commands.orphan.OrphanCommand;
 
@@ -72,8 +74,8 @@ public class AdminCommand implements OrphanCommand {
 
     @CommandPermission("axvaults.admin.save")
     @Subcommand("save")
-    public void save(CommandSender sender) {
-        Save.INSTANCE.execute(sender);
+    public void save(CommandSender sender, @Switch("-autosave") boolean autosave) {
+        Save.INSTANCE.execute(sender, autosave);
     }
 
     @CommandPermission("axvaults.admin.debug")

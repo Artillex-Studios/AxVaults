@@ -1,6 +1,6 @@
 package com.artillexstudios.axvaults.vaults;
 
-import com.artillexstudios.axapi.scheduler.Scheduler;
+import com.artillexstudios.axapi.utils.ContainerUtils;
 import com.artillexstudios.axapi.utils.StringUtils;
 import com.artillexstudios.axvaults.AxVaults;
 import com.artillexstudios.axvaults.hooks.HookManager;
@@ -17,7 +17,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
@@ -32,6 +31,7 @@ public class Vault implements InventoryHolder {
     private Material icon;
     private long lastOpen = System.currentTimeMillis();
     private final AtomicBoolean changed = new AtomicBoolean(false);
+    private final List<ItemStack> overflow = new ArrayList<>();
 
     public Vault(VaultPlayer vaultPlayer, int id, Material icon, @Nullable ItemStack[] contents) {
         this.vaultPlayer = vaultPlayer;
@@ -50,17 +50,11 @@ public class Vault implements InventoryHolder {
             for (int i = 0; i < storage.getSize(); i++) {
                 storage.setItem(i, items[i]);
             }
-            Player player = Bukkit.getPlayer(vaultPlayer.getUUID());
+            // if the items don't fit in the storage, add remaining to the overflow list
             for (int i = storage.getSize(); i < items.length; i++) {
                 if (items[i] == null) continue;
-                HashMap<Integer, ItemStack> remaining = storage.addItem(items[i]);
-                if (player != null) {
-                    Scheduler.get().runAt(player.getLocation(), () -> {
-                        remaining.forEach((k, v) -> player.getLocation().getWorld().dropItem(player.getLocation(), v));
-                    });
-                }
+                overflow.add(items[i]);
             }
-            changed.set(true);
             return;
         }
         storage.setContents(items);
@@ -116,17 +110,34 @@ public class Vault implements InventoryHolder {
 
     public void open(@NotNull Player player) {
         if (AxVaults.isStopping()) {
-            // The plugin is shutting down, we don't want to allow opening guis
+            // prevent opening vaults when the plugin is shutting down
             return;
         }
 
         changed.set(true);
-        if (vaultPlayer.getRows() != storage.getSize()) {
+        // recalculate vault if the row count has changed
+        if (vaultPlayer.getRows() * 9 != storage.getSize()) {
             reload();
         }
+
+        // give back overflow items that couldn't fit in the vault
+        if (!overflow.isEmpty()) {
+            dropOverFlow(player);
+        }
+
         player.openInventory(storage);
         SoundUtils.playSound(player, MESSAGES.getString("sounds.open"));
         lastOpen = System.currentTimeMillis();
+    }
+
+    private void dropOverFlow(@NotNull Player player) {
+        changed.set(true);
+        for (Iterator<ItemStack> it = overflow.iterator(); it.hasNext(); ) {
+            ItemStack itemStack = it.next();
+            it.remove();
+            // first try to re-add items to the vault, if it fails, give them back to the player
+            ContainerUtils.INSTANCE.addOrDrop(storage, List.of(itemStack), player.getLocation());
+        }
     }
 
     public boolean isOpened() {
