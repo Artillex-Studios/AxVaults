@@ -62,6 +62,7 @@ public class Vault implements InventoryHolder {
                     });
                 }
             }
+            changed.set(true);
             return;
         }
         storage.setContents(items);

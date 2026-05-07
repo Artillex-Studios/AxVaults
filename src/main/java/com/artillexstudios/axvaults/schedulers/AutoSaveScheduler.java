@@ -29,16 +29,20 @@ public class AutoSaveScheduler {
             MutableInteger saved = new MutableInteger();
 
             List<CompletableFuture<Void>> futures = new ArrayList<>();
-            for (Vault vault : VaultManager.getVaults()) {
-                if (vault.hasChanged().get()) { // only save if the vault has been touched since the last save
-                    futures.add(VaultUtils.save(vault));
-                    saved.increment();
+            try {
+                for (Vault vault : VaultManager.getVaults()) {
+                    if (vault.hasChanged().get()) { // only save if the vault has been touched since the last save
+                        futures.add(VaultUtils.save(vault));
+                        saved.increment();
+                    }
+                    if (vault.isOpened()) continue;
+                    vault.hasChanged().set(false); // if the player is not currently editing it, set changed to false
+                    if (Bukkit.getPlayer(vault.getUUID()) != null) continue;
+                    if (System.currentTimeMillis() - vault.getLastOpen() <= (time - 1) * 1_000L) continue;
+                    VaultManager.removeVault(vault);
                 }
-                if (vault.isOpened()) continue;
-                vault.hasChanged().set(false); // if the player is not currently editing it, set changed to false
-                if (Bukkit.getPlayer(vault.getUUID()) != null) continue;
-                if (System.currentTimeMillis() - vault.getLastOpen() <= (time - 1) * 1_000L) continue;
-                VaultManager.removeVault(vault);
+            } catch (Exception ex) {
+                ex.printStackTrace();
             }
 
             CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new)).thenRun(() -> {

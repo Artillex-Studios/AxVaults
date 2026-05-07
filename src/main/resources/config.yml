@@ -108,6 +108,7 @@ async-item-serializer: false
 #  > name
 #  > material / type
 #  > custom-model-data (only the old variant)
+#  > nbt-tags (matches persistent data container keys like plugin:key, supports regex)
 blacklist-items:
   - custom-model-data: 100
     material: BARRIER
@@ -115,6 +116,10 @@ blacklist-items:
   - custom-model-data: 150
     material: BARRIER
     name: "*Another custom item*"
+  #- material: DIAMOND_SWORD
+  #  nbt-tags:
+  #    - "yourplugin:*"
+  #    - "*blocked_tag*"
 
 # you must define at least 1
 # requires a restart to update

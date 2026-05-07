@@ -2,10 +2,13 @@ package com.artillexstudios.axvaults.utils;
 
 import com.artillexstudios.axapi.items.WrappedItemStack;
 import com.artillexstudios.axapi.items.component.DataComponents;
+import com.artillexstudios.axapi.items.nbt.CompoundTag;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class ItemMatcher {
     private final WrappedItemStack wrapped;
@@ -23,6 +26,7 @@ public class ItemMatcher {
         if (material()) matches++;
         if (name()) matches++;
         if (customModelData()) matches++;
+        if (nbtTags()) matches++;
         return matches >= needMatch;
     }
 
@@ -52,5 +56,25 @@ public class ItemMatcher {
         var cmd = wrapped.get(DataComponents.customModelData());
         if (cmd == null || cmd.floats().isEmpty()) return false;
         return num == cmd.floats().getFirst().intValue();
+    }
+
+    public boolean nbtTags() {
+        Object val = map.get("nbt-tags");
+        if (!(val instanceof List<?> confRawTags) || confRawTags.isEmpty()) return false;
+        needMatch++;
+
+        // Get NBTs of the item getting moved
+        CompoundTag itemMeta = wrapped.get(DataComponents.customData());
+        if (itemMeta == null) return false;
+        Set<String> itemTags = itemMeta.getAllKeys();
+
+        for (Object confRawTag : confRawTags) {
+            if (!(confRawTag instanceof String confTag) || confTag.isBlank()) continue;
+
+            for (String itemTag : itemTags) {
+                if (SimpleRegex.matches(confTag, itemTag)) return true;
+            }
+        }
+        return false;
     }
 }

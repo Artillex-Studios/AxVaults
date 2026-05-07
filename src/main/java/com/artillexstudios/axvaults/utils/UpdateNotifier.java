@@ -76,6 +76,7 @@ public class UpdateNotifier implements Listener {
                     .build();
 
             final HttpResponse<?> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            client.close();
             return response.body().toString();
         } catch (Exception ex) {
             return null;

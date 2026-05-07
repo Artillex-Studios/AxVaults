@@ -6,6 +6,7 @@ import com.artillexstudios.axvaults.vaults.Vault;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.ClickType;
+import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
@@ -19,13 +20,43 @@ public class BlacklistListener implements Listener {
 
     @EventHandler
     public void onClick(@NotNull InventoryClickEvent event) {
-        if (!(PaperUtils.getHolder(event.getInventory(), false) instanceof Vault)) {
+        if (!(PaperUtils.getHolder(event.getInventory(), false) instanceof Vault))
             return;
-        }
 
         if (BlacklistUtils.isBlacklisted(this.getItem(event))) {
+
+            // Only blacklist the storing, we can get newly blacklisted items back
+            if (!isStoringIntoVault(event))
+                return;
+
             event.setCancelled(true);
             MESSAGEUTILS.sendLang(event.getWhoClicked(), "banned-item");
+        }
+    }
+
+    private boolean isStoringIntoVault(@NotNull InventoryClickEvent event) {
+        Inventory clickedInventory = event.getClickedInventory();
+        if (clickedInventory == null)
+            return false;
+
+        Inventory topInventory = event.getView().getTopInventory();
+        InventoryAction action = event.getAction();
+
+        if (action == InventoryAction.MOVE_TO_OTHER_INVENTORY)
+            return clickedInventory != topInventory;
+
+        if (clickedInventory == topInventory) {
+            return action == InventoryAction.PLACE_ALL
+                    || action == InventoryAction.PLACE_ONE
+                    || action == InventoryAction.PLACE_SOME
+                    || action == InventoryAction.SWAP_WITH_CURSOR
+                    || action == InventoryAction.HOTBAR_SWAP
+                    || action == InventoryAction.HOTBAR_MOVE_AND_READD;
+        } else {
+            return action == InventoryAction.PICKUP_ALL
+                    || action == InventoryAction.PICKUP_HALF
+                    || action == InventoryAction.PICKUP_SOME
+                    || action == InventoryAction.PICKUP_ONE;
         }
     }
 

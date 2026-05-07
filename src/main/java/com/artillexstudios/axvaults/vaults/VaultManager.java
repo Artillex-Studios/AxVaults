@@ -7,7 +7,6 @@ import org.bukkit.inventory.Inventory;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -66,7 +65,6 @@ public class VaultManager {
         loadingPlayers.remove(vaultPlayer.getUUID());
     }
 
-    @Unmodifiable
     public static List<Vault> getVaults() {
         ArrayList<Vault> vaults = new ArrayList<>();
         for (VaultPlayer vaultPlayer : players.values()) {

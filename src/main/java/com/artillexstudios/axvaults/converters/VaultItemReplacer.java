@@ -76,6 +76,15 @@ public class VaultItemReplacer {
 
                 if (!replacementRule.matches(materialId)) continue;
 
+                // Adding some specific exceptions for SPARTANWEAPONRY
+                if (itemStack.getType().toString().contains("SPARTANWEAPONRY") &&
+                        (itemStack.getType().toString().contains("STEEL") ||
+                        itemStack.getType().toString().contains("ARROW") ||
+                        itemStack.getType().toString().contains("BOLT"))) {
+                    Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#33FF33[AxVaults] Skipping " + itemStack));
+                    continue;
+                }
+
                 Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#33FF33[AxVaults] Replacing " + contents[i] + " by " + replacementRule.material + " x" + replacementRule.amount));
 
                 contents[i] = new ItemStack(replacementRule.material(), replacementRule.amount());

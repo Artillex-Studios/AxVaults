@@ -181,8 +181,6 @@ public class EnderVaultsConverter {
 
                 if (isVeryEmpty(contents)) continue; // Empty vault
 
-                Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#FF0000[AxVaults] EnderVaultsConverter: updating vault for " + Bukkit.getOfflinePlayer(uuid).getName()));
-
                 ThreadUtils.runSync(() -> {
                     Vault vault = vaultPlayer.getVaultMap().get(vaultNumber);
                     if (vault == null) {
