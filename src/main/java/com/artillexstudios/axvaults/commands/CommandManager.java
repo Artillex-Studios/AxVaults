@@ -10,6 +10,7 @@ import revxrsal.commands.bukkit.BukkitCommandHandler;
 import revxrsal.commands.orphan.Orphans;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 import static com.artillexstudios.axvaults.AxVaults.CONFIG;
@@ -41,8 +42,20 @@ public class CommandManager {
 
     public static void reload() {
         handler.unregisterAllCommands();
-        handler.register(Orphans.path(CONFIG.getStringList("player-command-aliases").toArray(String[]::new)).handler(new PlayerCommand()));
-        handler.register(Orphans.path(CONFIG.getStringList("admin-command-aliases").toArray(String[]::new)).handler(new AdminCommand()));
+
+        {
+            List<String> aliases = CONFIG.getStringList("player-command-aliases");
+            if (!aliases.isEmpty()) {
+                handler.register(Orphans.path(aliases.toArray(String[]::new)).handler(new PlayerCommand()));
+            }
+        }
+        {
+            List<String> aliases = CONFIG.getStringList("admin-command-aliases");
+            if (!aliases.isEmpty()) {
+                handler.register(Orphans.path(aliases.toArray(String[]::new)).handler(new AdminCommand()));
+            }
+        }
+
         handler.registerBrigadier();
     }
 }

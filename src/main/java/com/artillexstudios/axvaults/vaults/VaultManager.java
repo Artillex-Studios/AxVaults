@@ -1,6 +1,7 @@
 package com.artillexstudios.axvaults.vaults;
 
 import com.artillexstudios.axvaults.AxVaults;
+import com.artillexstudios.axvaults.utils.ThreadUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.inventory.Inventory;
@@ -44,12 +45,19 @@ public class VaultManager {
 
         VaultPlayer vaultPlayer = players.computeIfAbsent(offlinePlayer.getUniqueId(), VaultPlayer::new);
         if (vaultPlayer.isLoaded()) {
-            return CompletableFuture.completedFuture(vaultPlayer);
+            ThreadUtils.runSync(() -> {
+                cf.complete(vaultPlayer);
+            });
+            return cf;
         }
 
         loadingPlayers.put(offlinePlayer.getUniqueId(), cf);
-        AxVaults.getThreadedQueue().submit(() -> vaultPlayer.load(cf));
-        cf.thenRun(() -> loadingPlayers.remove(offlinePlayer.getUniqueId()));
+        AxVaults.getThreadedQueue().submit(() -> {
+            vaultPlayer.load(cf);
+        });
+        cf.thenRun(() -> {
+            loadingPlayers.remove(offlinePlayer.getUniqueId());
+        });
         return cf;
     }
 
