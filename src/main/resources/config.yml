@@ -59,6 +59,10 @@ selector-stay-open: false
 # you shouldn't have to disable this unless a developers tells you to
 delete-empty-vaults: true
 
+# how often should players be able to refresh guis?
+# this doesn't impact performance too much, however you should not set it too low
+gui-refresh-cooldown-milliseconds: 100
+
 # should items be serialized asynchronously?
 # only enable if you are having performance issues
 # this setting might cause unexcepted bugs, like item loss
@@ -115,4 +119,4 @@ update-notifier:
 debug: false
 
 # do not change this
-version: 10
+version: 11
