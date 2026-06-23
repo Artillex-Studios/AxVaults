@@ -105,7 +105,8 @@ public class VaultPlayer {
         final Iterator<HumanEntity> viewerIterator = viewers.iterator();
 
         while (viewerIterator.hasNext()) {
-            viewerIterator.next().closeInventory();
+            final HumanEntity viewer = viewerIterator.next();
+            ThreadUtils.runAtEntity(viewer, viewer::closeInventory);
             viewerIterator.remove();
         }
     }

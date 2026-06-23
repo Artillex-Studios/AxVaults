@@ -6,6 +6,7 @@ import com.artillexstudios.axapi.utils.Cooldown;
 import com.artillexstudios.axapi.utils.ItemBuilder;
 import com.artillexstudios.axapi.utils.StringUtils;
 import com.artillexstudios.axvaults.AxVaults;
+import com.artillexstudios.axvaults.utils.ThreadUtils;
 import com.artillexstudios.axvaults.vaults.Vault;
 import com.artillexstudios.axvaults.vaults.VaultPlayer;
 import dev.triumphteam.gui.guis.Gui;
@@ -39,6 +40,11 @@ public class VaultSelector {
     }
 
     public void open(int page) {
+        if (!ThreadUtils.isEntityTask(player)) {
+            ThreadUtils.runAtEntity(player, () -> open(page));
+            return;
+        }
+
         int rows = CONFIG.getInt("vault-selector-rows", 6);
         int pageSize = rows * 9 - 9;
 
@@ -57,8 +63,10 @@ public class VaultSelector {
         for (int i = 0; i < pageSize * (page + 1); i++) {
             getItemOfVault(player, i + 1, gui).thenAccept(guiItem -> {
                 if (guiItem == null) return;
-                gui.addItem(guiItem);
-                gui.update();
+                ThreadUtils.runAtEntity(player, () -> {
+                    gui.addItem(guiItem);
+                    gui.update();
+                });
             });
         }
 
@@ -82,8 +90,10 @@ public class VaultSelector {
                 for (int i = 0; i < pageSize; i++) {
                     getItemOfVault(player, (gui.getCurrentPageNum() * pageSize) + i + 1, gui).thenAccept(guiItem -> {
                         if (guiItem == null) return;
-                        gui.addItem(guiItem);
-                        gui.update();
+                        ThreadUtils.runAtEntity(player, () -> {
+                            gui.addItem(guiItem);
+                            gui.update();
+                        });
                     });
                 }
             });

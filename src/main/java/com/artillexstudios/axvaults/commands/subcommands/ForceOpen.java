@@ -1,6 +1,7 @@
 package com.artillexstudios.axvaults.commands.subcommands;
 
 import com.artillexstudios.axvaults.guis.VaultSelector;
+import com.artillexstudios.axvaults.utils.ThreadUtils;
 import com.artillexstudios.axvaults.vaults.Vault;
 import com.artillexstudios.axvaults.vaults.VaultManager;
 import org.bukkit.command.CommandSender;
@@ -17,24 +18,26 @@ public enum ForceOpen {
 
     public void execute(CommandSender sender, Player player, @Nullable Integer number) {
         VaultManager.getPlayer(player).thenAccept(vaultPlayer -> {
-            if (number != null) {
-                HashMap<String, String> replacements = new HashMap<>();
-                replacements.put("%num%", "" + number);
-                replacements.put("%player%", player.getName());
+            ThreadUtils.runAtEntity(player, () -> {
+                if (number != null) {
+                    final HashMap<String, String> replacements = new HashMap<>();
+                    replacements.put("%num%", "" + number);
+                    replacements.put("%player%", player.getName());
 
-                Vault vault = vaultPlayer.getVault(number);
-                if (vault == null) {
-                    MESSAGEUTILS.sendLang(player, "vault.not-unlocked", replacements);
+                    final Vault vault = vaultPlayer.getVault(number);
+                    if (vault == null) {
+                        MESSAGEUTILS.sendLang(player, "vault.not-unlocked", replacements);
+                        return;
+                    }
+
+                    vault.open(player);
+                    MESSAGEUTILS.sendLang(player, "vault.opened", replacements);
+                    ThreadUtils.runAtSender(sender, () -> MESSAGEUTILS.sendLang(sender, "force-open-vault", replacements));
                     return;
                 }
-
-                vault.open(player);
-                MESSAGEUTILS.sendLang(player, "vault.opened", replacements);
-                MESSAGEUTILS.sendLang(sender, "force-open-vault", replacements);
-                return;
-            }
-            new VaultSelector(player, vaultPlayer).open();
-            MESSAGEUTILS.sendLang(sender, "force-open", Collections.singletonMap("%player%", player.getName()));
+                new VaultSelector(player, vaultPlayer).open();
+                ThreadUtils.runAtSender(sender, () -> MESSAGEUTILS.sendLang(sender, "force-open", Collections.singletonMap("%player%", player.getName())));
+            });
         });
 
     }

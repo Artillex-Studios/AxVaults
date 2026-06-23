@@ -2,6 +2,7 @@ package com.artillexstudios.axvaults.commands.subcommands;
 
 import com.artillexstudios.axvaults.AxVaults;
 import com.artillexstudios.axvaults.schedulers.AutoSaveScheduler;
+import com.artillexstudios.axvaults.utils.ThreadUtils;
 import com.artillexstudios.axvaults.utils.VaultUtils;
 import com.artillexstudios.axvaults.vaults.Vault;
 import com.artillexstudios.axvaults.vaults.VaultManager;
@@ -22,14 +23,14 @@ public enum Save {
         AxVaults.getThreadedQueue().submit(() -> {
             if (autosave) {
                 AutoSaveScheduler.getSaveRunnable().run();
-                MESSAGEUTILS.sendLang(sender, "save.manual", Map.of("%time%", "" + (System.currentTimeMillis() - time)));
+                ThreadUtils.runAtSender(sender, () -> MESSAGEUTILS.sendLang(sender, "save.manual", Map.of("%time%", "" + (System.currentTimeMillis() - time))));
             } else {
                 List<CompletableFuture<Void>> futures = new ArrayList<>();
                 for (Vault vault : VaultManager.getVaults()) {
-                    VaultUtils.save(vault);
+                    futures.add(VaultUtils.save(vault));
                 }
                 CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new)).thenRun(() -> {
-                    MESSAGEUTILS.sendLang(sender, "save.manual", Map.of("%time%", "" + (System.currentTimeMillis() - time)));
+                    ThreadUtils.runAtSender(sender, () -> MESSAGEUTILS.sendLang(sender, "save.manual", Map.of("%time%", "" + (System.currentTimeMillis() - time))));
                 });
             }
         });

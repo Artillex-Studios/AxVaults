@@ -3,6 +3,7 @@ package com.artillexstudios.axvaults.listeners;
 import com.artillexstudios.axapi.utils.PaperUtils;
 import com.artillexstudios.axvaults.AxVaults;
 import com.artillexstudios.axvaults.guis.VaultSelector;
+import com.artillexstudios.axvaults.utils.ThreadUtils;
 import com.artillexstudios.axvaults.vaults.Vault;
 import com.artillexstudios.axvaults.vaults.VaultManager;
 import org.bukkit.entity.Player;
@@ -26,7 +27,7 @@ public class InventoryClickListener implements Listener {
         boolean openSelector = CONFIG.getBoolean("clicking-outside-open-selector", false);
         if (openSelector && player.hasPermission("axvaults.selector") && event.getAction() == InventoryAction.NOTHING && event.getClickedInventory() == null) {
             VaultManager.getPlayer(player).thenAccept(vaultPlayer -> {
-                new VaultSelector(player, vaultPlayer).open();
+                ThreadUtils.runAtEntity(player, () -> new VaultSelector(player, vaultPlayer).open());
             });
         }
     }

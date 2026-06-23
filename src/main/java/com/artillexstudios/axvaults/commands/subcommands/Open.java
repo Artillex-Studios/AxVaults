@@ -1,6 +1,7 @@
 package com.artillexstudios.axvaults.commands.subcommands;
 
 import com.artillexstudios.axvaults.guis.VaultSelector;
+import com.artillexstudios.axvaults.utils.ThreadUtils;
 import com.artillexstudios.axvaults.vaults.Vault;
 import com.artillexstudios.axvaults.vaults.VaultManager;
 import org.bukkit.entity.Player;
@@ -20,7 +21,7 @@ public enum Open {
                 return;
             }
             VaultManager.getPlayer(sender).thenAccept(vaultPlayer -> {
-                new VaultSelector(sender, vaultPlayer).open();
+                ThreadUtils.runAtEntity(sender, () -> new VaultSelector(sender, vaultPlayer).open());
             });
             return;
         }
@@ -36,14 +37,16 @@ public enum Open {
         }
 
         VaultManager.getPlayer(sender).thenAccept(vaultPlayer -> {
-            Vault vault = vaultPlayer.getVault(number);
-            if (vault == null) {
-                MESSAGEUTILS.sendLang(sender, "vault.not-unlocked", replacements);
-                return;
-            }
+            ThreadUtils.runAtEntity(sender, () -> {
+                final Vault vault = vaultPlayer.getVault(number);
+                if (vault == null) {
+                    MESSAGEUTILS.sendLang(sender, "vault.not-unlocked", replacements);
+                    return;
+                }
 
-            vault.open(sender);
-            MESSAGEUTILS.sendLang(sender, "vault.opened", replacements);
+                vault.open(sender);
+                MESSAGEUTILS.sendLang(sender, "vault.opened", replacements);
+            });
         });
     }
 }

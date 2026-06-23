@@ -6,6 +6,7 @@ import com.artillexstudios.axapi.utils.Cooldown;
 import com.artillexstudios.axapi.utils.ItemBuilder;
 import com.artillexstudios.axapi.utils.StringUtils;
 import com.artillexstudios.axvaults.utils.SoundUtils;
+import com.artillexstudios.axvaults.utils.ThreadUtils;
 import com.artillexstudios.axvaults.vaults.Vault;
 import com.artillexstudios.axvaults.vaults.VaultPlayer;
 import dev.triumphteam.gui.guis.Gui;
@@ -39,6 +40,11 @@ public class ItemPicker {
     }
 
     public void open(@NotNull Vault vault, int oldPage, int cPage) {
+        if (!ThreadUtils.isEntityTask(player)) {
+            ThreadUtils.runAtEntity(player, () -> open(vault, oldPage, cPage));
+            return;
+        }
+
         int rows = CONFIG.getInt("item-picker-rows", 6);
         int pageSize = rows * 9 - 9;
 

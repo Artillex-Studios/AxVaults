@@ -5,6 +5,7 @@ import com.artillexstudios.axapi.utils.StringUtils;
 import com.artillexstudios.axvaults.AxVaults;
 import com.artillexstudios.axvaults.hooks.HookManager;
 import com.artillexstudios.axvaults.utils.SoundUtils;
+import com.artillexstudios.axvaults.utils.ThreadUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
@@ -109,6 +110,11 @@ public class Vault implements InventoryHolder {
     }
 
     public void open(@NotNull Player player) {
+        if (!ThreadUtils.isEntityTask(player)) {
+            ThreadUtils.runAtEntity(player, () -> open(player));
+            return;
+        }
+
         if (AxVaults.isStopping()) {
             // prevent opening vaults when the plugin is shutting down
             return;
@@ -152,7 +158,8 @@ public class Vault implements InventoryHolder {
         Iterator<HumanEntity> viewerIterator = viewers.iterator();
 
         while (viewerIterator.hasNext()) {
-            viewerIterator.next().openInventory(newStorage);
+            HumanEntity viewer = viewerIterator.next();
+            ThreadUtils.runAtEntity(viewer, () -> viewer.openInventory(newStorage));
             viewerIterator.remove();
         }
 
