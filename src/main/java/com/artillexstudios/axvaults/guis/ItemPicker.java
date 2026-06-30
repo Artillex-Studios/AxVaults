@@ -6,6 +6,7 @@ import com.artillexstudios.axapi.utils.Cooldown;
 import com.artillexstudios.axapi.utils.ItemBuilder;
 import com.artillexstudios.axapi.utils.StringUtils;
 import com.artillexstudios.axvaults.utils.SoundUtils;
+import com.artillexstudios.axvaults.utils.ThreadUtils;
 import com.artillexstudios.axvaults.vaults.Vault;
 import com.artillexstudios.axvaults.vaults.VaultPlayer;
 import dev.triumphteam.gui.guis.Gui;
@@ -111,7 +112,9 @@ public class ItemPicker {
             gui.setItem(rows, 5, item3);
         }
 
-        gui.open(player, cPage);
+        ThreadUtils.runSync(player, () -> {
+            gui.open(player, cPage);
+        });
     }
 
     private static boolean getOrAddCooldown(Player player) {
