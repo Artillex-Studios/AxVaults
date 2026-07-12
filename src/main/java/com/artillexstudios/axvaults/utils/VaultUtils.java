@@ -27,8 +27,10 @@ public class VaultUtils {
             LogUtils.error("An exception occurred while saving vaults!", throwable);
             return null;
         }).thenAccept(result -> {
-            AxVaults.getDatabase().saveVault(vault, result);
-            cf.complete(null);
+            ThreadUtils.runAsync(() -> {
+                AxVaults.getDatabase().saveVault(vault, result);
+                cf.complete(null);
+            });
         });
         return cf;
     }

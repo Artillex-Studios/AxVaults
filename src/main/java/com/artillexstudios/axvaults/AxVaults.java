@@ -13,6 +13,7 @@ import com.artillexstudios.axapi.metrics.AxMetrics;
 import com.artillexstudios.axapi.utils.MessageUtils;
 import com.artillexstudios.axapi.utils.StringUtils;
 import com.artillexstudios.axapi.utils.featureflags.FeatureFlags;
+import com.artillexstudios.axapi.utils.logging.LoggerNameFormat;
 import com.artillexstudios.axvaults.commands.CommandManager;
 import com.artillexstudios.axvaults.database.Database;
 import com.artillexstudios.axvaults.database.impl.H2;
@@ -36,8 +37,6 @@ import com.artillexstudios.axvaults.vaults.VaultManager;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.HumanEntity;
-import revxrsal.zapper.DependencyManager;
-import revxrsal.zapper.relocation.Relocation;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -73,14 +72,7 @@ public final class AxVaults extends AxPlugin {
     @Override
     public void dependencies(DependencyManagerWrapper manager) {
         instance = this;
-
-        DependencyManager dependencyManager = manager.wrapped();
-        for (Libraries lib : Libraries.values()) {
-            dependencyManager.dependency(lib.fetchLibrary());
-            for (Relocation relocation : lib.relocations()) {
-                dependencyManager.relocate(relocation);
-            }
-        }
+        Libraries.load(instance, manager);
     }
 
     public void enable() {
@@ -151,5 +143,6 @@ public final class AxVaults extends AxPlugin {
 
     public void updateFlags() {
         FeatureFlags.USE_LEGACY_HEX_FORMATTER.set(true);
+        FeatureFlags.LOGGER_NAME_FORMAT.set(LoggerNameFormat.NAMEABLE);
     }
 }
