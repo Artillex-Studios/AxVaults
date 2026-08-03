@@ -7,11 +7,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryType;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import static com.artillexstudios.axvaults.AxVaults.MESSAGEUTILS;
 
@@ -23,24 +20,19 @@ public class BlacklistListener implements Listener {
             return;
         }
 
-        if (BlacklistUtils.isBlacklisted(this.getItem(event))) {
+        if (isBlacklisted(event)) {
             event.setCancelled(true);
             MESSAGEUTILS.sendLang(event.getWhoClicked(), "banned-item");
         }
     }
 
-    @Nullable
-    private ItemStack getItem(InventoryClickEvent event) {
-        if (event.getClickedInventory() != null) {
-            if (event.getClick() == ClickType.SWAP_OFFHAND && event.getClickedInventory().getType() != InventoryType.PLAYER) {
-                return event.getWhoClicked().getInventory().getItemInOffHand();
-            }
-            if (event.getClick() == ClickType.NUMBER_KEY) {
-                // when using a number key, the game will move it from the another inventory, so use the opposite of the clicked inventory
-                Inventory inventory = event.getClickedInventory().getType() == InventoryType.PLAYER ? event.getView().getTopInventory() : event.getView().getBottomInventory();
-                return inventory.getItem(event.getHotbarButton());
-            }
+    private boolean isBlacklisted(InventoryClickEvent event) {
+        ItemStack hotbarItem = null;
+        if (event.getClick() == ClickType.NUMBER_KEY) {
+            hotbarItem = event.getWhoClicked().getInventory().getItem(event.getHotbarButton());
+        } else if (event.getClick() == ClickType.SWAP_OFFHAND) {
+            hotbarItem = event.getWhoClicked().getInventory().getItemInOffHand();
         }
-        return event.getCurrentItem();
+        return BlacklistUtils.isBlacklisted(event.getCurrentItem()) || BlacklistUtils.isBlacklisted(hotbarItem);
     }
 }
