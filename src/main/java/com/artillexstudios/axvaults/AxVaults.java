@@ -2,49 +2,55 @@ package com.artillexstudios.axvaults;
 
 import com.artillexstudios.axapi.AxPlugin;
 import com.artillexstudios.axapi.config.Config;
+import com.artillexstudios.axapi.dependencies.DependencyManagerWrapper;
 import com.artillexstudios.axapi.executor.ThreadedQueue;
-import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.dvs.versioning.BasicVersioning;
-import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.settings.dumper.DumperSettings;
-import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.settings.general.GeneralSettings;
-import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.settings.loader.LoaderSettings;
-import com.artillexstudios.axapi.libs.boostedyaml.boostedyaml.settings.updater.UpdaterSettings;
+import com.artillexstudios.axapi.libs.boostedyaml.dvs.versioning.BasicVersioning;
+import com.artillexstudios.axapi.libs.boostedyaml.settings.dumper.DumperSettings;
+import com.artillexstudios.axapi.libs.boostedyaml.settings.general.GeneralSettings;
+import com.artillexstudios.axapi.libs.boostedyaml.settings.loader.LoaderSettings;
+import com.artillexstudios.axapi.libs.boostedyaml.settings.updater.UpdaterSettings;
 import com.artillexstudios.axapi.metrics.AxMetrics;
 import com.artillexstudios.axapi.utils.MessageUtils;
 import com.artillexstudios.axapi.utils.StringUtils;
 import com.artillexstudios.axapi.utils.featureflags.FeatureFlags;
+import com.artillexstudios.axapi.utils.logging.LoggerNameFormat;
 import com.artillexstudios.axvaults.commands.CommandManager;
 import com.artillexstudios.axvaults.database.Database;
 import com.artillexstudios.axvaults.database.impl.H2;
 import com.artillexstudios.axvaults.database.impl.MySQL;
 import com.artillexstudios.axvaults.database.impl.SQLite;
 import com.artillexstudios.axvaults.database.messaging.SQLMessaging;
+import com.artillexstudios.axvaults.hooks.HookManager;
 import com.artillexstudios.axvaults.libraries.Libraries;
-import com.artillexstudios.axvaults.listeners.BlackListListener;
+import com.artillexstudios.axvaults.listeners.BlacklistListener;
 import com.artillexstudios.axvaults.listeners.BlockBreakListener;
+import com.artillexstudios.axvaults.listeners.InventoryClickListener;
 import com.artillexstudios.axvaults.listeners.InventoryCloseListener;
 import com.artillexstudios.axvaults.listeners.PlayerInteractListener;
 import com.artillexstudios.axvaults.listeners.PlayerListeners;
 import com.artillexstudios.axvaults.schedulers.AutoSaveScheduler;
+import com.artillexstudios.axvaults.utils.DebugUtils;
 import com.artillexstudios.axvaults.utils.UpdateNotifier;
+import com.artillexstudios.axvaults.utils.VaultUtils;
 import com.artillexstudios.axvaults.vaults.Vault;
 import com.artillexstudios.axvaults.vaults.VaultManager;
-import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
-import revxrsal.zapper.DependencyManager;
-import revxrsal.zapper.classloader.URLClassLoaderWrapper;
+import org.bukkit.entity.HumanEntity;
 
 import java.io.File;
-import java.net.URLClassLoader;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public final class AxVaults extends AxPlugin {
+    private static boolean stopping = false;
     public static Config CONFIG;
     public static Config MESSAGES;
     public static MessageUtils MESSAGEUTILS;
     private static AxPlugin instance;
     private static ThreadedQueue<Runnable> threadedQueue;
     private static Database database;
-    public static BukkitAudiences BUKKITAUDIENCES;
     private static AxMetrics metrics;
 
     public static ThreadedQueue<Runnable> getThreadedQueue() {
@@ -59,23 +65,29 @@ public final class AxVaults extends AxPlugin {
         return database;
     }
 
-    public void load() {
-        Libraries.load(new DependencyManager(getDescription(), new File(getDataFolder(), "lib"), URLClassLoaderWrapper.wrap((URLClassLoader) getClassLoader())));
+    public static boolean isStopping() {
+        return stopping;
+    }
+
+    @Override
+    public void dependencies(DependencyManagerWrapper manager) {
+        instance = this;
+        Libraries.load(instance, manager);
     }
 
     public void enable() {
-        instance = this;
+        new Metrics(this, 20541);
 
-        int pluginId = 20541;
-        new Metrics(this, pluginId);
-
-        CONFIG = new Config(new File(getDataFolder(), "config.yml"), getResource("config.yml"), GeneralSettings.builder().setUseDefaults(false).build(), LoaderSettings.builder().setAutoUpdate(true).build(), DumperSettings.DEFAULT, UpdaterSettings.builder().setVersioning(new BasicVersioning("version")).build());
-        MESSAGES = new Config(new File(getDataFolder(), "messages.yml"), getResource("messages.yml"), GeneralSettings.builder().setUseDefaults(false).build(), LoaderSettings.builder().setAutoUpdate(true).build(), DumperSettings.DEFAULT, UpdaterSettings.builder().setVersioning(new BasicVersioning("version")).build());
+        CONFIG = new Config(new File(getDataFolder(), "config.yml"), getResource("config.yml"), GeneralSettings.builder().setUseDefaults(false).build(), LoaderSettings.builder().setAutoUpdate(true).build(), DumperSettings.DEFAULT, UpdaterSettings.builder().setKeepAll(true).setVersioning(new BasicVersioning("version")).build());
+        MESSAGES = new Config(new File(getDataFolder(), "messages.yml"), getResource("messages.yml"), GeneralSettings.builder().setUseDefaults(false).build(), LoaderSettings.builder().setAutoUpdate(true).build(), DumperSettings.DEFAULT, UpdaterSettings.builder().setKeepAll(true).setVersioning(new BasicVersioning("version")).build());
 
         MESSAGEUTILS = new MessageUtils(MESSAGES.getBackingDocument(), "prefix", CONFIG.getBackingDocument());
-        BUKKITAUDIENCES = BukkitAudiences.create(this);
 
         threadedQueue = new ThreadedQueue<>("AxVaults-Datastore-thread");
+
+        VaultUtils.reload();
+        HookManager.setupHooks();
+        DebugUtils.init(CONFIG);
 
         database = switch (CONFIG.getString("database.type").toLowerCase()) {
             case "sqlite" -> new SQLite();
@@ -84,13 +96,15 @@ public final class AxVaults extends AxPlugin {
         };
 
         database.setup();
-        database.load();
+
+        threadedQueue.submit(() -> database.load());
 
         getServer().getPluginManager().registerEvents(new PlayerListeners(), this);
-        getServer().getPluginManager().registerEvents(new BlackListListener(), this);
+        getServer().getPluginManager().registerEvents(new BlacklistListener(), this);
         getServer().getPluginManager().registerEvents(new PlayerInteractListener(), this);
         getServer().getPluginManager().registerEvents(new BlockBreakListener(), this);
         getServer().getPluginManager().registerEvents(new InventoryCloseListener(), this);
+        getServer().getPluginManager().registerEvents(new InventoryClickListener(), this);
 
         CommandManager.load();
 
@@ -102,23 +116,33 @@ public final class AxVaults extends AxPlugin {
 
         Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#55ff00[AxVaults] Loaded plugin!"));
 
-        if (CONFIG.getBoolean("update-notifier.enabled", true)) new UpdateNotifier(this, 5417);
+        UpdateNotifier.init(CONFIG, MESSAGES);
+        if (CONFIG.getBoolean("update-notifier.enabled", true)) new UpdateNotifier();
     }
 
     public void disable() {
+        stopping = true;
         if (metrics != null) metrics.cancel();
         for (Vault vault : VaultManager.getVaults()) {
-            AxVaults.getDatabase().saveVault(vault);
+            for (HumanEntity humanEntity : new ArrayList<>(vault.getInventory().getViewers())) {
+                humanEntity.closeInventory();
+            }
         }
+
         AutoSaveScheduler.stop();
+        List<CompletableFuture<?>> futures = new ArrayList<>();
+        for (Vault vault : VaultManager.getVaults()) {
+            futures.add(VaultUtils.save(vault));
+        }
+
+        CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new)).join();
         SQLMessaging.stop();
         database.disable();
         threadedQueue.stop();
     }
 
-    public void updateFlags(FeatureFlags flags) {
-        flags.USE_LEGACY_HEX_FORMATTER.set(true);
-//        FeatureFlags.PACKET_ENTITY_TRACKER_ENABLED.set(true);
-//        FeatureFlags.HOLOGRAM_UPDATE_TICKS.set(10L);
+    public void updateFlags() {
+        FeatureFlags.USE_LEGACY_HEX_FORMATTER.set(true);
+        FeatureFlags.LOGGER_NAME_FORMAT.set(LoggerNameFormat.NAMEABLE);
     }
 }

@@ -1,67 +1,63 @@
 package com.artillexstudios.axvaults.schedulers;
 
+import com.artillexstudios.axapi.executor.ExceptionReportingScheduledThreadPool;
 import com.artillexstudios.axapi.utils.mutable.MutableInteger;
-import com.artillexstudios.axvaults.AxVaults;
+import com.artillexstudios.axvaults.utils.VaultUtils;
 import com.artillexstudios.axvaults.vaults.Vault;
 import com.artillexstudios.axvaults.vaults.VaultManager;
 import org.bukkit.Bukkit;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import static com.artillexstudios.axvaults.AxVaults.CONFIG;
 
 public class AutoSaveScheduler {
-    private static ScheduledExecutorService service = null;
+    private static int autoSaveMinutes = 1;
+    private static ExceptionReportingScheduledThreadPool pool = null;
     private static long lastSave = -1;
     private static long savedVaults = -1;
+    private static final Runnable saveRunnable = () -> {
+        long saveStart = System.currentTimeMillis();
+        MutableInteger saved = new MutableInteger();
+
+        List<CompletableFuture<Void>> futures = new ArrayList<>();
+        try {
+            for (Vault vault : VaultManager.getVaults()) {
+                if (vault.hasChanged().get()) { // only save if the vault has been touched since the last save
+                    futures.add(VaultUtils.save(vault));
+                    saved.increment();
+                }
+                if (vault.isOpened()) continue;
+                vault.hasChanged().set(false); // if the player is not currently editing it, set changed to false
+                if (Bukkit.getPlayer(vault.getUUID()) != null) continue;
+                if (System.currentTimeMillis() - vault.getLastOpen() <= (autoSaveMinutes - 1) * 1_000L) continue;
+                VaultManager.removeVault(vault);
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new)).thenRun(() -> {
+            lastSave = System.currentTimeMillis() - saveStart;
+            savedVaults = saved.get();
+        });
+    };
 
     public static void start() {
-        int time = CONFIG.getInt("auto-save-minutes");
-        if (service != null) service.shutdown();
+        autoSaveMinutes = CONFIG.getInt("auto-save-minutes");
+        if (pool != null) pool.shutdown();
 
-        service = Executors.newSingleThreadScheduledExecutor();
-        service.scheduleAtFixedRate(() -> {
-            try {
-                long saveStart = System.currentTimeMillis();
-                MutableInteger saved = new MutableInteger();
-
-                List<CompletableFuture<Void>> futures = new ArrayList<>();
-                synchronized (VaultManager.getVaults()) {
-                    Iterator<Vault> iterator = VaultManager.getVaults().iterator();
-                    while (iterator.hasNext()) {
-                        final Vault vault = iterator.next();
-                        if (vault.getChangedValue().get()) { // only save if the vault has been touched since the last save
-                            futures.add(AxVaults.getDatabase().saveVault(vault));
-                            saved.set(saved.get() + 1);
-                        }
-                        if (vault.isOpened()) continue;
-                        vault.getChangedValue().set(false); // if the player is not currently editing it, set changed to false
-                        if (Bukkit.getPlayer(vault.getUUID()) != null) continue;
-                        if (System.currentTimeMillis() - vault.getLastOpen() <= (time - 1) * 1_000L) continue;
-                        VaultManager.removeVault(vault);
-                        iterator.remove();
-                    }
-                }
-
-                CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new)).thenRun(() -> {
-                    lastSave = System.currentTimeMillis() - saveStart;
-                    savedVaults = saved.get();
-                });
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        }, time, time, TimeUnit.MINUTES);
+        pool = new ExceptionReportingScheduledThreadPool(1);
+        pool.scheduleAtFixedRate(saveRunnable, autoSaveMinutes, autoSaveMinutes, TimeUnit.MINUTES);
     }
 
     public static void stop() {
-        if (service == null) return;
-        service.shutdown();
+        if (pool == null) return;
+        pool.shutdown();
     }
 
     public static long getLastSaveLength() {
@@ -70,5 +66,10 @@ public class AutoSaveScheduler {
 
     public static long getSavedVaults() {
         return savedVaults;
+    }
+
+    @ApiStatus.Internal
+    public static Runnable getSaveRunnable() {
+        return saveRunnable;
     }
 }

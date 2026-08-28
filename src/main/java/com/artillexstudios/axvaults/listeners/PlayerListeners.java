@@ -3,6 +3,7 @@ package com.artillexstudios.axvaults.listeners;
 import com.artillexstudios.axvaults.AxVaults;
 import com.artillexstudios.axvaults.database.impl.MySQL;
 import com.artillexstudios.axvaults.vaults.VaultManager;
+import com.artillexstudios.axvaults.vaults.VaultPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -15,22 +16,23 @@ public class PlayerListeners implements Listener {
 
     public PlayerListeners() {
         for (Player player : Bukkit.getOnlinePlayers()) {
-            VaultManager.loadPlayer(player.getUniqueId());
+            VaultManager.loadPlayer(player);
         }
     }
 
     @EventHandler
     public void onJoin(@NotNull PlayerJoinEvent event) {
-        VaultManager.loadPlayer(event.getPlayer().getUniqueId());
+        VaultManager.loadPlayer(event.getPlayer());
         if (AxVaults.getDatabase() instanceof MySQL db) db.checkForChanges();
     }
 
     @EventHandler
     public void onQuit(@NotNull PlayerQuitEvent event) {
-        VaultManager.getPlayer(event.getPlayer().getUniqueId(), vaultPlayer -> {
+        VaultPlayer vaultPlayer = VaultManager.getPlayerOrNull(event.getPlayer());
+        if (vaultPlayer == null) return;
+        AxVaults.getThreadedQueue().submit(() -> {
             vaultPlayer.save();
             if (AxVaults.getDatabase() instanceof MySQL db) db.checkForChanges();
         });
-//        VaultManager.removePlayer(event.getPlayer());
     }
 }

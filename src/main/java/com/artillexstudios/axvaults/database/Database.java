@@ -1,12 +1,12 @@
 package com.artillexstudios.axvaults.database;
 
 import com.artillexstudios.axvaults.vaults.Vault;
+import com.artillexstudios.axvaults.vaults.VaultPlayer;
 import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
 public interface Database {
 
@@ -14,9 +14,9 @@ public interface Database {
 
     void setup();
 
-    CompletableFuture<Void> saveVault(@NotNull Vault vault);
+    void saveVault(Vault vault, Object result);
 
-    void loadVaults(@NotNull UUID uuid);
+    void loadVaults(@NotNull VaultPlayer vaultPlayer);
 
     boolean isVault(@NotNull Location location);
 

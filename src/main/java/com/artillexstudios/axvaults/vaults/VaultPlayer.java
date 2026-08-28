@@ -2,6 +2,8 @@ package com.artillexstudios.axvaults.vaults;
 
 import com.artillexstudios.axvaults.AxVaults;
 import com.artillexstudios.axvaults.utils.PermissionUtils;
+import com.artillexstudios.axvaults.utils.ThreadUtils;
+import com.artillexstudios.axvaults.utils.VaultUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
@@ -13,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static com.artillexstudios.axvaults.AxVaults.CONFIG;
@@ -20,13 +23,30 @@ import static com.artillexstudios.axvaults.AxVaults.CONFIG;
 public class VaultPlayer {
     private final UUID uuid;
     private final ConcurrentHashMap<Integer, Vault> vaultMap = new ConcurrentHashMap<>();
+    private boolean loaded = false;
 
     public VaultPlayer(UUID uuid) {
         this.uuid = uuid;
     }
 
+    public UUID getUUID() {
+        return uuid;
+    }
+
+    public boolean isLoaded() {
+        return loaded;
+    }
+
     public void load() {
-        AxVaults.getDatabase().loadVaults(uuid);
+        AxVaults.getDatabase().loadVaults(this);
+        loaded = true;
+    }
+
+    public void load(CompletableFuture<VaultPlayer> cf) {
+        load();
+        ThreadUtils.runSync(() -> {
+            cf.complete(this);
+        });
     }
 
     public ConcurrentHashMap<Integer, Vault> getVaultMap() {
@@ -35,10 +55,12 @@ public class VaultPlayer {
 
     @Nullable
     public Vault getVault(int num) {
-        final Player player = Bukkit.getPlayer(uuid);
+        Player player = Bukkit.getPlayer(uuid);
         if (player != null) {
             if (!PermissionUtils.hasPermission(player, num)) return null;
-            if (!vaultMap.containsKey(num)) return addVault(new Vault(uuid, num, null));
+            if (!vaultMap.containsKey(num)) {
+                return addVault(new Vault(this, num, null, null));
+            }
         }
         if (!vaultMap.containsKey(num)) return null;
         return vaultMap.get(num);
@@ -51,8 +73,9 @@ public class VaultPlayer {
         return vault;
     }
 
-    public void removeVault(@NotNull Vault vault) {
-        vaultMap.remove(vault.getId());
+    @Nullable
+    public Vault removeVault(@NotNull Vault vault) {
+        return vaultMap.remove(vault.getId());
     }
 
     public int getRows() {
@@ -68,7 +91,7 @@ public class VaultPlayer {
     public void save() {
         AxVaults.getThreadedQueue().submit(() -> {
             for (Vault vault : vaultMap.values()) {
-                AxVaults.getDatabase().saveVault(vault);
+                VaultUtils.save(vault);
             }
         });
 
@@ -87,7 +110,12 @@ public class VaultPlayer {
         }
     }
 
-    public UUID getUUID() {
-        return uuid;
+    @Override
+    public String toString() {
+        return "VaultPlayer{" +
+                "uuid=" + uuid +
+                ", vaultMap=" + vaultMap.size() +
+                ", loaded=" + loaded +
+                '}';
     }
 }

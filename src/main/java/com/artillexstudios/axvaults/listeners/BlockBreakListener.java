@@ -16,6 +16,7 @@ public class BlockBreakListener implements Listener {
     public void onBreak(@NotNull BlockBreakEvent event) {
         if (!PlacedVaults.getVaults().containsKey(event.getBlock().getLocation())) return;
         event.setCancelled(true);
+
         AxVaults.getThreadedQueue().submit(() -> {
             PlacedVaults.removeVault(event.getBlock().getLocation());
             MESSAGEUTILS.sendLang(event.getPlayer(), "set.removed");
