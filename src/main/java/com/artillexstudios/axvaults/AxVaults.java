@@ -75,6 +75,7 @@ public final class AxVaults extends AxPlugin {
         Libraries.load(instance, manager);
     }
 
+    @Override
     public void enable() {
         new Metrics(this, 20541);
 
@@ -120,6 +121,7 @@ public final class AxVaults extends AxPlugin {
         if (CONFIG.getBoolean("update-notifier.enabled", true)) new UpdateNotifier();
     }
 
+    @Override
     public void disable() {
         stopping = true;
         if (metrics != null) metrics.cancel();
@@ -141,6 +143,7 @@ public final class AxVaults extends AxPlugin {
         threadedQueue.stop();
     }
 
+    @Override
     public void updateFlags() {
         FeatureFlags.LOGGER_NAME_FORMAT.set(LoggerNameFormat.NAMEABLE);
     }
