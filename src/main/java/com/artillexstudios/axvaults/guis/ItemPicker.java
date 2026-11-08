@@ -117,9 +117,7 @@ public class ItemPicker {
             gui.setItem(rows, 5, item3);
         }
 
-        ThreadUtils.runSync(player, () -> {
-            gui.open(player, cPage);
-        });
+        gui.open(player, cPage);
     }
 
     private static boolean getOrAddCooldown(Player player) {
