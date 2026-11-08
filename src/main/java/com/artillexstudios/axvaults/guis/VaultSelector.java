@@ -110,7 +110,9 @@ public class VaultSelector {
             gui.setItem(rows, 5, item3);
         }
 
-        gui.open(player, page);
+        ThreadUtils.runSync(player, () -> {
+            gui.open(player, page);
+        });
     }
 
     private CompletableFuture<GuiItem> getItemOfVault(@NotNull Player player, int num, @NotNull PaginatedGui gui) {

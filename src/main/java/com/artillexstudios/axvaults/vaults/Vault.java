@@ -120,20 +120,22 @@ public class Vault implements InventoryHolder {
             return;
         }
 
-        changed.set(true);
-        // recalculate vault if the row count has changed
-        if (vaultPlayer.getRows() * 9 != storage.getSize()) {
-            reload();
-        }
+        ThreadUtils.runSync(player, () -> {
+            changed.set(true);
+            // recalculate vault if the row count has changed
+            if (vaultPlayer.getRows() * 9 != storage.getSize()) {
+                reload();
+            }
 
-        // give back overflow items that couldn't fit in the vault
-        if (!overflow.isEmpty()) {
-            dropOverFlow(player);
-        }
+            // give back overflow items that couldn't fit in the vault
+            if (!overflow.isEmpty()) {
+                dropOverFlow(player);
+            }
 
-        player.openInventory(storage);
-        SoundUtils.playSound(player, MESSAGES.getString("sounds.open"));
-        lastOpen = System.currentTimeMillis();
+            player.openInventory(storage);
+            SoundUtils.playSound(player, MESSAGES.getString("sounds.open"));
+            lastOpen = System.currentTimeMillis();
+        });
     }
 
     private void dropOverFlow(@NotNull Player player) {

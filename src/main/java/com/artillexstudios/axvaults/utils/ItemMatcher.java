@@ -1,9 +1,11 @@
 package com.artillexstudios.axvaults.utils;
 
 import com.artillexstudios.axapi.items.WrappedItemStack;
-import com.artillexstudios.axapi.items.component.DataComponents;
+import com.artillexstudios.axapi.items.components.DataComponents;
+import com.artillexstudios.axapi.items.components.data.CustomModelData;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import org.bukkit.Material;
 
 import java.util.Map;
 
@@ -30,16 +32,16 @@ public class ItemMatcher {
         Object val = map.getOrDefault("material", map.get("type"));
         if (val == null) return false;
         needMatch++;
-        var material = DataComponents.material();
+        Material material = wrapped.get(DataComponents.MATERIAL);
         if (material == null) return false;
-        return SimpleRegex.matches((String) val, wrapped.get(material).toString());
+        return SimpleRegex.matches((String) val, material.toString());
     }
 
     public boolean name() {
         Object val = map.get("name");
         if (val == null) return false;
         needMatch++;
-        Component customName = wrapped.get(DataComponents.customName());
+        Component customName = wrapped.get(DataComponents.CUSTOM_NAME);
         if (customName == null) return false;
         String plain = plainSerializer.serialize(customName);
         return SimpleRegex.matches((String) val, plain);
@@ -49,7 +51,7 @@ public class ItemMatcher {
         Object val = map.get("custom-model-data");
         if (!(val instanceof Integer num)) return false;
         needMatch++;
-        var cmd = wrapped.get(DataComponents.customModelData());
+        CustomModelData cmd = wrapped.get(DataComponents.CUSTOM_MODEL_DATA);
         if (cmd == null || cmd.floats().isEmpty()) return false;
         return num == cmd.floats().getFirst().intValue();
     }

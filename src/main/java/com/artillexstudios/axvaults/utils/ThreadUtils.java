@@ -4,6 +4,7 @@ import com.artillexstudios.axapi.scheduler.Scheduler;
 import com.artillexstudios.axvaults.AxVaults;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,6 +86,14 @@ public class ThreadUtils {
                 ENTITY_TASK_DEPTH.set(previousDepth);
                 ENTITY_TASK_ENTITY.set(previousEntity);
             }
+        }
+    }
+
+    public static void runSync(Player player, Runnable runnable) {
+        if (Scheduler.get().isOwnedByCurrentRegion(player.getLocation()) || AxVaults.isStopping()) {
+            runnable.run();
+        } else {
+            Scheduler.get().run(player, task -> runnable.run(), runnable);
         }
     }
 }
